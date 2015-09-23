@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Effects;
 using FilePlayer.ViewModels;
 
 namespace FilePlayer.Views
@@ -28,13 +29,31 @@ namespace FilePlayer.Views
         {
             switch(e.action)
             {
-                case "MOVEUP":
+                case "MOVE_UP":
                     MoveUp();
                     break;
-                case "MOVEDOWN":
+                case "MOVE_DOWN":
                     MoveDown();
                     break;
+                case "CONFIRM_OPEN":
+                    OpenConfirmationDialog();
+                    break;
             }
+        }
+
+        private void OpenConfirmationDialog()
+        {
+            itemlist.Dispatcher.Invoke((Action)delegate
+            {
+                if (this.Effect == null)
+                {
+                    this.Effect = new BlurEffect();
+                }
+                else
+                {
+                    this.Effect = null;
+                }
+            });
         }
 
         private void itemlist_Loaded(object sender, RoutedEventArgs e)

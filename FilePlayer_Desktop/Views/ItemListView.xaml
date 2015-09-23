@@ -7,8 +7,6 @@
              xmlns:prism="http://www.codeplex.com/prism"
              mc:Ignorable="d">
 
-
-
     <DataGrid x:Name="itemlist" 
               ItemsSource="{Binding AllItems}" 
               HeadersVisibility="None" 

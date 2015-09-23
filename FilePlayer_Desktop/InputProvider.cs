@@ -2,6 +2,7 @@
 using SharpDX.XInput;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace FilePlayer
 {
@@ -22,13 +23,7 @@ namespace FilePlayer
         Controller[] controllers;
         Controller controller;
 
-
-        public XboxControllerInputProvider()
-        {
-            controllers = new[] { new Controller(UserIndex.One), new Controller(UserIndex.Two), new Controller(UserIndex.Three), new Controller(UserIndex.Four) };
-            controller = null;
-            FindController();
-        }
+        public XINPUT_GAMEPAD_SECRET xgs;
 
         public struct XINPUT_GAMEPAD_SECRET
         {
@@ -42,9 +37,13 @@ namespace FilePlayer
             public short sThumbRY;
         }
 
-        public XINPUT_GAMEPAD_SECRET xgs;
 
-
+        public XboxControllerInputProvider()
+        {
+            controllers = new[] { new Controller(UserIndex.One), new Controller(UserIndex.Two), new Controller(UserIndex.Three), new Controller(UserIndex.Four) };
+            controller = null;
+            FindController(5000);
+        }
 
         public int ButtonStrToHex(string btnName)
         {
@@ -109,49 +108,63 @@ namespace FilePlayer
 
         public void PollGamepad()
         {
-            int WaitTimeForNextClick = 150;
+            int WaitTimeAfterClick = 150;
+            if(controller == null)
+            {
+                FindController(-1);
+            }
+
             while (true)
             {
                 if (IsButtonPressed(0, "guide"))
                 {
                     this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "GUIDE" });
-                    Thread.Sleep(WaitTimeForNextClick);
+                    Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "a"))
                 {
                     this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "A" });
-                    Thread.Sleep(WaitTimeForNextClick);
+                    Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "b"))
                 {
                     this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "B" });
-                    Thread.Sleep(WaitTimeForNextClick);
+                    Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "up"))
                 {
                     this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "DUP" });
-                    Thread.Sleep(WaitTimeForNextClick);
+                    Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "down"))
                 {
                     this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "DDOWN" });
-                    Thread.Sleep(WaitTimeForNextClick);
+                    Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "rshoulder"))
                 {
                     this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "RSHOULDER" });
-                    Thread.Sleep(WaitTimeForNextClick);
+                    Thread.Sleep(WaitTimeAfterClick);
                 }
             }
         }
 
-
-
-
-        public void FindController()
+        /// <summary>
+        /// Polls list of controller slots. 
+        /// </summary>
+        /// <param name="timeout"></param>
+        public bool FindController(int timeout)
         {
-            
-            while (true)
+            Stopwatch stopwatch = null;
+            if (timeout >= 0)
+            { 
+                stopwatch = new Stopwatch();
+                stopwatch.Start();
+            }
+
+            bool lookForController = (timeout >= -1);
+
+            while (lookForController)
             {
                 // Get 1st controller available
                 foreach (var selectControler in controllers)
@@ -159,16 +172,21 @@ namespace FilePlayer
                     if (selectControler.IsConnected)
                     {
                         controller = selectControler;
-                        return;
+                        return true;
                     }
                 }
+                if (stopwatch != null)
+                {
+                    if (stopwatch.ElapsedMilliseconds > timeout)
+                    {
+                        lookForController = false;
+                    }
+
+                }
             }
+
+            return false;
         }
-
-
-
-
-
         
     }
 }

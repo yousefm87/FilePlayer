@@ -16,7 +16,6 @@ namespace FilePlayer.ViewModels
     {
         private ItemLists itemLists;
         Thread gamepadThread;
-        private String resultMessage;
         XboxControllerInputProvider input;
         public int SelectedItemIndex;
 
@@ -57,25 +56,27 @@ namespace FilePlayer.ViewModels
             switch (e.buttonPressed)
             {
                 case "A":
-                    Console.WriteLine("Case 1");
+                    if (this.SendAction != null)
+                        this.SendAction(this, new ItemListViewEventArgs { action = "CONFIRM_OPEN" });
                     break;
                 case "B":
                     Console.WriteLine("Case 2");
                     break;
                 case "DUP":
                     if(this.SendAction != null)
-                        this.SendAction(this, new ItemListViewEventArgs { action = "MOVEUP" });
+                        this.SendAction(this, new ItemListViewEventArgs { action = "MOVE_UP" });
                     break;
                 case "DDOWN":
                     if(this.SendAction != null)
-                        this.SendAction(this, new ItemListViewEventArgs { action = "MOVEDOWN" });
+                        this.SendAction(this, new ItemListViewEventArgs { action = "MOVE_DOWN" });
                     break;
                 case "RSHOULDER":
                     
                     Console.WriteLine("Case 2");
                     break;
                 case "GUIDE":
-                    this.SendAction(this, new ItemListViewEventArgs { action = "" });
+                    //if(this.SendAction != null)
+                        //this.SendAction(this, new ItemListViewEventArgs { action = "MOVEUP" });
                     break;
                 //default:
                 //    Console.WriteLine("Default case");
