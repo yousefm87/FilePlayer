@@ -25,10 +25,12 @@ namespace FilePlayer.Views
             
         }
 
-        void PerformViewAction(object sender, ItemListViewEventArgs e)
+        void PerformViewAction(object sender, ViewEventArgs e)
         {
             switch(e.action)
             {
+                case "MODAL_OPEN":
+                    
                 case "MOVE_UP":
                     MoveUp();
                     break;

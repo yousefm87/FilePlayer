@@ -1,27 +1,26 @@
-﻿using FilePlayer.Model;
-using Microsoft.Practices.Prism.Mvvm;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Threading;
+using Prism.Mvvm;
+using FilePlayer.Model;
+
 
 namespace FilePlayer.ViewModels
 {
-    public class ItemListViewEventArgs : EventArgs
-    {
-        public string action;
-    }
+
+    public class ItemListViewEventArgs : ViewEventArgs {}
 
     public class ItemListViewModel : BindableBase
     {
         private ItemLists itemLists;
         Thread gamepadThread;
-        XboxControllerInputProvider input;
+        public XboxControllerInputProvider input;
         public int SelectedItemIndex;
 
 
-        public delegate void ItemListViewEventHandler<ItemListViewEventArgs>(object sender, ItemListViewEventArgs e);
-        public event ItemListViewEventHandler<ItemListViewEventArgs> SendAction;
+        public delegate void ItemListViewEventHandler<ViewEventArgs>(object sender, ViewEventArgs e);
+        public event ItemListViewEventHandler<ViewEventArgs> SendAction;
 
 
 
@@ -57,7 +56,7 @@ namespace FilePlayer.ViewModels
             {
                 case "A":
                     if (this.SendAction != null)
-                        this.SendAction(this, new ItemListViewEventArgs { action = "CONFIRM_OPEN" });
+                        this.SendAction(this, new ViewEventArgs { action = "CONFIRM_OPEN" });
                     break;
                 case "B":
                     Console.WriteLine("Case 2");
