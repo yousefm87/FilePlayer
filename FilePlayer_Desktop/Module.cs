@@ -20,8 +20,8 @@ namespace FilePlayer
 
         public void Initialize()
         {
-
-            this.iRegionManager.RegisterViewWithRegion("ItemListView", typeof(ItemListView));
+            
+            this.iRegionManager.RegisterViewWithRegion("ItemListView", typeof(Views.ItemListView));
 
         }
 

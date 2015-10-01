@@ -3,6 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Effects;
 using FilePlayer.ViewModels;
+using FilePlayer.Model;
+
+using Microsoft.Practices.Prism.PubSubEvents;
 
 namespace FilePlayer.Views
 {
@@ -15,21 +18,32 @@ namespace FilePlayer.Views
         
         public ItemListViewModel ItemListViewModel { get; set; }
 
+        private IEventAggregator iEventAggregator;
+        SubscriptionToken viewActionToken;
+
         public ItemListView()
         {
-            InitializeComponent();
-            ItemListViewModel = new ItemListViewModel();
+            ItemListViewModel = new ItemListViewModel(Event.EventInstance.EventAggregator);
             this.DataContext = ItemListViewModel;
+            this.iEventAggregator = Event.EventInstance.EventAggregator;
 
-            ItemListViewModel.SendAction += PerformViewAction;
-            
+            InitializeComponent();
+
+            viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
+                (viewEventArgs) =>
+                {
+                    PerformViewAction(this, viewEventArgs);
+                }
+            );
+                        //ItemListViewModel.SendAction += PerformViewAction;
+
         }
 
         void PerformViewAction(object sender, ViewEventArgs e)
         {
             switch(e.action)
             {
-                case "MODAL_OPEN":
+                case "":
                     
                 case "MOVE_UP":
                     MoveUp();
@@ -55,6 +69,8 @@ namespace FilePlayer.Views
                 {
                     this.Effect = null;
                 }
+
+
             });
         }
 

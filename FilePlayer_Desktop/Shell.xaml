@@ -1,10 +1,25 @@
 ﻿<Window x:Class="FilePlayer.Shell"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:prism="http://www.codeplex.com/prism"
+        xmlns:views="clr-namespace:FilePlayer.Views"
+        xmlns:viewModels="clr-namespace:FilePlayer.ViewModels"
+        xmlns:app="clr-namespace:FilePlayer"
+        mc:Ignorable="d" 
         Title="FilePlayer" 
         Height="300" 
         Width="300">
+
+
+    <Window.Resources>
+        <Style x:Key="ConfirmDialogWindowStyle" TargetType="Window">
+
+        </Style>
+    </Window.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -12,6 +27,39 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <ItemsControl prism:RegionManager.RegionName="ItemListView" />
+        <UserControl prism:RegionManager.RegionName="ItemListView" />
+
+        <i:Interaction.Triggers>
+            <prism:InteractionRequestTrigger  SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
+
+                <app:AppPopup x:Name="popup" IsModal="True" CenterOverAssociatedObject="True" >
+                    <app:AppPopup.WindowContent>
+                        <views:ConfirmationDialog />
+                    </app:AppPopup.WindowContent>
+                </app:AppPopup>
+            </prism:InteractionRequestTrigger>
+        </i:Interaction.Triggers>
+        <!-- <my:ModalDialogPopup IsOpen="{Binding ConfirmationPopupIsOpen, Mode=TwoWay}" Title="Modal popup title goes here">
+            <my:ModalDialogPopup.HostedContent>
+                <ContentControl>
+                    <Grid Height="400" Width="600">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="30"/>
+                            
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Text="{Binding ConfirmationText}">
+                            
+                        </TextBlock>
+                        <Button Grid.Row="1" Grid.Column="1" Content="No" Command="{Binding OpenSecondPopupCommand}"/>
+                        <Button Grid.Row="1" Grid.Column="2" Content="Yes"></Button>
+                    </Grid>
+                </ContentControl>
+            </my:ModalDialogPopup.HostedContent>
+        </my:ModalDialogPopup> -->
     </Grid>
 </Window>

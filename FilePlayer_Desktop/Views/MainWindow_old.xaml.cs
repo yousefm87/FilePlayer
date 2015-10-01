@@ -12,7 +12,7 @@ namespace FilePlayer.Views
     /// </summary>
     public partial class MainWindow : Window//, IView
     {
-        private readonly IEventAggregator _eventAggregator;
+
 
         public MainWindowViewModel MainWindowViewModel { get; set; }
         private ModalAdorner modalAdorner;

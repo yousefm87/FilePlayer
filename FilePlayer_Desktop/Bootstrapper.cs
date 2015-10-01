@@ -1,7 +1,8 @@
 ﻿using System.Windows;
 using Prism.Unity;
 using Prism.Modularity;
-
+using FilePlayer.Views;
+using System.Windows.Controls;
 
 namespace FilePlayer
 {
@@ -20,6 +21,13 @@ namespace FilePlayer
             App.Current.MainWindow = (Window)this.Shell;
             App.Current.MainWindow.Show();
         }
+
+        protected override void ConfigureContainer()
+        {
+            base.ConfigureContainer();
+
+        }
+
 
         protected override void ConfigureModuleCatalog()
         {

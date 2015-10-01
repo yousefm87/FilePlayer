@@ -13,7 +13,7 @@
         Width="525"
         prism:ViewModelLocator.AutoWireViewModel="True">
     <Grid x:Name="LayoutRoot">
-        <views:ItemListView VerticalAlignment="Top"  />
+        <!-- <views:ItemListView VerticalAlignment="Top"  /> -->
 
 
         <!-- add view here -->

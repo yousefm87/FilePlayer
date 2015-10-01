@@ -3,6 +3,8 @@ using SharpDX.XInput;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using Microsoft.Practices.Prism.PubSubEvents;
+using FilePlayer.ViewModels;
 
 namespace FilePlayer
 {
@@ -19,6 +21,8 @@ namespace FilePlayer
 
         public delegate void ControllerEventHandler<ControllerEventArgs>(object sender, ControllerEventArgs e);
         public event ControllerEventHandler<ControllerEventArgs> ControllerButtonPressed;
+
+        private IEventAggregator iEventAggregator;
 
         Controller[] controllers;
         Controller controller;
@@ -38,8 +42,9 @@ namespace FilePlayer
         }
 
 
-        public XboxControllerInputProvider()
+        public XboxControllerInputProvider(IEventAggregator iEventAggregator)
         {
+            this.iEventAggregator = iEventAggregator;
             controllers = new[] { new Controller(UserIndex.One), new Controller(UserIndex.Two), new Controller(UserIndex.Three), new Controller(UserIndex.Four) };
             controller = null;
             FindController(5000);
@@ -118,32 +123,39 @@ namespace FilePlayer
             {
                 if (IsButtonPressed(0, "guide"))
                 {
-                    this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "GUIDE" });
+
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "GUIDE" });
+                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "GUIDE" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "a"))
                 {
-                    this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "A" });
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "A" });
+                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "A" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "b"))
                 {
-                    this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "B" });
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "B" });
+                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "B" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "up"))
                 {
-                    this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "DUP" });
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "DUP" });
+                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "DUP" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "down"))
                 {
-                    this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "DDOWN" });
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "DDOWN" });
+                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "DDOWN" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
                 if (IsButtonPressed(0, "rshoulder"))
                 {
-                    this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "RSHOULDER" });
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "RSHOULDER" });
+                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "RSHOULDER" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
             }
