@@ -3,6 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using Prism.Interactivity.InteractionRequest;
 using System.Windows.Media;
+using Microsoft.Practices.Prism.PubSubEvents;
+using FilePlayer.Model;
+using FilePlayer.ViewModels;
 
 namespace FilePlayer.Views
 {
@@ -11,12 +14,23 @@ namespace FilePlayer.Views
     /// </summary>
     public partial class ConfirmationDialog : UserControl, IInteractionRequestAware
     {
+
+        private IEventAggregator iEventAggregator;
+        public SubscriptionToken confirmViewActionToken;
+
         public ConfirmationDialog()
         {
-
+            iEventAggregator = Event.EventInstance.EventAggregator;
             InitializeComponent();
 
             SetSelectedButton("nobutton");
+
+            confirmViewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Subscribe(
+                (viewEventArgs) =>
+                {
+                    PerformViewAction(this, viewEventArgs);
+                }
+            );
         }
 
         Brush selectedButtonBackground = Brushes.DodgerBlue;
@@ -26,7 +40,42 @@ namespace FilePlayer.Views
 
 
 
+        void PerformViewAction(object sender, ConfirmationViewEventArgs e)
+        {
+            switch (e.action)
+            {
+                case "CONFIRM_MOVE_LEFT":
+                    SetSelectedButton("NOBUTTON");
+                    break;
+                case "CONFIRM_MOVE_RIGHT":
+                    SetSelectedButton("YESBUTTON");
+                    break;
+                case "CONFIRM_SELECT_BUTTON":
 
+                    
+
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        string response;
+
+                        if (this.FinishInteraction != null)
+                            this.FinishInteraction();
+                    
+                        if (yesButton.Background == Brushes.DodgerBlue)
+                        {
+                            response = "YES";
+                        }
+                        else
+                        {
+                            response = "NO";
+                        }
+                    
+                        this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("CONFIRM_CLOSE", new string[] { response }));
+                    });
+                    break;
+            }
+
+        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -44,16 +93,23 @@ namespace FilePlayer.Views
             switch (selectedButton.ToLower())
             {
                 case "yesbutton":
-                    noButton.Background = unselectedButtonBackground;
-                    noButton.Foreground = unselectedButtonForeground;
-                    yesButton.Background = selectedButtonBackground;
-                    yesButton.Foreground = selectedButtonForeground;
+
+                    buttonPanel.Dispatcher.Invoke((Action)delegate
+                    {
+                        noButton.Background = unselectedButtonBackground;
+                        noButton.Foreground = unselectedButtonForeground;
+                        yesButton.Background = selectedButtonBackground;
+                        yesButton.Foreground = selectedButtonForeground;
+                    });
                     break;
                 case "nobutton":
-                    noButton.Background = selectedButtonBackground;
-                    noButton.Foreground = selectedButtonForeground;
-                    yesButton.Background = unselectedButtonBackground;
-                    yesButton.Foreground = unselectedButtonForeground;
+                    buttonPanel.Dispatcher.Invoke((Action)delegate
+                    {
+                        noButton.Background = selectedButtonBackground;
+                        noButton.Foreground = selectedButtonForeground;
+                        yesButton.Background = unselectedButtonBackground;
+                        yesButton.Foreground = unselectedButtonForeground;
+                    });
                     break;
             }
 

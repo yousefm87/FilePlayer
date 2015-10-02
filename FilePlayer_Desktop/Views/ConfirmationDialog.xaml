@@ -13,7 +13,14 @@
             <TextBlock Margin="10" TextWrapping="Wrap">This is a custom view that is being shown in response to an interaction request being raised.</TextBlock>
             <TextBlock Margin="10" TextWrapping="Wrap">The data passed through the notification is:</TextBlock>
             -->
-            <TextBlock Margin="10,100,10,10" FontSize="20" TextWrapping="Wrap" Grid.Row="1" Grid.Column="1" Text="{Binding Content, StringFormat='Would you like to open \'{0}\''}" />
+            <TextBlock Margin="10,100,10,10" FontSize="20" TextWrapping="Wrap" Grid.Row="1" Grid.Column="1">
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}Would you like to open '{0}'?">
+                        <Binding Path="Content"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+            <!--
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -23,15 +30,16 @@
                     <RowDefinition />
                     <RowDefinition />
                 </Grid.RowDefinitions>
-<!--
+
                 <TextBlock Margin="10,3" FontWeight="Bold" TextWrapping="Wrap" Grid.Row="0" Grid.Column="0">Title:</TextBlock>
                 <TextBlock Margin="10,3" TextWrapping="Wrap" Grid.Row="0" Grid.Column="1" Text="{Binding Title}" />
 
                 <TextBlock Margin="10,3" FontWeight="Bold" TextWrapping="Wrap" Grid.Row="1" Grid.Column="0"></TextBlock>
                 <TextBlock Margin="10,3" TextWrapping="Wrap" Grid.Row="1" Grid.Column="1" Text="{Binding Content, StringFormat='Would you like to open {0}?'}" />
                 
--->
+
             </Grid>
+-->
 <!--            <TextBlock Margin="10" TextWrapping="Wrap">
                 The notification passed as a parameter in the InteractionRequest is automatically set as the DataContext of the window.
                 As this view does not have its own DataContext it will inherit the DataContext of the hosting window.
@@ -40,7 +48,7 @@
                 You can either stop this iteration by closing the window or clicking the button below.
                 The button will invoke the FinishInteraction action to close the window.
             </TextBlock> -->
-            <StackPanel Orientation="Horizontal">
+            <StackPanel x:Name="buttonPanel" Orientation="Horizontal">
                 <Button x:Name="noButton" AutomationProperties.AutomationId="CustomPopupNoButton" Margin="50" HorizontalAlignment="Right" Width="100" Height="40" Click="Button_Click">No</Button>
                 <Button x:Name="yesButton" AutomationProperties.AutomationId="CustomPopupYesButton" Margin="50" HorizontalAlignment="Right" Width="100" Height="40" Click="Button_Click">Yes</Button>
             </StackPanel>

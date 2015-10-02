@@ -54,35 +54,35 @@ namespace FilePlayer
         {
             switch(btnName.ToLower())
             {
-                case "guide":
+                case "guide": //Guide button
                     return 0x0400;
-                case "up":
+                case "dup": //D-Pad Up
                     return 0x00000001;
-                case "down":
+                case "ddown": //D-Pad Down
                     return 0x00000002;
-                case "left":
+                case "dleft": //D-Pad Left
                     return 0x00000004;
-                case "right":
+                case "dright": //D-Pad Right
                     return 0x00000008;
-                case "start":
+                case "start": //Start
                     return 0x00000010;
-                case "back":
+                case "back": //Back
                     return 0x00000020;
-                case "lthumb":
+                case "lthumb": //Left Thumbstick
                     return 0x00000040;
-                case "rthumb":
+                case "rthumb": //Right Thumbstick
                     return 0x00000080;
-                case "lshoulder":
+                case "lshoulder": //Left Shoulder 
                     return 0x0100;
-                case "rshoulder":
+                case "rshoulder": //Right Shoulder
                     return 0x0200;
-                case "a":
+                case "a": //A
                     return 0x1000;
-                case "b":
+                case "b": //B
                     return 0x2000;
-                case "x":
+                case "x": //X
                     return 0x4000;
-                case "y":
+                case "y": //Y
                     return 0x8000;
             }
             Console.WriteLine("ButtonStrToHex: button '" + btnName + "' not recognized.");
@@ -121,41 +121,85 @@ namespace FilePlayer
 
             while (true)
             {
-                if (IsButtonPressed(0, "guide"))
+                if (IsButtonPressed(0, "GUIDE"))
                 {
 
                     this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "GUIDE" });
-                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "GUIDE" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
-                if (IsButtonPressed(0, "a"))
-                {
-                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "A" });
-                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "A" });
-                    Thread.Sleep(WaitTimeAfterClick);
-                }
-                if (IsButtonPressed(0, "b"))
-                {
-                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "B" });
-                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "B" });
-                    Thread.Sleep(WaitTimeAfterClick);
-                }
-                if (IsButtonPressed(0, "up"))
+                if (IsButtonPressed(0, "DUP"))
                 {
                     this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "DUP" });
-                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "DUP" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
-                if (IsButtonPressed(0, "down"))
+                if (IsButtonPressed(0, "DDOWN"))
                 {
                     this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "DDOWN" });
-                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "DDOWN" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
-                if (IsButtonPressed(0, "rshoulder"))
+
+                if (IsButtonPressed(0, "DLEFT"))
+                {
+
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "DLEFT" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "DRIGHT"))
+                {
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "DRIGHT" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "START"))
+                {
+
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "START" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "BACK"))
+                {
+
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "BACK" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "LTHUMB"))
+                {
+
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "LTHUMB" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "RTHUMB"))
+                {
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "RTHUMB" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "LSHOULDER"))
+                {
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "LSHOULDER" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "RSHOULDER"))
                 {
                     this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "RSHOULDER" });
-                    //this.ControllerButtonPressed(this, new ControllerEventArgs { buttonPressed = "RSHOULDER" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "A"))
+                {
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "A" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "B"))
+                {
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "B" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "X"))
+                {
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "X" });
+                    Thread.Sleep(WaitTimeAfterClick);
+                }
+                if (IsButtonPressed(0, "Y"))
+                {
+                    this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { buttonPressed = "Y" });
                     Thread.Sleep(WaitTimeAfterClick);
                 }
             }

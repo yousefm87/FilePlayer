@@ -18,7 +18,7 @@
               AutoGenerateColumns="False" 
               IsSynchronizedWithCurrentItem="True" 
               SelectionUnit="Cell" 
-              Loaded ="itemlist_Loaded"
+              Loaded ="Itemlist_Loaded"
               RowHeight="50">
         <DataGrid.Columns>
             <DataGridTextColumn Binding="{Binding}" Width="*" FontSize="20"/>

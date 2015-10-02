@@ -10,13 +10,14 @@ using System.Linq;
 
 namespace FilePlayer.ViewModels
 {
+    public class ConfirmationViewEventArgs : ViewEventArgs
+    {
+        public ConfirmationViewEventArgs(string action) : base(action) { }
+        public ConfirmationViewEventArgs(string action, string[] addlInfo) : base(action, addlInfo) { }
+    }
+
     class ConfirmationDialogViewModel : ViewModelBase
     {
-        private ItemLists itemLists;
-        Thread gamepadThread;
-        public XboxControllerInputProvider input;
-        public int SelectedItemIndex;
-
         private IEventAggregator iEventAggregator;
 
         private SubscriptionToken controllerSubToken = null;

@@ -32,7 +32,7 @@
         <i:Interaction.Triggers>
             <prism:InteractionRequestTrigger  SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
 
-                <app:AppPopup x:Name="popup" IsModal="True" CenterOverAssociatedObject="True" >
+                <app:AppPopup x:Name="popup" CenterOverAssociatedObject="True" >
                     <app:AppPopup.WindowContent>
                         <views:ConfirmationDialog />
                     </app:AppPopup.WindowContent>

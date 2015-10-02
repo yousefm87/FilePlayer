@@ -11,6 +11,13 @@ using System.Linq;
 namespace FilePlayer.ViewModels
 {
 
+    public class ItemListViewEventArgs : ViewEventArgs
+    {
+        public ItemListViewEventArgs(string action) : base(action) { }
+        public ItemListViewEventArgs(string action, string[] addlInfo) : base(action, addlInfo) { }
+    }
+
+
     public class ItemListViewModel : ViewModelBase
     {
         private ItemLists itemLists;
@@ -66,11 +73,17 @@ namespace FilePlayer.ViewModels
                     controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
                         (controllerEventArgs) =>
                         {
-                            ControllerButtonPress(controllerEventArgs);
+                            ControllerButtonPressToActionItemListView(controllerEventArgs);
                         }
                     );
                     break;
                 case "ITEMLIST_CONFIRM":
+                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
+                        (controllerEventArgs) =>
+                        {
+                            ControllerButtonPressToActionConfirmationDialog(controllerEventArgs);
+                        }
+                    );
                     break;
                 case "ITEM_PLAY":
                     break;
@@ -80,46 +93,75 @@ namespace FilePlayer.ViewModels
             
         }
         
-        void ControllerButtonPress(ControllerEventArgs e)
+        void ControllerButtonPressToActionItemListView(ControllerEventArgs e)
         {
 
             switch (e.buttonPressed)
             {
                 case "A":
-                    //if (this.SendAction != null)
-                    //this.SendAction(this, new ViewEventArgs { action = "CONFIRM_OPEN" });
                     string itemName = AllItems.ToList().ElementAt(SelectedItemIndex);
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONFIRM_OPEN", new string[]{ itemName }));
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("CONFIRM_OPEN", new string[]{ itemName }));
+                    SetControllerState("ITEMLIST_CONFIRM");
                     break;
                 case "B":
                     Console.WriteLine("Case 2");
                     break;
                 case "DUP":
-                    //if(this.SendAction != null)
-                        //this.SendAction(this, new ItemListViewEventArgs { action = "MOVE_UP" });
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("MOVE_UP"));
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_UP"));
                     break;
                 case "DDOWN":
-                    //if(this.SendAction != null)
-                    //this.SendAction(this, new ItemListViewEventArgs { action = "MOVE_DOWN" });
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("MOVE_DOWN"));
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_DOWN"));
                     break;
                 case "RSHOULDER":
-                    
                     Console.WriteLine("Case 2");
                     break;
                 case "GUIDE":
-                    //if(this.SendAction != null)
-                        //this.SendAction(this, new ItemListViewEventArgs { action = "MOVEUP" });
                     break;
-                //default:
-                //    Console.WriteLine("Default case");
-                //    break;
             }
         }
 
-        
- 
+        void ControllerButtonPressToActionConfirmationDialog(ControllerEventArgs e)
+        {
+
+            switch (e.buttonPressed)
+            {
+                case "A":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
+                    SetControllerState("ITEMLIST_BROWSE");
+                    break;
+                case "B":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
+                    SetControllerState("ITEMLIST_BROWSE");
+                    break;
+                case "X":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
+                    SetControllerState("ITEMLIST_BROWSE");
+                    break;
+                case "Y":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
+                    SetControllerState("ITEMLIST_BROWSE");
+                    break;
+                case "DUP":
+                    break;
+                case "DDOWN":
+                    break;
+                case "DLEFT":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_LEFT"));
+                    break;
+                case "DRIGHT":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_RIGHT"));
+                    break;
+                case "LSHOULDER":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_LEFT"));
+                    break;
+                case "RSHOULDER":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_RIGHT"));
+                    break;
+                case "GUIDE":
+                    break;
+            }
+        }
+
 
     }
 }

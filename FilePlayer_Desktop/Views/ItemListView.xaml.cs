@@ -29,7 +29,7 @@ namespace FilePlayer.Views
 
             InitializeComponent();
 
-            viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
+            viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
                     PerformViewAction(this, viewEventArgs);
@@ -39,20 +39,23 @@ namespace FilePlayer.Views
 
         }
 
-        void PerformViewAction(object sender, ViewEventArgs e)
+        void PerformViewAction(object sender, ItemListViewEventArgs e)
         {
             switch(e.action)
             {
                 case "":
                     
-                case "MOVE_UP":
+                case "ITEMLIST_MOVE_UP":
                     MoveUp();
                     break;
-                case "MOVE_DOWN":
+                case "ITEMLIST_MOVE_DOWN":
                     MoveDown();
                     break;
                 case "CONFIRM_OPEN":
                     OpenConfirmationDialog();
+                    break;
+                case "CONFIRM_CLOSE":
+                    CloseConfirmationDialog();
                     break;
             }
         }
@@ -74,7 +77,17 @@ namespace FilePlayer.Views
             });
         }
 
-        private void itemlist_Loaded(object sender, RoutedEventArgs e)
+
+        private void CloseConfirmationDialog()
+        {
+            itemlist.Dispatcher.Invoke((Action)delegate
+            {
+                if (this.Effect != null)
+                    this.Effect = null;
+            });
+        }
+
+        private void Itemlist_Loaded(object sender, RoutedEventArgs e)
         {
             SelectFirstItem();
         }

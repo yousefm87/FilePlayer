@@ -25,7 +25,7 @@ namespace FilePlayer
             this.DataContext = ShellViewModel;
             this.iEventAggregator = Event.EventInstance.EventAggregator;
 
-            viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
+            viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
                     PerformViewAction(this, viewEventArgs);
@@ -37,7 +37,7 @@ namespace FilePlayer
             
         }
 
-        void PerformViewAction(object sender, ViewEventArgs e)
+        void PerformViewAction(object sender, ItemListViewEventArgs e)
         {
             
             switch (e.action)
