@@ -134,13 +134,11 @@ namespace FilePlayer.Views
         {
             this.Dispatcher.Invoke((Action)delegate
             {
-                string response = buttonActions[selectedButtonIndex];
-
                 if (this.FinishInteraction != null)
                 {
                     this.FinishInteraction();
                 }
-
+                string response = buttonActions[selectedButtonIndex];
                 this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("PAUSE_CLOSE", new string[] { response }));
 
                 Init();

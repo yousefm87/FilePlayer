@@ -14,27 +14,7 @@ namespace FilePlayer.ViewModels
 {
 
     
-    public class ItemSelectionNotification : Confirmation
-    {
-        public ItemSelectionNotification()
-        {
-            this.Items = new List<string>();
-            this.SelectedItem = null;
-        }
 
-        public ItemSelectionNotification(IEnumerable<string> items)
-            : this()
-        {
-            foreach (string item in items)
-            {
-                this.Items.Add(item);
-            }
-        }
-
-        public IList<string> Items { get; private set; }
-
-        public string SelectedItem { get; set; }
-    }
 
 
     public class ViewEventArgs : EventArgs
@@ -78,7 +58,32 @@ namespace FilePlayer.ViewModels
             _handler(parameter);
         }
     }
-    
+
+
+    public class PauseCommand : ICommand
+    {
+        private readonly Action<object> _handler;
+
+        public PauseCommand(Action<object> handler)
+        {
+            _handler = handler;
+        }
+
+
+        public bool CanExecute(object parameter)
+        {
+            return (parameter != null);
+        }
+
+
+        public event EventHandler CanExecuteChanged;
+
+        public void Execute(object parameter)
+        {
+            _handler(parameter);
+        }
+    }
+
     public class ShellViewModel : ViewModelBase
     {
 
@@ -90,21 +95,10 @@ namespace FilePlayer.ViewModels
         private InteractionRequest<INotification> _pauseRequest;
 
         public InteractionRequest<INotification> ConfirmationRequest { get; private set; }
-        public InteractionRequest<INotification> PauseRequest
-        {
-            get
-            {
-                return _pauseRequest;
-            }
-            private set
-            {
-                _pauseRequest = value;
-                //OnPropertyChanged("PauseRequest");
+        public InteractionRequest<INotification> PauseRequest { get; private set; }
 
-            }
-        }
         public ConfirmationCommand RaiseConfirmationCommand { get; private set; }
-        public ICommand RaisePauseCommand { get; private set; }
+        public PauseCommand RaisePauseCommand { get; private set; }
 
 
 
@@ -161,7 +155,7 @@ namespace FilePlayer.ViewModels
             this.PauseRequest = new InteractionRequest<INotification>();
 
             this.RaiseConfirmationCommand = new ConfirmationCommand(this.RaiseConfirmation);
-            this.RaisePauseCommand = new ConfirmationCommand(this.RaisePause);
+            this.RaisePauseCommand = new PauseCommand(this.RaisePause);
 
         }
 
@@ -186,8 +180,6 @@ namespace FilePlayer.ViewModels
 
             this.PauseRequest.Raise(
                 new Notification { Content = contentText, Title = "Pause" });
-
-            OnPropertyChanged("PauseRequest");
         }
 
     }

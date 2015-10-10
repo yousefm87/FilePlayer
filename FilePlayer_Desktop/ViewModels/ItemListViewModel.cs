@@ -308,7 +308,7 @@ namespace FilePlayer.ViewModels
 
         public void MinimizeProcess(Process proc)
         {
-            ShowWindow(proc.MainWindowHandle, 2);
+            ShowWindow(proc.MainWindowHandle, 6);
         }
 
         public void MaximizeProcess(Process proc)

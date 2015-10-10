@@ -48,12 +48,15 @@ namespace FilePlayer
                 case "CONFIRM_CLOSE":
                     if(e.addlInfo[0] == "YES")
                     {
-                        ShellViewModel.ShellWindowState = WindowState.Minimized;
+                        this.Dispatcher.Invoke((Action)delegate
+                        {
+                            ShellViewModel.ShellWindowState = WindowState.Minimized;
+                        });
                     }
                     break;
                 case "PAUSE_OPEN":
                     
-                    ShellViewModel.ShellWindowState = WindowState.Maximized;
+                    
                     OpenPauseDialog(e);
                     break;
                 case "PAUSE_CLOSE":
@@ -91,6 +94,7 @@ namespace FilePlayer
             {
                 this.Dispatcher.Invoke((Action)delegate
                 {
+                    ShellViewModel.ShellWindowState = WindowState.Maximized;
                     ShellViewModel.RaisePauseCommand.Execute(e);
                 });
             }
