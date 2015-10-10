@@ -8,6 +8,7 @@ using Prism.Interactivity.InteractionRequest;
 using Prism.Commands;
 
 using System.Windows.Input;
+using System.Windows;
 
 namespace FilePlayer.ViewModels
 {
@@ -80,19 +81,42 @@ namespace FilePlayer.ViewModels
     
     public class ShellViewModel : ViewModelBase
     {
-        
+
+        private WindowState _shellWindowState = WindowState.Maximized;
         private bool _confirmationPopupIsOpen;
         private string _confirmationText;
-        public InteractionRequest<INotification> ConfirmationRequest { get; private set; }
-        public InteractionRequest<ItemSelectionNotification> ItemSelectionRequest { get; private set; }
-
-
-        public ConfirmationCommand RaiseConfirmationCommand { get; private set; }
-        
-
-        public ICommand RaiseItemSelectionCommand { get; private set; }
-
         private string resultMessage;
+        private IEventAggregator iEventAggregator;
+        private InteractionRequest<INotification> _pauseRequest;
+
+        public InteractionRequest<INotification> ConfirmationRequest { get; private set; }
+        public InteractionRequest<INotification> PauseRequest
+        {
+            get
+            {
+                return _pauseRequest;
+            }
+            private set
+            {
+                _pauseRequest = value;
+                //OnPropertyChanged("PauseRequest");
+
+            }
+        }
+        public ConfirmationCommand RaiseConfirmationCommand { get; private set; }
+        public ICommand RaisePauseCommand { get; private set; }
+
+
+
+        public WindowState ShellWindowState
+        {
+            get { return _shellWindowState; }
+            set
+            {
+                _shellWindowState = value;
+                OnPropertyChanged("ShellWindowState");
+            }
+        }
 
         public bool ConfirmationPopupIsOpen
         {
@@ -127,25 +151,6 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        private void RaiseConfirmation(object viewEventArgs)
-        {
-            // In this case we are passing a simple notification as a parameter.
-            // The custom popup view we are using for this interaction request does not have a DataContext of its own
-            // so it will inherit the DataContext of the window, which will be this same notification.
-            this.InteractionResultMessage = "";
-
-            ViewEventArgs args = (ViewEventArgs)viewEventArgs;
-            String contentText = args.addlInfo[0];
-
-
-
-            this.ConfirmationRequest.Raise(
-                new Notification { Content = contentText, Title = "Custom Popup" });
-        }
-
-        private IEventAggregator iEventAggregator;
-
-        private SubscriptionToken viewActionToken = null;
 
         public ShellViewModel(IEventAggregator iEventAggregator)
         {
@@ -153,12 +158,37 @@ namespace FilePlayer.ViewModels
             ConfirmationPopupIsOpen = false;
             ConfirmationText = "";
             this.ConfirmationRequest = new InteractionRequest<INotification>();
-            this.ItemSelectionRequest = new InteractionRequest<ItemSelectionNotification>();
+            this.PauseRequest = new InteractionRequest<INotification>();
 
             this.RaiseConfirmationCommand = new ConfirmationCommand(this.RaiseConfirmation);
-
+            this.RaisePauseCommand = new ConfirmationCommand(this.RaisePause);
 
         }
-    
+
+        
+        private void RaiseConfirmation(object viewEventArgs)
+        {
+            this.InteractionResultMessage = "";
+
+            ViewEventArgs args = (ViewEventArgs)viewEventArgs;
+            String contentText = args.addlInfo[0];
+
+            this.ConfirmationRequest.Raise(
+                new Notification { Content = contentText, Title = "Confirm" });
+        }
+
+        private void RaisePause(object viewEventArgs)
+        {
+            this.InteractionResultMessage = "";
+
+            ViewEventArgs args = (ViewEventArgs)viewEventArgs;
+            String contentText = "";// args.addlInfo[0];
+
+            this.PauseRequest.Raise(
+                new Notification { Content = contentText, Title = "Pause" });
+
+            OnPropertyChanged("PauseRequest");
+        }
+
     }
 }

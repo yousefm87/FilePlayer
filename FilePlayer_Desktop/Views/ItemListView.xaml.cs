@@ -6,6 +6,8 @@ using FilePlayer.ViewModels;
 using FilePlayer.Model;
 
 using Microsoft.Practices.Prism.PubSubEvents;
+using System.IO;
+using System.Diagnostics;
 
 namespace FilePlayer.Views
 {
@@ -32,6 +34,7 @@ namespace FilePlayer.Views
             viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
+                    
                     PerformViewAction(this, viewEventArgs);
                 }
             );
@@ -52,15 +55,31 @@ namespace FilePlayer.Views
                     MoveDown();
                     break;
                 case "CONFIRM_OPEN":
-                    OpenConfirmationDialog();
+                    AddListShade();
+                    break;
+                case "PAUSE_OPEN":
+                    AddListShade();
                     break;
                 case "CONFIRM_CLOSE":
-                    CloseConfirmationDialog();
+                    RemoveListShade();
+                    if(e.addlInfo[0] == "YES")
+                    {
+                        ItemListViewModel.OpenSelectedItemInApp();
+                        ItemListViewModel.SetControllerState("ITEM_PLAY");
+                    }
+                    else
+                    {
+                        ItemListViewModel.SetControllerState("ITEMLIST_BROWSE");
+                    }
                     break;
+                case "PAUSE_CLOSE":
+                    RemoveListShade();
+                    break;
+
             }
         }
 
-        private void OpenConfirmationDialog()
+        private void AddListShade()
         {
             itemlist.Dispatcher.Invoke((Action)delegate
             {
@@ -78,7 +97,7 @@ namespace FilePlayer.Views
         }
 
 
-        private void CloseConfirmationDialog()
+        private void RemoveListShade()
         {
             itemlist.Dispatcher.Invoke((Action)delegate
             {

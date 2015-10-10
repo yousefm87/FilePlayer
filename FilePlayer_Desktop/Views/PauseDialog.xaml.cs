@@ -7,21 +7,21 @@ using Microsoft.Practices.Prism.PubSubEvents;
 using FilePlayer.Model;
 using FilePlayer.ViewModels;
 
+
 namespace FilePlayer.Views
 {
     /// <summary>
     /// Interaction logic for ConfirmationDialog.xaml
     /// </summary>
-    public partial class ConfirmationDialog : UserControl, IInteractionRequestAware
+    public partial class PauseDialog : UserControl, IInteractionRequestAware
     {
 
         private IEventAggregator iEventAggregator;
-        public SubscriptionToken confirmViewActionToken;
-        public Button[] buttons;
+        public SubscriptionToken pauseViewActionToken;
+
         public string[] buttonActions;
+        public Button[] buttons;
         public int selectedButtonIndex;
-
-
         Brush selectedButtonBackground = Brushes.DodgerBlue;
         Brush selectedButtonForeground = Brushes.White;
         Brush unselectedButtonBackground = Brushes.AliceBlue;
@@ -32,53 +32,50 @@ namespace FilePlayer.Views
         public Action FinishInteraction { get; set; }
         public INotification Notification { get; set; }
 
-        public ConfirmationDialogViewModel ConfirmationDialogViewModel { get; set; }
+        public PauseDialogViewModel PauseDialogViewModel { get; set; }
 
-        public ConfirmationDialog()
+        public PauseDialog()
         {
-            ConfirmationDialogViewModel = new ConfirmationDialogViewModel(Event.EventInstance.EventAggregator);
+
+            PauseDialogViewModel = new PauseDialogViewModel(Event.EventInstance.EventAggregator);
+
             InitializeComponent();
             Init();
 
-            confirmViewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Subscribe(
+            pauseViewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
                     PerformViewAction(this, viewEventArgs);
                 }
             );
         }
-
+        
         public void Init()
         {
             iEventAggregator = Event.EventInstance.EventAggregator;
 
             selectedButtonIndex = 0;
-            buttons = new Button[] { noButton, yesButton };
-            buttonActions = new string[] { "NO", "YES" };
+            buttons = new Button[] { returnToAppButton, closeAppButton, closeAllButton };
+            buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "CLOSE_ALL" };
 
             for (int i = 0; i < buttons.Length; i++)
             {
                 bool isSelected = (i == selectedButtonIndex);
                 SetButtonSelected(buttons[i], isSelected);
             }
-
-
         }
 
-
-
-
-        void PerformViewAction(object sender, ConfirmationViewEventArgs e)
+        void PerformViewAction(object sender, PauseViewEventArgs e)
         {
             switch (e.action)
             {
-                case "CONFIRM_MOVE_LEFT":
-                    MoveLeft();
+                case "PAUSE_MOVE_UP":
+                    MoveUp();
                     break;
-                case "CONFIRM_MOVE_RIGHT":
-                    MoveRight();
+                case "PAUSE_MOVE_DOWN":
+                    MoveDown();
                     break;
-                case "CONFIRM_SELECT_BUTTON":
+                case "PAUSE_SELECT_BUTTON":
                     SelectButton();
                     break;
             }
@@ -90,6 +87,7 @@ namespace FilePlayer.Views
             if (this.FinishInteraction != null)
                 this.FinishInteraction();
         }
+
 
 
 
@@ -114,7 +112,7 @@ namespace FilePlayer.Views
             }
         }
 
-        public void MoveLeft()
+        public void MoveUp()
         {
             if (selectedButtonIndex != 0)
             {
@@ -123,7 +121,7 @@ namespace FilePlayer.Views
             }
         }
 
-        public void MoveRight()
+        public void MoveDown()
         {
             if (selectedButtonIndex != (buttons.Length - 1))
             {
@@ -136,15 +134,17 @@ namespace FilePlayer.Views
         {
             this.Dispatcher.Invoke((Action)delegate
             {
+                string response = buttonActions[selectedButtonIndex];
 
                 if (this.FinishInteraction != null)
                 {
                     this.FinishInteraction();
                 }
-                string response = buttonActions[selectedButtonIndex];
-                this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("CONFIRM_CLOSE", new string[] { response }));
+
+                this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("PAUSE_CLOSE", new string[] { response }));
 
                 Init();
+                
             });
         }
     }

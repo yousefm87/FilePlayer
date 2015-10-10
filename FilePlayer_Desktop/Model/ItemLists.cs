@@ -23,11 +23,24 @@ namespace FilePlayer.Model
             }
 
         }
+        
+        public string GetCurrentConsoleAppPath()
+        {
+            JToken appPath = consoles["consoles"][currConsole]["apppath"];
 
+            return appPath.Value<String>();
+        }
+        
         public IEnumerable<string> GetNames()
         {
             JToken currConsoleItemList = consoles["consoles"][currConsole]["itemlist"];
             return currConsoleItemList.Children()["name"].Values<String>();
+        }
+
+        public IEnumerable<string> GetItemFilePaths()
+        {
+            JToken currConsoleItemList = consoles["consoles"][currConsole]["itemlist"];
+            return currConsoleItemList.Children()["file"].Values<String>();
         }
 
         public void UpdateItemLists()

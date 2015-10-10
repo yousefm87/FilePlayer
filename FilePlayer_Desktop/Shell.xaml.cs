@@ -45,6 +45,31 @@ namespace FilePlayer
                 case "CONFIRM_OPEN":
                     OpenConfirmationDialog(e);
                     break;
+                case "CONFIRM_CLOSE":
+                    if(e.addlInfo[0] == "YES")
+                    {
+                        ShellViewModel.ShellWindowState = WindowState.Minimized;
+                    }
+                    break;
+                case "PAUSE_OPEN":
+                    
+                    ShellViewModel.ShellWindowState = WindowState.Maximized;
+                    OpenPauseDialog(e);
+                    break;
+                case "PAUSE_CLOSE":
+                    switch (e.addlInfo[0])
+                    {
+                        case "RETURN_TO_APP":
+                            ShellViewModel.ShellWindowState = WindowState.Minimized;
+                            break;
+                        case "CLOSE_APP":
+                            ShellViewModel.ShellWindowState = WindowState.Maximized;
+                            break;
+                        case "CLOSE_ALL":
+                            break;
+                    }
+
+                    break;
             }
         }
 
@@ -56,6 +81,17 @@ namespace FilePlayer
                 this.Dispatcher.Invoke((Action)delegate
                 {
                     ShellViewModel.RaiseConfirmationCommand.Execute(e);
+                });
+            }
+        }
+
+        private void OpenPauseDialog(ViewEventArgs e)
+        {
+            if (ShellViewModel.RaisePauseCommand.CanExecute(e))
+            {
+                this.Dispatcher.Invoke((Action)delegate
+                {
+                    ShellViewModel.RaisePauseCommand.Execute(e);
                 });
             }
         }
@@ -75,4 +111,7 @@ namespace FilePlayer
         }
 
     }
+
+
+    
 }

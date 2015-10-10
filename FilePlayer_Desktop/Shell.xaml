@@ -11,7 +11,8 @@
         mc:Ignorable="d" 
         Title="FilePlayer" 
         Height="300" 
-        Width="300">
+        Width="300"
+        WindowState="{Binding ShellWindowState}">
 
 
     <Window.Resources>
@@ -27,18 +28,28 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <UserControl prism:RegionManager.RegionName="ItemListView" />
 
+        
         <i:Interaction.Triggers>
-            <prism:InteractionRequestTrigger  SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
+            <prism:InteractionRequestTrigger SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
 
-                <app:AppPopup x:Name="popup" CenterOverAssociatedObject="True" >
+                <app:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True" >
                     <app:AppPopup.WindowContent>
                         <views:ConfirmationDialog />
                     </app:AppPopup.WindowContent>
                 </app:AppPopup>
             </prism:InteractionRequestTrigger>
+            
+            <prism:InteractionRequestTrigger SourceObject="{Binding PauseRequest, Mode=OneWay}">
+                <app:AppPopup x:Name="pausepopup" CenterOverAssociatedObject="True" IsEnabled="True">
+                    <app:AppPopup.WindowContent>
+                        <views:PauseDialog />
+                    </app:AppPopup.WindowContent>
+                </app:AppPopup>
+            </prism:InteractionRequestTrigger>
         </i:Interaction.Triggers>
+
+        <UserControl prism:RegionManager.RegionName="ItemListView" />
         <!-- <my:ModalDialogPopup IsOpen="{Binding ConfirmationPopupIsOpen, Mode=TwoWay}" Title="Modal popup title goes here">
             <my:ModalDialogPopup.HostedContent>
                 <ContentControl>
