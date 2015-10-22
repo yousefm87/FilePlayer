@@ -7,21 +7,46 @@
              xmlns:prism="http://www.codeplex.com/prism"
              
              mc:Ignorable="d">
-    
-    
-    
-    
+
+    <UserControl.Resources>
+        <Style x:Key="ItemListDataGrid" TargetType="DataGrid">
+            <Setter Property="HeadersVisibility" Value="None" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="IsSynchronizedWithCurrentItem" Value="True" />
+            <Setter Property="SelectionUnit" Value="Cell" />
+            <Setter Property="RowHeight" Value="100" />
+        </Style>
+        <Style x:Key="ItemListDataGridCell" TargetType="DataGridCell" BasedOn="{StaticResource {x:Type DataGridCell}}">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="FontSize" Value="40" />
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="DodgerBlue"/>
+                    <Setter Property="Foreground" Value="WhiteSmoke"/>
+                    <Setter Property="FontWeight" Value="UltraBold"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="False">
+                    <Setter Property="Background" Value="WhiteSmoke"/>
+                    <Setter Property="Foreground" Value="MidnightBlue"/>
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+    </UserControl.Resources>
+
+
     <DataGrid x:Name="itemlist" 
               ItemsSource="{Binding AllItemNames}" 
-              HeadersVisibility="None" 
-              VerticalScrollBarVisibility="Hidden" 
-              AutoGenerateColumns="False" 
-              IsSynchronizedWithCurrentItem="True" 
-              SelectionUnit="Cell" 
               Loaded ="Itemlist_Loaded"
-              RowHeight="50">
+              Style="{StaticResource ItemListDataGrid}"
+              CellStyle="{StaticResource ItemListDataGridCell}">
         <DataGrid.Columns>
-            <DataGridTextColumn Binding="{Binding}" Width="*" FontSize="30"/>
+            <DataGridTextColumn Binding="{Binding}" Width="*"/>
         </DataGrid.Columns>
     </DataGrid>
 

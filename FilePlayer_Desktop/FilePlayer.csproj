@@ -150,6 +150,7 @@
     <Compile Include="Shell.xaml.cs">
       <DependentUpon>Shell.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Styles\Controls.cs" />
     <Compile Include="ViewModels\PauseDialogViewModel.cs" />
     <Compile Include="ViewModels\ConfirmationDialogViewModel.cs" />
     <Compile Include="ViewModels\ItemListViewModel.cs" />
@@ -166,6 +167,10 @@
       <DependentUpon>PauseDialog.xaml</DependentUpon>
     </Compile>
     <Page Include="Shell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\Styles.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -212,7 +217,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Automation\maximize.au3" />
+    <None Include="Automation\maximizenestopia.au3" />
+    <None Include="Automation\maximizesnes9x.au3" />
     <None Include="JSON\consoles.json" />
     <None Include="packages.config">
       <SubType>Designer</SubType>

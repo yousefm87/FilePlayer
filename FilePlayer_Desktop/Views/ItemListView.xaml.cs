@@ -44,15 +44,33 @@ namespace FilePlayer.Views
 
         void PerformViewAction(object sender, ItemListViewEventArgs e)
         {
+            int numMoves;
             switch(e.action)
             {
                 case "":
                     
                 case "ITEMLIST_MOVE_UP":
-                    MoveUp();
+                    numMoves = Int32.Parse(e.addlInfo[0]);
+                    MoveUp(numMoves);
                     break;
                 case "ITEMLIST_MOVE_DOWN":
-                    MoveDown();
+                    numMoves = Int32.Parse(e.addlInfo[0]);
+                    MoveDown(numMoves);
+                    break;
+                case "ITEMLIST_MOVE_LEFT":
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        ItemListViewModel.SetPreviousLists();
+                        SelectFirstItem();
+                    });
+
+                    break;
+                case "ITEMLIST_MOVE_RIGHT":
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        ItemListViewModel.SetNextLists();
+                        SelectFirstItem();
+                    });
                     break;
                 case "CONFIRM_OPEN":
                     AddListShade();
@@ -62,6 +80,9 @@ namespace FilePlayer.Views
                     break;
                 case "CONFIRM_CLOSE":
                     RemoveListShade();
+                    break;
+                case "OPEN_ITEM":
+                    //TODO: Open App after minimizing 
                     if(e.addlInfo[0] == "YES")
                     {
                         ItemListViewModel.OpenSelectedItemInApp();
@@ -120,8 +141,16 @@ namespace FilePlayer.Views
                 //Select the first column of the first item.
                 itemlist.Dispatcher.Invoke((Action)delegate
                 {
-                    itemlist.CurrentCell = new DataGridCellInfo(itemlist.Items[newSelectedIndex], itemlist.Columns[0]);
+                    if(itemlist.CurrentCell.IsValid)
+                    {
+                        itemlist.SelectedCells.Remove(itemlist.CurrentCell);
+                    }
+                    DataGridCellInfo newCell = new DataGridCellInfo(itemlist.Items[newSelectedIndex], itemlist.Columns[0]);
+
+                    itemlist.CurrentCell = newCell;
                     itemlist.SelectedCells.Add(itemlist.CurrentCell);
+                    itemlist.ScrollIntoView(itemlist.CurrentCell.Item, itemlist.CurrentCell.Column);
+                    
                 });
 
                 ItemListViewModel.SelectedItemIndex = newSelectedIndex;
@@ -181,6 +210,63 @@ namespace FilePlayer.Views
             }
         }
 
+        public void MoveUp(int numMove)
+        {
+            if ((itemlist.Items.Count > 0) && (itemlist.Columns.Count > 0))
+            {
+                int selectedIndex = ItemListViewModel.SelectedItemIndex; //int selectedIndex = itemlist.SelectedIndex;
+                int newSelectedIndex = selectedIndex - numMove;
+                int minIndex = 0;
+
+                if (newSelectedIndex < minIndex)
+                {
+                    newSelectedIndex = minIndex;
+                }
+
+                itemlist.Dispatcher.Invoke((Action)delegate
+                {
+                    itemlist.SelectedCells.Remove(itemlist.CurrentCell);
+
+                    itemlist.CurrentCell = new DataGridCellInfo(itemlist.Items[newSelectedIndex], itemlist.Columns[0]);
+                    itemlist.SelectedCells.Add(itemlist.CurrentCell);
+
+                    itemlist.ScrollIntoView(itemlist.CurrentCell.Item, itemlist.CurrentCell.Column);
+                });
+
+                ItemListViewModel.SelectedItemIndex = newSelectedIndex;
+                
+
+            }
+        }
+
+        public void MoveDown(int numMove)
+        {
+
+            if ((itemlist.Items.Count > 0) && (itemlist.Columns.Count > 0))
+            {
+                int selectedIndex = ItemListViewModel.SelectedItemIndex;
+                int newSelectedIndex = selectedIndex + numMove;
+                int maxIndex = itemlist.Items.Count - 1;
+
+                if (newSelectedIndex > maxIndex)
+                {
+                    newSelectedIndex = maxIndex;
+                }
+
+                itemlist.Dispatcher.Invoke((Action)delegate
+                {
+                    itemlist.SelectedCells.Remove(itemlist.CurrentCell);
+
+                    itemlist.CurrentCell = new DataGridCellInfo(itemlist.Items[newSelectedIndex], itemlist.Columns[0]);
+                    itemlist.SelectedCells.Add(itemlist.CurrentCell);
+
+                    itemlist.ScrollIntoView(itemlist.CurrentCell.Item, itemlist.CurrentCell.Column);
+                });
+
+                ItemListViewModel.SelectedItemIndex = newSelectedIndex;
+                
+            }
+        }
 
 
     }

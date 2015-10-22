@@ -30,6 +30,9 @@ namespace FilePlayer.ViewModels
 
         private SubscriptionToken controllerSubToken = null;
         private SubscriptionToken itemListToken = null;
+        private IEnumerable<string> allItemNames;
+        private IEnumerable<string> allItemPaths;
+
 
         public ItemLists ItemLists
         {
@@ -41,8 +44,26 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public IEnumerable<string> AllItemNames { get; private set; }
-        public IEnumerable<string> AllItemPaths { get; private set; }
+        public IEnumerable<string> AllItemNames
+        {
+            get { return this.allItemNames; }
+            set
+            {
+                allItemNames = value;
+                OnPropertyChanged("allItemNames");
+            }
+        }
+
+
+        public IEnumerable<string> AllItemPaths
+        {
+            get { return this.allItemPaths; }
+            set
+            {
+                allItemPaths = value;
+                OnPropertyChanged("allItemPaths");
+            }
+        }
 
         Process autProc = null;
         Process appProc = null;
@@ -58,10 +79,10 @@ namespace FilePlayer.ViewModels
             String consolesStr = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\consoles.json";
             this.ItemLists = new ItemLists(consolesStr);
 
-            this.AllItemNames = this.ItemLists.GetNames();
-            this.AllItemPaths = this.itemLists.GetItemFilePaths();
+            this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
+            this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
 
-            this.SelectedItemIndex = 1;
+            this.SelectedItemIndex = 0;
             
             input = new XboxControllerInputProvider(Event.EventInstance.EventAggregator);
             
@@ -97,10 +118,38 @@ namespace FilePlayer.ViewModels
                             SetControllerState("ITEMLIST_BROWSE");
                             break;
                         case "CLOSE_ALL":
-
+                            appProc.Kill();
+                            
                             break;
                     }
                     break;
+                case "ITEMLIST_MOVE_LEFT":
+
+                    break;
+                case "ITEMLIST_MOVE_RIGHT":
+
+                    break;
+
+            }
+        }
+
+        public void SetNextLists()
+        {
+            if (ItemLists.SetConsoleNext())
+            {
+                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
+                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
+                SelectedItemIndex = 0;
+            }
+       }
+
+        public void SetPreviousLists()
+        {
+            if (ItemLists.SetConsolePrevious())
+            {
+                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
+                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
+                SelectedItemIndex = 0;
             }
         }
 
@@ -154,7 +203,7 @@ namespace FilePlayer.ViewModels
             switch (e.buttonPressed)
             {
                 case "A":
-                    string itemName = AllItemNames.ToList().ElementAt(SelectedItemIndex);
+                    string itemName = ItemLists.GetItemNames(ItemLists.CurrConsole).ToList().ElementAt(SelectedItemIndex);
                     this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("CONFIRM_OPEN", new string[]{ itemName }));
                     SetControllerState("ITEMLIST_CONFIRM");
                     break;
@@ -162,13 +211,22 @@ namespace FilePlayer.ViewModels
                     Console.WriteLine("Case 2");
                     break;
                 case "DUP":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_UP"));
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_UP", new string[] { 1.ToString() }));
                     break;
                 case "DDOWN":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_DOWN"));
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_DOWN", new string[] { 1.ToString() }));
+                    break;
+                case "DLEFT":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_LEFT", new string[] { 1.ToString() }));
+                    break;
+                case "DRIGHT":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_RIGHT", new string[] { 1.ToString() }));
+                    break;
+                case "LSHOULDER":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_UP", new string[] { 10.ToString() }));
                     break;
                 case "RSHOULDER":
-                    Console.WriteLine("");
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_DOWN", new string[] { 10.ToString() }));
                     break;
                 case "GUIDE":
                     break;
@@ -266,8 +324,9 @@ namespace FilePlayer.ViewModels
         public void OpenSelectedItemInApp()
         {
             string autPath = "C:\\Program Files (x86)\\AutoIt3\\AutoIt3.exe";
-            string maximizeActionPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Automation\\maximize.au3"; ;
-            string appPath = ItemLists.GetCurrentConsoleAppPath();
+            string maximizeActionPath_old = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Automation\\maximize.au3";
+            string maximizeActionPath = ItemLists.GetConsoleMaxAndFocus(ItemLists.CurrConsole);
+            string appPath = ItemLists.GetConsoleAppPath(ItemLists.CurrConsole);
             string itemPath = AllItemPaths.ToList().ElementAt(SelectedItemIndex);
 
 
@@ -278,32 +337,34 @@ namespace FilePlayer.ViewModels
                 {
                     FileName = appPath,
                     Arguments = "\"" + itemPath + "\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
+                    UseShellExecute = true,
+                    CreateNoWindow = false
                 }
                 
             };
 
             appProc.Start();
-
+            string windowTitle = appProc.MainWindowTitle;
             appProc.WaitForInputIdle();
 
+            
+                      
             autProc = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = autPath,
-                    Arguments = "\"" + maximizeActionPath + "\" \"" + appProc.MainWindowTitle + "\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
+                    Arguments = "\"" + maximizeActionPath + "\" \"" + windowTitle + "\"",
+                    UseShellExecute = true,
                     CreateNoWindow = true
                 }
             };
 
             autProc.Start();
+            
 
-            autProc.WaitForExit();
+            
+            
         }
 
         public void MinimizeProcess(Process proc)

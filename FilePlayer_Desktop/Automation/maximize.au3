@@ -1,5 +1,0 @@
-Local $hWnd = WinWait($CmdLine[1])
-WinActivate($hWnd)
-WinWaitActive($hWnd)
-SendKeepActive($hWnd)
-Send("{AltDown}{Enter}{AltUp}")

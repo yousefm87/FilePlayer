@@ -10,7 +10,7 @@ namespace FilePlayer.Model
     public class ItemLists
     {
         public JObject consoles = null;
-        public int currConsole = 0;
+        public int CurrConsole { get; set; }
 
         public ItemLists(String jsonFilePath)
         {
@@ -19,27 +19,54 @@ namespace FilePlayer.Model
 
             if (consoles["consoles"] != null)
             {
-                currConsole = 0;
+                CurrConsole = 0;
             }
 
         }
-        
-        public string GetCurrentConsoleAppPath()
+
+        public bool SetConsoleNext()
         {
-            JToken appPath = consoles["consoles"][currConsole]["apppath"];
+            if((CurrConsole + 1) < consoles["consoles"].Count())
+            {
+                CurrConsole++;
+                return true;
+            }
+            return false;
+        }
+
+        public bool SetConsolePrevious()
+        {
+            if ((CurrConsole - 1) >= 0)
+            {
+                CurrConsole--;
+                return true;
+            }
+            return false;
+        }
+
+        public string GetConsoleMaxAndFocus(int consoleIndex)
+        {
+            JToken appPath = consoles["consoles"][consoleIndex]["maxandfocusscript"];
+
+            return appPath.Value<String>();
+        }
+
+        public string GetConsoleAppPath(int consoleIndex)
+        {
+            JToken appPath = consoles["consoles"][consoleIndex]["apppath"];
 
             return appPath.Value<String>();
         }
         
-        public IEnumerable<string> GetNames()
+        public IEnumerable<string> GetItemNames(int consoleIndex)
         {
-            JToken currConsoleItemList = consoles["consoles"][currConsole]["itemlist"];
+            JToken currConsoleItemList = consoles["consoles"][consoleIndex]["itemlist"];
             return currConsoleItemList.Children()["name"].Values<String>();
         }
 
-        public IEnumerable<string> GetItemFilePaths()
+        public IEnumerable<string> GetItemFilePaths(int consoleIndex)
         {
-            JToken currConsoleItemList = consoles["consoles"][currConsole]["itemlist"];
+            JToken currConsoleItemList = consoles["consoles"][consoleIndex]["itemlist"];
             return currConsoleItemList.Children()["file"].Values<String>();
         }
 

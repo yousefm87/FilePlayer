@@ -1,9 +1,19 @@
 ﻿{"consoles": [
   {
+    "apppath": "F:\\EMU\\Snes9X\\snes9x-x64.exe",
     "consolename": "Super Nintendo",
-    "apppath": "F:\\EMU\\snes9x-1.53-x64\\snes9x-x64.exe",
-    "filespath": "F:\\ROMS\\SNES Roms\\",
     "extension": "smc",
-    "titlesubstring": "Snes9X"
+    "filespath": "F:\\ROMS\\SNES Roms\\",
+    "titlesubstring": "Snes9X",
+    "maxandfocusscript": "C:\\FilePlayer\\FilePlayer_Desktop\\Automation\\maximizesnes9x.au3"
+  },
+  {
+    "apppath": "F:\\EMU\\Nestopia\\nestopia.exe",
+    "consolename": "Nintendo Entertainment System",
+    "extension": "nes",
+    "filespath": "F:\\ROMS\\NES Roms\\",
+    "titlesubstring": "Nestopia",
+    "maxandfocusscript": "C:\\FilePlayer\\FilePlayer_Desktop\\Automation\\maximizenestopia.au3"
   }
+
 ]}

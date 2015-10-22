@@ -33,8 +33,6 @@ namespace FilePlayer
             );
 
             InitializeComponent();
-
-            
         }
 
         void PerformViewAction(object sender, ItemListViewEventArgs e)
@@ -46,13 +44,16 @@ namespace FilePlayer
                     OpenConfirmationDialog(e);
                     break;
                 case "CONFIRM_CLOSE":
-                    if(e.addlInfo[0] == "YES")
+                    if (e.addlInfo[0] == "YES")
                     {
                         this.Dispatcher.Invoke((Action)delegate
                         {
                             ShellViewModel.ShellWindowState = WindowState.Minimized;
                         });
+
                     }
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("OPEN_ITEM", e.addlInfo));
+                    
                     break;
                 case "PAUSE_OPEN":
                     
@@ -69,6 +70,7 @@ namespace FilePlayer
                             ShellViewModel.ShellWindowState = WindowState.Maximized;
                             break;
                         case "CLOSE_ALL":
+                            Application.Current.Shutdown();
                             break;
                     }
 
@@ -102,19 +104,6 @@ namespace FilePlayer
 
     }
 
-    public class AppPopup : PopupWindowAction
-    {
-
-        protected override Window GetWindow(INotification notification)
-        {
-            Window popupWin = base.GetWindow(notification); 
-            popupWin.WindowStyle = System.Windows.WindowStyle.None;
-            popupWin.AllowsTransparency = true;
-            return popupWin;
-
-        }
-
-    }
 
 
     

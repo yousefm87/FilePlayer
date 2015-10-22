@@ -7,17 +7,12 @@
         xmlns:prism="http://www.codeplex.com/prism"
         xmlns:views="clr-namespace:FilePlayer.Views"
         xmlns:viewModels="clr-namespace:FilePlayer.ViewModels"
-        xmlns:app="clr-namespace:FilePlayer"
+        xmlns:styles="clr-namespace:FilePlayer.Styles"
         mc:Ignorable="d" 
-        Title="FilePlayer" 
-        Height="300" 
-        Width="300"
+        MinWidth="300"
+        MinHeight="300"
+        Title="FilePlayer"
         WindowState="{Binding ShellWindowState}">
-
-
-    <Window.Resources>
-
-    </Window.Resources>
     
     <Grid>
         <Grid.RowDefinitions>
@@ -30,20 +25,20 @@
         
         <i:Interaction.Triggers>
             <prism:InteractionRequestTrigger SourceObject="{Binding PauseRequest, Mode=OneWay}">
-                <app:AppPopup x:Name="pausepopup" CenterOverAssociatedObject="True" >
-                    <app:AppPopup.WindowContent >
+                <styles:AppPopup x:Name="pausepopup" CenterOverAssociatedObject="True" >
+                    <styles:AppPopup.WindowContent >
                         <views:PauseDialog />
-                    </app:AppPopup.WindowContent>
-                </app:AppPopup>
+                    </styles:AppPopup.WindowContent>
+                </styles:AppPopup>
             </prism:InteractionRequestTrigger>
             
             <prism:InteractionRequestTrigger SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
 
-                <app:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True" >
-                    <app:AppPopup.WindowContent>
+                <styles:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True" >
+                    <styles:AppPopup.WindowContent>
                         <views:ConfirmationDialog />
-                    </app:AppPopup.WindowContent>
-                </app:AppPopup>
+                    </styles:AppPopup.WindowContent>
+                </styles:AppPopup>
             </prism:InteractionRequestTrigger>
             
 

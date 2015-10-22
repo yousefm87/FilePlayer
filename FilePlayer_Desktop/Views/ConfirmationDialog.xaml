@@ -18,6 +18,7 @@
 
             <StackPanel x:Name="buttonPanel" Orientation="Horizontal">
                 <Button x:Name="noButton" AutomationProperties.AutomationId="CustomPopupNoButton" Margin="50" HorizontalAlignment="Right" Width="100" Height="40" Click="Button_Click">No</Button>
+                
                 <Button x:Name="yesButton" AutomationProperties.AutomationId="CustomPopupYesButton" Margin="50" HorizontalAlignment="Right" Width="100" Height="40" Click="Button_Click">Yes</Button>
             </StackPanel>
         </StackPanel>
