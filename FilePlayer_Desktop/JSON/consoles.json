@@ -5,7 +5,8 @@
     "extension": "smc",
     "filespath": "F:\\ROMS\\SNES Roms\\",
     "titlesubstring": "Snes9X",
-    "maxandfocusscript": "C:\\FilePlayer\\FilePlayer_Desktop\\Automation\\maximizesnes9x.au3"
+    "maxandfocusscript": "C:\\FilePlayer\\FilePlayer_Desktop\\Automation\\maximizesnes9x.au3",
+    "arguments":  ""
   },
   {
     "apppath": "F:\\EMU\\Nestopia\\nestopia.exe",
@@ -13,7 +14,8 @@
     "extension": "nes",
     "filespath": "F:\\ROMS\\NES Roms\\",
     "titlesubstring": "Nestopia",
-    "maxandfocusscript": "C:\\FilePlayer\\FilePlayer_Desktop\\Automation\\maximizenestopia.au3"
+    "maxandfocusscript": "", //C:\\FilePlayer\\FilePlayer_Desktop\\Automation\\maximizenestopia.au3",
+    "arguments":  ""
   }
 
 ]}

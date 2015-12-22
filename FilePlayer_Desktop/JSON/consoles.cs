@@ -17,6 +17,7 @@ namespace ObjectDAL
         public List<Itemlist> itemlist { get; set; }
         public string titlesubstring { get; set; }
         public string maxandfocusscript { get; set; }
+        public string arguments { get; set; }
     }
 
     public class RootObject

@@ -328,7 +328,7 @@ namespace FilePlayer.ViewModels
             string maximizeActionPath = ItemLists.GetConsoleMaxAndFocus(ItemLists.CurrConsole);
             string appPath = ItemLists.GetConsoleAppPath(ItemLists.CurrConsole);
             string itemPath = AllItemPaths.ToList().ElementAt(SelectedItemIndex);
-
+            string consoleArgs = ItemLists.GetConsoleArguments(ItemLists.CurrConsole);
 
 
             appProc = new Process
@@ -336,7 +336,7 @@ namespace FilePlayer.ViewModels
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = appPath,
-                    Arguments = "\"" + itemPath + "\"",
+                    Arguments = consoleArgs + " \"" + itemPath + "\"",
                     UseShellExecute = true,
                     CreateNoWindow = false
                 }
@@ -347,21 +347,22 @@ namespace FilePlayer.ViewModels
             string windowTitle = appProc.MainWindowTitle;
             appProc.WaitForInputIdle();
 
-            
-                      
-            autProc = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = autPath,
-                    Arguments = "\"" + maximizeActionPath + "\" \"" + windowTitle + "\"",
-                    UseShellExecute = true,
-                    CreateNoWindow = true
-                }
-            };
 
-            autProc.Start();
-            
+            if (maximizeActionPath != "")
+            {
+                autProc = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = autPath,
+                        Arguments = "\"" + maximizeActionPath + "\" \"" + windowTitle + "\"",
+                        UseShellExecute = true,
+                        CreateNoWindow = false
+                    }
+                };
+
+                autProc.Start();
+            }
 
             
             
