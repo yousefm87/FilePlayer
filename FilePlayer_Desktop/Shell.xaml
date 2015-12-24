@@ -24,14 +24,15 @@
 
         
         <i:Interaction.Triggers>
-            <prism:InteractionRequestTrigger SourceObject="{Binding PauseRequest, Mode=OneWay}">
-                <styles:AppPopup x:Name="pausepopup" CenterOverAssociatedObject="True" >
+            <!--
+            <prism:InteractionRequestTrigger  SourceObject="{Binding PauseRequest}">
+                <styles:AppPopup x:Name="pausepopup"  CenterOverAssociatedObject="True">
                     <styles:AppPopup.WindowContent >
-                        <views:PauseDialog />
+                        <views:PauseDialog x:Name="pauseView"/>
                     </styles:AppPopup.WindowContent>
                 </styles:AppPopup>
             </prism:InteractionRequestTrigger>
-            
+            -->
             <prism:InteractionRequestTrigger SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
 
                 <styles:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True" >

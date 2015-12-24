@@ -21,6 +21,8 @@ namespace FilePlayer.Styles
             Window popupWin = base.GetWindow(notification);
             popupWin.WindowStyle = System.Windows.WindowStyle.None;
             popupWin.AllowsTransparency = true;
+
+
             return popupWin;
 
         }

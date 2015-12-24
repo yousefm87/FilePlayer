@@ -14,8 +14,17 @@
     "extension": "nes",
     "filespath": "F:\\ROMS\\NES Roms\\",
     "titlesubstring": "Nestopia",
-    "maxandfocusscript": "", //C:\\FilePlayer\\FilePlayer_Desktop\\Automation\\maximizenestopia.au3",
+    "maxandfocusscript": "",
     "arguments":  ""
+  },
+  {
+    "apppath": "F:\\EMU\\Fusion364\\Fusion.exe",
+    "consolename": "Sega Genesis",
+    "extension": "bin",
+    "filespath": "F:\\ROMS\\MEGA DRIVE (Genesis) Roms\\",
+    "titlesubstring": "Nestopia",
+    "maxandfocusscript": "",
+    "arguments":  "-fullscreen"
   }
 
 ]}

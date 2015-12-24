@@ -13,7 +13,7 @@ namespace FilePlayer.Views
     /// <summary>
     /// Interaction logic for ConfirmationDialog.xaml
     /// </summary>
-    public partial class PauseDialog : UserControl, IInteractionRequestAware
+    public partial class PauseDialog : IInteractionRequestAware
     {
 
         private IEventAggregator iEventAggregator;
@@ -41,7 +41,7 @@ namespace FilePlayer.Views
 
             InitializeComponent();
             Init();
-
+            
             pauseViewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
@@ -57,7 +57,7 @@ namespace FilePlayer.Views
             selectedButtonIndex = 0;
             buttons = new Button[] { returnToAppButton, closeAppButton, closeAllButton };
             buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "CLOSE_ALL" };
-
+            
             for (int i = 0; i < buttons.Length; i++)
             {
                 bool isSelected = (i == selectedButtonIndex);
@@ -134,16 +134,17 @@ namespace FilePlayer.Views
         {
             this.Dispatcher.Invoke((Action)delegate
             {
-                if (this.FinishInteraction != null)
-                {
-                    this.FinishInteraction();
-                }
                 string response = buttonActions[selectedButtonIndex];
                 this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("PAUSE_CLOSE", new string[] { response }));
-
-                Init();
-                
             });
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            if (pauseViewActionToken != null)
+            {
+                this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Unsubscribe(pauseViewActionToken);
+            }
         }
     }
 }

@@ -114,11 +114,13 @@ namespace FilePlayer.ViewModels
                             SetControllerState("ITEM_PLAY");
                             break;
                         case "CLOSE_APP":
-                            appProc.Kill();
+                            if(!appProc.HasExited)
+                                appProc.Kill();
                             SetControllerState("ITEMLIST_BROWSE");
                             break;
                         case "CLOSE_ALL":
-                            appProc.Kill();
+                            if(!appProc.HasExited)
+                                appProc.Kill();
                             
                             break;
                     }
