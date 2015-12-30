@@ -12,16 +12,48 @@
         SizeToContent="WidthAndHeight"
         WindowStyle="None"
         AllowsTransparency="True"
+        Background = "#9999b3"
+        BorderBrush ="#1a1a1f"
+        MinHeight="200"
+        MinWidth="150"
         Closed="Window_Closed">
+    
+    
+    <Window.Resources>
+        <Style x:Key="selBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="#646882" />
+            <Setter Property="BorderBrush" Value="#2b2c36" />
+            <Setter Property="Foreground" Value="WhiteSmoke" />
+            <Setter Property="FontWeight" Value="UltraBold"/>
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Height" Value="80" />
+            <Setter Property="Width" Value="300" />
+            <Setter Property="Margin" Value="18,1,18,1" />
+        </Style>
+        <Style x:Key="unselBtnStyle" TargetType="Button">
+            <Setter Property="Background" Value="#2b2d38" />
+            <Setter Property="BorderBrush" Value="#31323d" />
+            <Setter Property="Foreground" Value="GhostWhite" />
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Height" Value="80" />
+            <Setter Property="Width" Value="300" />
+            <Setter Property="Margin" Value="18,1,18,1" />
+        </Style>
+
+    </Window.Resources>
 
     <Grid>
         <StackPanel>
 
             <StackPanel x:Name="buttonPanel" Orientation="Vertical" >
-                <Button x:Name="returnToAppButton"  AutomationProperties.AutomationId="PauseReturnToAppButton" Margin="20,20,20,5" HorizontalAlignment="Right" Height="60" Width="200" Click="Button_Click">Return to App</Button>
-                <Button x:Name="closeAppButton" AutomationProperties.AutomationId="PauseCloseAppButton" Margin="20,5,20,5"  HorizontalAlignment="Right" Height="60" Width="200" Click="Button_Click">Close App</Button>
-                <Button x:Name="closeAllButton" AutomationProperties.AutomationId="PauseCloseAllButton" Margin="20,5,20,20" HorizontalAlignment="Right"  Height="60" Width="200" Click="Button_Click">Close App And FilePlayer</Button>
-                
+                <AdornerDecorator Height="9"  />
+                <Button x:Name="returnToAppButton"  AutomationProperties.AutomationId="PauseReturnToAppButton" Click="Button_Click">Return to App</Button>
+                <Button x:Name="closeAppButton" AutomationProperties.AutomationId="PauseCloseAppButton" Click="Button_Click">Close App</Button>
+                <Button x:Name="closeAllButton" AutomationProperties.AutomationId="PauseCloseAllButton" Click="Button_Click">Close App And FilePlayer</Button>
+                <AdornerDecorator Height="9"  />
             </StackPanel>
         </StackPanel>
 

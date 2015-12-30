@@ -68,10 +68,6 @@ namespace FilePlayer.ViewModels
         Process autProc = null;
         Process appProc = null;
 
-        [DllImport("User32")]
-        private static extern int ShowWindow(IntPtr hwnd, int nCmdShow);
-
-
         public ItemListViewModel(IEventAggregator iEventAggregator)
         {
             this.iEventAggregator = iEventAggregator;
@@ -104,13 +100,17 @@ namespace FilePlayer.ViewModels
             switch (e.action)
             {
                 case "PAUSE_OPEN":
-                    MinimizeProcess(appProc);
+                    //MinimizeProcess(appProc);
+                    WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Minimize");
                     break;
                 case "PAUSE_CLOSE":
                     switch (e.addlInfo[0])
                     {
                         case "RETURN_TO_APP":
-                            MaximizeProcess(appProc);
+                            //MaximizeProcess(appProc);
+                            
+                            WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
+//                            ShowProcess(appProc);
                             SetControllerState("ITEM_PLAY");
                             break;
                         case "CLOSE_APP":
@@ -370,14 +370,6 @@ namespace FilePlayer.ViewModels
             
         }
 
-        public void MinimizeProcess(Process proc)
-        {
-            ShowWindow(proc.MainWindowHandle, 6);
-        }
 
-        public void MaximizeProcess(Process proc)
-        {
-            ShowWindow(proc.MainWindowHandle, 3);
-        }
     }
 }

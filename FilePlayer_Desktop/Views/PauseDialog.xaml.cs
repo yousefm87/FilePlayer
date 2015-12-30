@@ -41,6 +41,7 @@ namespace FilePlayer.Views
 
             InitializeComponent();
             Init();
+            this.Topmost = true;
             
             pauseViewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
@@ -98,16 +99,18 @@ namespace FilePlayer.Views
             {
                 buttonPanel.Dispatcher.Invoke((Action)delegate
                 {
-                    button.Background = selectedButtonBackground;
-                    button.Foreground = selectedButtonForeground;
+                    button.SetResourceReference(Control.StyleProperty, "selBtnStyle");
+                    //button.Background = selectedButtonBackground;
+                    //button.Foreground = selectedButtonForeground;
                 });
             }
             else
             {
                 buttonPanel.Dispatcher.Invoke((Action)delegate
                 {
-                    button.Background = unselectedButtonBackground;
-                    button.Foreground = unselectedButtonForeground;
+                    button.SetResourceReference(Control.StyleProperty, "unselBtnStyle");
+                    //button.Background = unselectedButtonBackground;
+                    //button.Foreground = unselectedButtonForeground;
                 });
             }
         }
@@ -141,6 +144,7 @@ namespace FilePlayer.Views
 
         private void Window_Closed(object sender, EventArgs e)
         {
+            this.Topmost = false;
             if (pauseViewActionToken != null)
             {
                 this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Unsubscribe(pauseViewActionToken);

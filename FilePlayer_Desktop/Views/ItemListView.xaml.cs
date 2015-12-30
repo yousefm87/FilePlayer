@@ -8,6 +8,7 @@ using FilePlayer.Model;
 using Microsoft.Practices.Prism.PubSubEvents;
 using System.IO;
 using System.Diagnostics;
+using System.Threading;
 
 namespace FilePlayer.Views
 {
@@ -86,6 +87,7 @@ namespace FilePlayer.Views
                     if(e.addlInfo[0] == "YES")
                     {
                         ItemListViewModel.OpenSelectedItemInApp();
+                        //Thread.Sleep(5000);
                         ItemListViewModel.SetControllerState("ITEM_PLAY");
                     }
                     else

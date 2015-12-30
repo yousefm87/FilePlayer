@@ -12,6 +12,9 @@
         MinWidth="300"
         MinHeight="300"
         Title="FilePlayer"
+        Icon="Images\genericgame.png"
+        WindowStyle="None"
+        AllowsTransparency="True"
         WindowState="{Binding ShellWindowState}">
     
     <Grid>
@@ -35,9 +38,11 @@
             -->
             <prism:InteractionRequestTrigger SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
 
-                <styles:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True" >
+                <styles:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True">
                     <styles:AppPopup.WindowContent>
-                        <views:ConfirmationDialog />
+                        <views:ConfirmationDialog             
+                            Background = "#87879e"
+                            BorderBrush ="#1a1a1f"/>
                     </styles:AppPopup.WindowContent>
                 </styles:AppPopup>
             </prism:InteractionRequestTrigger>

@@ -166,6 +166,7 @@
     <Compile Include="Views\PauseDialog.xaml.cs">
       <DependentUpon>PauseDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WindowActions.cs" />
     <Page Include="Shell.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -235,7 +236,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Images\" />
     <Folder Include="Services\" />
     <Folder Include="Theme\" />
   </ItemGroup>
@@ -250,6 +250,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\genericgame.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

@@ -5,8 +5,8 @@
     "extension": "smc",
     "filespath": "F:\\ROMS\\SNES Roms\\",
     "titlesubstring": "Snes9X",
-    "maxandfocusscript": "C:\\FilePlayer\\FilePlayer_Desktop\\Automation\\maximizesnes9x.au3",
-    "arguments":  ""
+    "maxandfocusscript": "",
+    "arguments":  "-fullscreen"
   },
   {
     "apppath": "F:\\EMU\\Nestopia\\nestopia.exe",
@@ -22,7 +22,7 @@
     "consolename": "Sega Genesis",
     "extension": "bin",
     "filespath": "F:\\ROMS\\MEGA DRIVE (Genesis) Roms\\",
-    "titlesubstring": "Nestopia",
+    "titlesubstring": "Fusion",
     "maxandfocusscript": "",
     "arguments":  "-fullscreen"
   }

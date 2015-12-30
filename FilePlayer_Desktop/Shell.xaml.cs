@@ -45,6 +45,8 @@ namespace FilePlayer
             );
 
             InitializeComponent();
+            this.Topmost = true;
+            this.Topmost = false;
         }
 
         void PerformViewAction(object sender, ItemListViewEventArgs e)
@@ -68,7 +70,10 @@ namespace FilePlayer
                     
                     break;
                 case "PAUSE_OPEN":
-                    
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        this.Activate();
+                    });
                     
                     OpenPauseDialog(e);
                     break;
