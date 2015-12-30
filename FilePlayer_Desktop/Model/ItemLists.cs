@@ -58,6 +58,13 @@ namespace FilePlayer.Model
             return appPath.Value<String>();
         }
 
+        public string GetConsoleName(int consoleIndex)
+        {
+            JToken appPath = consoles["consoles"][consoleIndex]["consolename"];
+
+            return appPath.Value<String>();
+        }
+
         public string GetConsoleArguments(int consoleIndex)
         {
             JToken appPath = consoles["consoles"][consoleIndex]["arguments"];

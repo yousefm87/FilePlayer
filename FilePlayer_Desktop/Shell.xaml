@@ -25,7 +25,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        
+
         <i:Interaction.Triggers>
             <!--
             <prism:InteractionRequestTrigger  SourceObject="{Binding PauseRequest}">
@@ -46,7 +46,7 @@
                     </styles:AppPopup.WindowContent>
                 </styles:AppPopup>
             </prism:InteractionRequestTrigger>
-            
+
 
         </i:Interaction.Triggers>
 

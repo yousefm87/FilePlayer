@@ -32,7 +32,7 @@ namespace FilePlayer.ViewModels
         private SubscriptionToken itemListToken = null;
         private IEnumerable<string> allItemNames;
         private IEnumerable<string> allItemPaths;
-
+        private string currAppName;
 
         public ItemLists ItemLists
         {
@@ -41,6 +41,16 @@ namespace FilePlayer.ViewModels
             {
                 itemLists = value;
                 OnPropertyChanged("itemLists");
+            }
+        }
+
+        public string CurrAppName
+        {
+            get { return this.currAppName; }
+            set
+            {
+                currAppName = value;
+                OnPropertyChanged("currAppName");
             }
         }
 
@@ -78,6 +88,7 @@ namespace FilePlayer.ViewModels
             this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
             this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
 
+            this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
             this.SelectedItemIndex = 0;
             
             input = new XboxControllerInputProvider(Event.EventInstance.EventAggregator);
@@ -126,9 +137,11 @@ namespace FilePlayer.ViewModels
                     }
                     break;
                 case "ITEMLIST_MOVE_LEFT":
+                    this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
 
                     break;
                 case "ITEMLIST_MOVE_RIGHT":
+                    this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
 
                     break;
 
