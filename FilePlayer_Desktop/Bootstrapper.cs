@@ -1,8 +1,6 @@
 ﻿using System.Windows;
 using Prism.Unity;
 using Prism.Modularity;
-using FilePlayer.Views;
-using System.Windows.Controls;
 
 namespace FilePlayer
 {

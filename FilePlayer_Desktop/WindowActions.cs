@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace FilePlayer
 {
@@ -31,9 +27,9 @@ namespace FilePlayer
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+        //[DllImport("user32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
 
         [DllImport("user32.dll")]
         public static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
@@ -51,32 +47,27 @@ namespace FilePlayer
             public IntPtr hWnd;
         }
 
-        private struct WINDOWPLACEMENT
-        {
-            public int length;
-            public int flags;
-            public int showCmd;
-            public System.Drawing.Point ptMinPosition;
-            public System.Drawing.Point ptMaxPosition;
-            public System.Drawing.Rectangle rcNormalPosition;
-        }
+        //private struct WINDOWPLACEMENT
+        //{
+        //    public int length;
+        //    public int flags;
+        //    public int showCmd;
+        //    public System.Drawing.Point ptMinPosition;
+        //    public System.Drawing.Point ptMaxPosition;
+        //    public System.Drawing.Rectangle rcNormalPosition;
+        //}
 
         private static bool EnumProc(IntPtr hWnd, ref SearchData data)
         {
-            // Check classname and title 
-            // This is different from FindWindow() in that the code below allows partial matches
             StringBuilder sb = new StringBuilder(1024);
-            //GetClassName(hWnd, sb, sb.Capacity);
-            //if (sb.ToString().StartsWith(data.Wndclass))
-            //{
+
             sb = new StringBuilder(1024);
             GetWindowText(hWnd, sb, sb.Capacity);
             if (sb.ToString().Contains(data.Title))
             {
                 data.hWnd = hWnd;
-                return false;    // Found the wnd, halt enumeration
+                return false;    
             }
-            //}
             return true;
         }
 
@@ -87,15 +78,9 @@ namespace FilePlayer
             return sd.hWnd;
         }
 
-        // public static bool PerformWindowAction(string title, string action)
-        //{
-
-        //}
 
         public static bool PerformWindowAction(string title, string action)
         {
-
-
             IntPtr hWnd = SearchForWindow("", title);
             bool foundWin = (hWnd.ToInt32() != 0);
 
@@ -113,8 +98,7 @@ namespace FilePlayer
                     action = "";
                     break;
             }
-
-
+            
             StringBuilder sb = new StringBuilder(1024);
             GetWindowText(hWnd, sb, sb.Capacity);
 
@@ -127,8 +111,6 @@ namespace FilePlayer
                 switch (winStyle)
                 {
                     case WindowShowStyle.Maximize:
-                        
-                        //ShowWindow(hWnd, WindowShowStyle.ShowMaximized);
                         SwitchToThisWindow(hWnd, true);
                         SetForegroundWindow(hWnd);
 

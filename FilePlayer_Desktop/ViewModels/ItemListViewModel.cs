@@ -2,12 +2,15 @@
 using System;
 using System.IO;
 using System.Threading;
-using Prism.Mvvm;
 using FilePlayer.Model;
 using Microsoft.Practices.Prism.PubSubEvents;
 using System.Linq;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using GiantBomb.Api;
+using GiantBomb.Api.Model;
+using System.Net;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace FilePlayer.ViewModels
 {
@@ -22,17 +25,42 @@ namespace FilePlayer.ViewModels
     public class ItemListViewModel : ViewModelBase
     {
         private ItemLists itemLists;
+        private GameInfo gameInfo;
         Thread gamepadThread;
         public XboxControllerInputProvider input;
-        public int SelectedItemIndex;
+        
 
         private IEventAggregator iEventAggregator;
-
-        private SubscriptionToken controllerSubToken = null;
+        private ControllerHandler controllerHandler;
+        
         private SubscriptionToken itemListToken = null;
         private IEnumerable<string> allItemNames;
         private IEnumerable<string> allItemPaths;
         private string currAppName;
+        private string itemImage;
+        private int selectedItemIndex;
+        private string releaseDate;
+        private string description;
+        private string shortDescription;
+        
+
+
+
+        public int SelectedItemIndex
+        {
+            get { return this.selectedItemIndex; }
+            set
+            {
+                selectedItemIndex = value;
+
+                ItemImage = GameInfo.GetGameImageLocation(AllItemNames.ElementAt(SelectedItemIndex));
+                ReleaseDate = GameInfo.GetGameReleaseDate(AllItemNames.ElementAt(SelectedItemIndex));
+                Description = GameInfo.GetGameDescription(AllItemNames.ElementAt(SelectedItemIndex));
+                ShortDescription = GameInfo.GetGameShortDescription(AllItemNames.ElementAt(SelectedItemIndex));
+
+                OnPropertyChanged("SelectedItemIndex");
+            }
+        }
 
         public ItemLists ItemLists
         {
@@ -41,6 +69,52 @@ namespace FilePlayer.ViewModels
             {
                 itemLists = value;
                 OnPropertyChanged("itemLists");
+            }
+        }
+
+        public GameInfo GameInfo
+        {
+            get { return this.gameInfo; }
+            set
+            {
+                gameInfo = value;
+                OnPropertyChanged("GameInfo");
+            }
+        }
+
+        public string ReleaseDate
+        {
+            get { return this.releaseDate; }
+            set
+            {
+                if(value != "")
+                {
+                    releaseDate = Convert.ToDateTime(value).ToString("MMMM d, yyyy");
+                }
+                else
+                {
+                    releaseDate = value;
+                }
+                OnPropertyChanged("ReleaseDate");
+            }
+        }
+
+        public string Description
+        {
+            get { return this.description; }
+            set
+            {
+                description = value;
+                OnPropertyChanged("Description");
+            }
+        }
+        public string ShortDescription
+        {
+            get { return this.shortDescription; }
+            set
+            {
+                shortDescription = value;
+                OnPropertyChanged("ShortDescription");
             }
         }
 
@@ -60,7 +134,7 @@ namespace FilePlayer.ViewModels
             set
             {
                 allItemNames = value;
-                OnPropertyChanged("allItemNames");
+                OnPropertyChanged("AllItemNames");
             }
         }
 
@@ -75,6 +149,15 @@ namespace FilePlayer.ViewModels
             }
         }
 
+        public string ItemImage
+        {
+            get { return this.itemImage; }
+            set
+            {
+                itemImage = value;
+                OnPropertyChanged("ItemImage");
+            }
+        }
         Process autProc = null;
         Process appProc = null;
 
@@ -82,22 +165,31 @@ namespace FilePlayer.ViewModels
         {
             this.iEventAggregator = iEventAggregator;
 
-            String consolesStr = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\consoles.json";
+            String consolesStr = System.AppDomain.CurrentDomain.BaseDirectory + "\\JSON\\consoles.json";
+                //Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\consoles.json";
             this.ItemLists = new ItemLists(consolesStr);
 
-            this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
-            this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
+            string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
-            this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-            this.SelectedItemIndex = 0;
+            this.GameInfo = new GameInfo(gameInfoStr);
+
             
+            this.AllItemNames = ItemLists.GetItemNames(ItemLists.CurrConsole);
+            this.AllItemPaths = ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
+
+            this.CurrAppName = ItemLists.GetConsoleName(ItemLists.CurrConsole);
+            this.SelectedItemIndex = 0;
+
+            //GameRetriever.GetConsoleData(AllItemNames, CurrAppName, ItemLists.GetConsoleFilePath(ItemLists.CurrConsole), true);
+
             input = new XboxControllerInputProvider(Event.EventInstance.EventAggregator);
             
             gamepadThread = new Thread(new ThreadStart(input.PollGamepad));
             gamepadThread.Start();
 
-            SetControllerState("ITEMLIST_BROWSE");
-            itemListToken = this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Subscribe(
+            controllerHandler = new ControllerHandler(Event.EventInstance.EventAggregator);
+
+            itemListToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
                 (controllerEventArgs) =>
                 {
                     PerformAction(controllerEventArgs);
@@ -106,33 +198,51 @@ namespace FilePlayer.ViewModels
 
         }
 
-        public void PerformAction(ItemListViewEventArgs e)
+
+        public void PerformAction(ViewEventArgs e)
         {
             switch (e.action)
             {
+                case "CONFIRM_OPEN":
+                    if (allItemNames.Count() > 0)
+                    {
+                        string currItem = allItemNames.ElementAt(SelectedItemIndex);
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONFIRM_OPEN_DIALOG", new String[] { currItem }));
+                        controllerHandler.SetControllerState("ITEMLIST_CONFIRM");
+                    }
+                    break;
                 case "PAUSE_OPEN":
-                    //MinimizeProcess(appProc);
                     WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Minimize");
                     break;
                 case "PAUSE_CLOSE":
                     switch (e.addlInfo[0])
                     {
                         case "RETURN_TO_APP":
-                            //MaximizeProcess(appProc);
-                            
                             WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
-//                            ShowProcess(appProc);
-                            SetControllerState("ITEM_PLAY");
+                            controllerHandler.SetControllerState("ITEM_PLAY");
                             break;
                         case "CLOSE_APP":
                             if(!appProc.HasExited)
                                 appProc.Kill();
-                            SetControllerState("ITEMLIST_BROWSE");
+                            controllerHandler.SetControllerState("ITEMLIST_BROWSE");
                             break;
                         case "CLOSE_ALL":
-                            if(!appProc.HasExited)
+                            if (!appProc.HasExited)
+                            {
                                 appProc.Kill();
-                            
+                                gamepadThread.Abort();
+                            }
+                            break;
+                    }
+                    break;
+                case "ITEMLIST_PAUSE_CLOSE":
+                    switch (e.addlInfo[0])
+                    {
+                        case "EXIT":
+                            gamepadThread.Abort();
+                            break;
+                        case "ITEMLIST_PAUSE_CLOSE":
+                            controllerHandler.SetControllerState("ITEMLIST_BROWSE");
                             break;
                     }
                     break;
@@ -144,7 +254,37 @@ namespace FilePlayer.ViewModels
                     this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
 
                     break;
-
+                case "OPEN_ITEM":
+                    if (e.addlInfo[0] == "YES")
+                    {
+                        OpenSelectedItemInApp();
+                        controllerHandler.SetControllerState("ITEM_PLAY");
+                    }
+                    else
+                    {
+                        controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                    }
+                    break;
+                case "FILTER_ACTION":
+                    switch (e.addlInfo[0])
+                    {
+                        case "FILTER_FILES":
+                            controllerHandler.SetControllerState("CHAR_GETTER");
+                            break;
+                        case "FILTER_APPLY":
+                            break;
+                        case "FILTER_TYPE":
+                            controllerHandler.SetControllerState("VERTICAL_OPTION_SELECTER");
+                            break;
+                    }
+                    break;
+                case "CHAR_CLOSE":
+                    controllerHandler.SetControllerState("FILTER_MAIN");
+                    
+                    break;
+                case "VOS_OPTION":
+                    controllerHandler.SetControllerState("FILTER_MAIN");
+                    break;
             }
         }
 
@@ -154,6 +294,16 @@ namespace FilePlayer.ViewModels
             {
                 this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
+                SelectedItemIndex = 0;
+            }
+        }
+
+        public void SetNextLists(string searchStr)
+        {
+            if (ItemLists.SetConsoleNext())
+            {
+                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr);
+                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr);
                 SelectedItemIndex = 0;
             }
        }
@@ -168,170 +318,13 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public void SetControllerState(string state)
+        public void SetPreviousLists(string searchStr)
         {
-            if (controllerSubToken != null)
+            if (ItemLists.SetConsolePrevious())
             {
-                this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Unsubscribe(controllerSubToken);
-            }
-            switch (state)
-            {
-                case "ITEMLIST_BROWSE":
-                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
-                        (controllerEventArgs) =>
-                        {
-                            ControllerButtonPressToActionItemListView(controllerEventArgs);
-                        }
-                    );
-                    break;
-                case "ITEMLIST_CONFIRM":
-                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
-                        (controllerEventArgs) =>
-                        {
-                            ControllerButtonPressToActionConfirmationDialog(controllerEventArgs);
-                        }
-                    );
-                    break;
-                case "ITEM_PLAY":
-                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
-                        (controllerEventArgs) =>
-                        {
-                            ControllerButtonPressToActionItemPlaying(controllerEventArgs);
-                        }
-                    );
-                    break;
-                case "ITEM_PAUSE":
-                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
-                        (controllerEventArgs) =>
-                        {
-                            ControllerButtonPressToActionPauseDialog(controllerEventArgs);
-                        }
-                    );
-                    break;
-            }
-            
-        }
-
-        void ControllerButtonPressToActionItemListView(ControllerEventArgs e)
-        {
-
-            switch (e.buttonPressed)
-            {
-                case "A":
-                    string itemName = ItemLists.GetItemNames(ItemLists.CurrConsole).ToList().ElementAt(SelectedItemIndex);
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("CONFIRM_OPEN", new string[]{ itemName }));
-                    SetControllerState("ITEMLIST_CONFIRM");
-                    break;
-                case "B":
-                    Console.WriteLine("Case 2");
-                    break;
-                case "DUP":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_UP", new string[] { 1.ToString() }));
-                    break;
-                case "DDOWN":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_DOWN", new string[] { 1.ToString() }));
-                    break;
-                case "DLEFT":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_LEFT", new string[] { 1.ToString() }));
-                    break;
-                case "DRIGHT":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_RIGHT", new string[] { 1.ToString() }));
-                    break;
-                case "LSHOULDER":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_UP", new string[] { 10.ToString() }));
-                    break;
-                case "RSHOULDER":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("ITEMLIST_MOVE_DOWN", new string[] { 10.ToString() }));
-                    break;
-                case "GUIDE":
-                    break;
-            }
-        }
-
-        void ControllerButtonPressToActionConfirmationDialog(ControllerEventArgs e)
-        {
-
-            switch (e.buttonPressed)
-            {
-                case "A":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
-                    break;
-                case "B":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
-                    break;
-                case "X":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
-                    break;
-                case "Y":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
-                    break;
-                case "DUP":
-                    break;
-                case "DDOWN":
-                    break;
-                case "DLEFT":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_LEFT"));
-                    break;
-                case "DRIGHT":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_RIGHT"));
-                    break;
-                case "LSHOULDER":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_LEFT"));
-                    break;
-                case "RSHOULDER":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_RIGHT"));
-                    break;
-                case "GUIDE":
-                    break;
-            }
-        }
-
-
-        void ControllerButtonPressToActionPauseDialog(ControllerEventArgs e)
-        {
-
-            switch (e.buttonPressed)
-            {
-                case "A":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_SELECT_BUTTON"));
-                    break;
-                case "B":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_SELECT_BUTTON"));
-                    break;
-                case "X":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_SELECT_BUTTON"));
-                    break;
-                case "Y":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_SELECT_BUTTON"));
-                    break;
-                case "DUP":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_MOVE_UP"));
-                    break;
-                case "DDOWN":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_MOVE_DOWN"));
-                    break;
-                case "DLEFT":
-                    break;
-                case "DRIGHT":
-                    break;
-                case "LSHOULDER":
-                    break;
-                case "RSHOULDER":
-                    break;
-                case "GUIDE":
-
-                    break;
-            }
-        }
-
-        void ControllerButtonPressToActionItemPlaying(ControllerEventArgs e)
-        { 
-            switch (e.buttonPressed)
-            {
-                case "GUIDE":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("PAUSE_OPEN", new string[] { "" }));
-                    SetControllerState("ITEM_PAUSE");
-                    break;
+                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr);
+                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr);
+                SelectedItemIndex = 0;
             }
         }
 
@@ -382,6 +375,15 @@ namespace FilePlayer.ViewModels
             
             
         }
+
+
+        public void SetItemImage()
+        {
+            string itemPath = AllItemPaths.ToList().ElementAt(SelectedItemIndex);
+
+        }
+
+
 
 
     }

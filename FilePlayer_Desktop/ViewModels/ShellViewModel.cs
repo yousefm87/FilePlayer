@@ -1,26 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Practices.Prism.PubSubEvents;
 using Prism.Interactivity.InteractionRequest;
-using Prism.Commands;
-
 using System.Windows.Input;
 using System.Windows;
+using System.Collections.Generic;
 
 namespace FilePlayer.ViewModels
 {
-
-    
-
-
-
     public class ViewEventArgs : EventArgs
     {
         public string action;
         public string[] addlInfo;
+       
 
         public ViewEventArgs(string _action)
         {
@@ -92,13 +83,10 @@ namespace FilePlayer.ViewModels
         private string _confirmationText;
         private string resultMessage;
         private IEventAggregator iEventAggregator;
-        private InteractionRequest<INotification> _pauseRequest;
 
         public InteractionRequest<INotification> ConfirmationRequest { get; private set; }
-        public InteractionRequest<INotification> PauseRequest { get; private set; }
 
         public ConfirmationCommand RaiseConfirmationCommand { get; private set; }
-        public PauseCommand RaisePauseCommand { get; private set; }
 
 
 
@@ -149,13 +137,12 @@ namespace FilePlayer.ViewModels
         public ShellViewModel(IEventAggregator iEventAggregator)
         {
             this.iEventAggregator = iEventAggregator;
+
             ConfirmationPopupIsOpen = false;
             ConfirmationText = "";
-            this.ConfirmationRequest = new InteractionRequest<INotification>();
-            this.PauseRequest = new InteractionRequest<INotification>();
 
+            this.ConfirmationRequest = new InteractionRequest<INotification>();
             this.RaiseConfirmationCommand = new ConfirmationCommand(this.RaiseConfirmation);
-            this.RaisePauseCommand = new PauseCommand(this.RaisePause);
 
         }
 
@@ -169,17 +156,6 @@ namespace FilePlayer.ViewModels
 
             this.ConfirmationRequest.Raise(
                 new Notification { Content = contentText, Title = "Confirm" });
-        }
-
-        private void RaisePause(object viewEventArgs)
-        {
-            this.InteractionResultMessage = "";
-
-            ViewEventArgs args = (ViewEventArgs)viewEventArgs;
-            String contentText = "";// args.addlInfo[0];
-
-            this.PauseRequest.Raise(
-                new Notification { Content = contentText, Title = "Pause" });
         }
 
     }

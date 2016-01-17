@@ -1,7 +1,7 @@
 ﻿{"consoles": [
   {
     "apppath": "F:\\EMU\\Snes9X\\snes9x-x64.exe",
-    "consolename": "Super Nintendo",
+    "consolename": "Super Nintendo Entertainment System",
     "extension": "smc",
     "filespath": "F:\\ROMS\\SNES Roms\\",
     "titlesubstring": "Snes9X",
@@ -19,7 +19,7 @@
   },
   {
     "apppath": "F:\\EMU\\Fusion364\\Fusion.exe",
-    "consolename": "Sega Genesis",
+    "consolename": "Genesis",
     "extension": "bin",
     "filespath": "F:\\ROMS\\MEGA DRIVE (Genesis) Roms\\",
     "titlesubstring": "Fusion",

@@ -11,9 +11,9 @@ using FilePlayer.ViewModels;
 namespace FilePlayer.Views
 {
     /// <summary>
-    /// Interaction logic for ConfirmationDialog.xaml
+    /// Interaction logic for ItemListPauseView.xaml
     /// </summary>
-    public partial class PauseDialog : IInteractionRequestAware
+    public partial class ItemListPauseView : IInteractionRequestAware
     {
 
         private IEventAggregator iEventAggregator;
@@ -32,33 +32,33 @@ namespace FilePlayer.Views
         public Action FinishInteraction { get; set; }
         public INotification Notification { get; set; }
 
-        public PauseDialogViewModel PauseDialogViewModel { get; set; }
+        public ItemListPauseViewModel ItemListPauseViewModel { get; set; }
 
-        public PauseDialog()
+        public ItemListPauseView()
         {
 
-            PauseDialogViewModel = new PauseDialogViewModel(Event.EventInstance.EventAggregator);
+            ItemListPauseViewModel = new ItemListPauseViewModel(Event.EventInstance.EventAggregator);
 
             InitializeComponent();
             Init();
             this.Topmost = true;
-            
-            pauseViewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Subscribe(
+
+            pauseViewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
                     PerformViewAction(this, viewEventArgs);
                 }
             );
         }
-        
+
         public void Init()
         {
             iEventAggregator = Event.EventInstance.EventAggregator;
 
             selectedButtonIndex = 0;
-            buttons = new Button[] { returnToAppButton, closeAppButton, closeAllButton };
-            buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "CLOSE_ALL" };
-            
+            buttons = new Button[] { closePauseButton, exitButton, updateGameDataButton };
+            buttonActions = new string[] { "ITEMLIST_PAUSE_CLOSE", "EXIT", "GET_DATA_FROM_GIANTBOMB"};
+
             for (int i = 0; i < buttons.Length; i++)
             {
                 bool isSelected = (i == selectedButtonIndex);
@@ -66,19 +66,20 @@ namespace FilePlayer.Views
             }
         }
 
-        void PerformViewAction(object sender, PauseViewEventArgs e)
+        void PerformViewAction(object sender, ItemListPauseViewEventArgs e)
         {
             switch (e.action)
             {
-                case "PAUSE_MOVE_UP":
+                case "ITEMLIST_PAUSE_MOVE_UP":
                     MoveUp();
                     break;
-                case "PAUSE_MOVE_DOWN":
+                case "ITEMLIST_PAUSE_MOVE_DOWN":
                     MoveDown();
                     break;
-                case "PAUSE_SELECT_BUTTON":
+                case "ITEMLIST_PAUSE_SELECT_BUTTON":
                     SelectButton();
                     break;
+
             }
 
         }
@@ -100,8 +101,6 @@ namespace FilePlayer.Views
                 buttonPanel.Dispatcher.Invoke((Action)delegate
                 {
                     button.SetResourceReference(Control.StyleProperty, "selBtnStyle");
-                    //button.Background = selectedButtonBackground;
-                    //button.Foreground = selectedButtonForeground;
                 });
             }
             else
@@ -109,8 +108,6 @@ namespace FilePlayer.Views
                 buttonPanel.Dispatcher.Invoke((Action)delegate
                 {
                     button.SetResourceReference(Control.StyleProperty, "unselBtnStyle");
-                    //button.Background = unselectedButtonBackground;
-                    //button.Foreground = unselectedButtonForeground;
                 });
             }
         }
@@ -138,7 +135,7 @@ namespace FilePlayer.Views
             this.Dispatcher.Invoke((Action)delegate
             {
                 string response = buttonActions[selectedButtonIndex];
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("PAUSE_CLOSE", new string[] { response }));
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_PAUSE_CLOSE", new string[] { response }));
             });
         }
 
@@ -147,7 +144,7 @@ namespace FilePlayer.Views
             this.Topmost = false;
             if (pauseViewActionToken != null)
             {
-                this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Unsubscribe(pauseViewActionToken);
+                this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Unsubscribe(pauseViewActionToken);
             }
         }
     }

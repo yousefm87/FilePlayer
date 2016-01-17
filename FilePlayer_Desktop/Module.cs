@@ -1,6 +1,5 @@
 ﻿using Prism.Modularity;
 using Prism.Regions;
-using FilePlayer.Views;
 
 namespace FilePlayer
 {
