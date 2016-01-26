@@ -11,6 +11,7 @@ using GiantBomb.Api.Model;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace FilePlayer.ViewModels
 {
@@ -53,10 +54,13 @@ namespace FilePlayer.ViewModels
             {
                 selectedItemIndex = value;
 
-                ItemImage = GameInfo.GetGameImageLocation(AllItemNames.ElementAt(SelectedItemIndex));
-                ReleaseDate = GameInfo.GetGameReleaseDate(AllItemNames.ElementAt(SelectedItemIndex));
-                Description = GameInfo.GetGameDescription(AllItemNames.ElementAt(SelectedItemIndex));
-                ShortDescription = GameInfo.GetGameShortDescription(AllItemNames.ElementAt(SelectedItemIndex));
+                if (AllItemNames.Count() > 0)
+                {
+                    ItemImage = GameInfo.GetGameImageLocation(AllItemNames.ElementAt(SelectedItemIndex));
+                    ReleaseDate = GameInfo.GetGameReleaseDate(AllItemNames.ElementAt(SelectedItemIndex));
+                    Description = GameInfo.GetGameDescription(AllItemNames.ElementAt(SelectedItemIndex));
+                    ShortDescription = GameInfo.GetGameShortDescription(AllItemNames.ElementAt(SelectedItemIndex));
+                }
 
                 OnPropertyChanged("SelectedItemIndex");
             }
@@ -173,7 +177,7 @@ namespace FilePlayer.ViewModels
 
             this.GameInfo = new GameInfo(gameInfoStr);
 
-            
+                        
             this.AllItemNames = ItemLists.GetItemNames(ItemLists.CurrConsole);
             this.AllItemPaths = ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
 
@@ -280,10 +284,18 @@ namespace FilePlayer.ViewModels
                     break;
                 case "CHAR_CLOSE":
                     controllerHandler.SetControllerState("FILTER_MAIN");
-                    
                     break;
                 case "VOS_OPTION":
                     controllerHandler.SetControllerState("FILTER_MAIN");
+                    break;
+                case "GIANTBOMB_UPLOAD_START":
+                    Task.Factory.StartNew(() =>
+                    {
+                        controllerHandler.SetControllerState("NONE");
+                        GameRetriever.GetAllPlatformsData(itemLists, iEventAggregator);
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_COMPLETE", new String[] { }));
+                        controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                    });
                     break;
             }
         }
@@ -295,6 +307,10 @@ namespace FilePlayer.ViewModels
                 this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
                 SelectedItemIndex = 0;
+
+                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+
+                this.GameInfo = new GameInfo(gameInfoStr);
             }
         }
 
@@ -305,8 +321,26 @@ namespace FilePlayer.ViewModels
                 this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr);
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr);
                 SelectedItemIndex = 0;
+
+                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+
+                this.GameInfo = new GameInfo(gameInfoStr);
             }
        }
+
+        public void SetNextLists(string searchStr, string filterType)
+        {
+            if (ItemLists.SetConsoleNext())
+            {
+                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr, filterType);
+                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr, filterType);
+                SelectedItemIndex = 0;
+
+                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+
+                this.GameInfo = new GameInfo(gameInfoStr);
+            }
+        }
 
         public void SetPreviousLists()
         {
@@ -315,6 +349,10 @@ namespace FilePlayer.ViewModels
                 this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
                 SelectedItemIndex = 0;
+
+                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+
+                this.GameInfo = new GameInfo(gameInfoStr);
             }
         }
 
@@ -325,9 +363,26 @@ namespace FilePlayer.ViewModels
                 this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr);
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr);
                 SelectedItemIndex = 0;
+
+                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+
+                this.GameInfo = new GameInfo(gameInfoStr);
             }
         }
 
+        public void SetPreviousLists(string searchStr, string filterType)
+        {
+            if (ItemLists.SetConsolePrevious())
+            {
+                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr, filterType);
+                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr, filterType);
+                SelectedItemIndex = 0;
+
+                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+
+                this.GameInfo = new GameInfo(gameInfoStr);
+            }
+        }
 
         public void OpenSelectedItemInApp()
         {

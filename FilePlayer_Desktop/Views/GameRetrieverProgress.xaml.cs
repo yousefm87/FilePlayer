@@ -6,39 +6,36 @@ using System.Windows.Media;
 using Microsoft.Practices.Prism.PubSubEvents;
 using FilePlayer.Model;
 using FilePlayer.ViewModels;
-
+using System.Windows.Data;
 
 namespace FilePlayer.Views
 {
     /// <summary>
-    /// Interaction logic for ItemListPauseView.xaml
+    /// Interaction logic for GameRetrieverProgress.xaml
     /// </summary>
-    public partial class GameRetrieverProgress : IInteractionRequestAware
+    public partial class GameRetrieverProgress : Window
     {
 
         private IEventAggregator iEventAggregator;
-        public SubscriptionToken pauseViewActionToken;
+        public SubscriptionToken progressActionToken;
 
         public string[] buttonActions;
         public Button[] buttons;
-
-        // Both the FinishInteraction and Notification properties will be set by the PopupWindowAction
-        // when the popup is shown.
-        public Action FinishInteraction { get; set; }
-        public INotification Notification { get; set; }
-
+        
         public GameRetrieverProgressViewModel GameRetrieverProgressViewModel { get; set; }
 
         public GameRetrieverProgress()
         {
+            InitializeComponent();
 
             GameRetrieverProgressViewModel = new GameRetrieverProgressViewModel(Event.EventInstance.EventAggregator);
+            
+            this.DataContext = GameRetrieverProgressViewModel;
 
-            InitializeComponent();
-            Init();
             this.Topmost = true;
 
-            pauseViewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Subscribe(
+            iEventAggregator = Event.EventInstance.EventAggregator;
+            progressActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
                     PerformViewAction(this, viewEventArgs);
@@ -48,16 +45,15 @@ namespace FilePlayer.Views
 
         public void Init()
         {
-            iEventAggregator = Event.EventInstance.EventAggregator;
-
+            
+            
 
         }
 
-        void PerformViewAction(object sender, ItemListPauseViewEventArgs e)
+        void PerformViewAction(object sender, ViewEventArgs e)
         {
             switch (e.action)
             {
-                
 
             }
 
@@ -67,9 +63,9 @@ namespace FilePlayer.Views
         private void Window_Closed(object sender, EventArgs e)
         {
             this.Topmost = false;
-            if (pauseViewActionToken != null)
+            if (progressActionToken != null)
             {
-                this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Unsubscribe(pauseViewActionToken);
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Unsubscribe(progressActionToken);
             }
         }
     }

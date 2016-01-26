@@ -26,6 +26,7 @@ namespace FilePlayer
         PauseDialog pauseDialog = null;
         ItemListPauseView itemlistPauseView = null;
         VerticalOptionSelecter verticalOptionSelecter = null;
+        GameRetrieverProgress gameRetrieverProgress = null;
 
         public Shell()
         {
@@ -52,10 +53,10 @@ namespace FilePlayer
             
             switch (e.action)
             {
-                case "CONFIRM_OPEN_DIALOG":
+                case "CONFIRM_OPEN_DIALOG": //When Clicking an item in itemlist
                     OpenConfirmationDialog(e);
                     break;
-                case "CONFIRM_CLOSE":
+                case "CONFIRM_CLOSE": //When Click item in confirmation dialog
                     if (e.addlInfo[0] == "YES")
                     {
                         this.Dispatcher.Invoke((Action)delegate
@@ -67,7 +68,7 @@ namespace FilePlayer
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("OPEN_ITEM", e.addlInfo));
                     
                     break;
-                case "PAUSE_OPEN":
+                case "PAUSE_OPEN": //When opening app pause dialog
                     this.Dispatcher.Invoke((Action)delegate
                     {
                         this.Activate();
@@ -75,21 +76,21 @@ namespace FilePlayer
                     
                     OpenPauseDialog(e);
                     break;
-                case "PAUSE_CLOSE":
+                case "PAUSE_CLOSE": //When closing app pause dialog
                     switch (e.addlInfo[0])
                     {
-                        case "RETURN_TO_APP":
+                        case "RETURN_TO_APP": //Click "Return to app"
                             pauseDialog.Close();
                             ShellViewModel.ShellWindowState = WindowState.Minimized;
                             break;
-                        case "CLOSE_APP":
+                        case "CLOSE_APP": //Click "Close App"
                             this.Dispatcher.Invoke((Action)delegate
                             {
                                 pauseDialog.Close();
                                 ShellViewModel.ShellWindowState = WindowState.Maximized;
                             });
                             break;
-                        case "CLOSE_ALL":
+                        case "CLOSE_ALL": // Click "Close App + FilePlayer"
                             this.Dispatcher.Invoke((Action)delegate
                             {
                                 pauseDialog.Close(); 
@@ -100,7 +101,7 @@ namespace FilePlayer
                     }
 
                     break;
-                case "ITEMLIST_PAUSE_OPEN":
+                case "ITEMLIST_PAUSE_OPEN": //When opening itemlist pause
                     this.Dispatcher.Invoke((Action)delegate
                     {
                         this.Activate();
@@ -109,51 +110,60 @@ namespace FilePlayer
                     OpenItemlistPauseView(e);
                     break;
 
-                case "ITEMLIST_PAUSE_CLOSE":
+                case "ITEMLIST_PAUSE_CLOSE":  
                     switch (e.addlInfo[0])
                     {
-                        case "EXIT":
+                        case "EXIT": //Exit the application
                             this.Dispatcher.Invoke((Action)delegate
                             {
                                 itemlistPauseView.Close();
                                 Application.Current.Shutdown();
                             });
                             break;
-                        case "ITEMLIST_PAUSE_CLOSE":
+                        case "ITEMLIST_PAUSE_CLOSE": //Close Itemlist pause
                             this.Dispatcher.Invoke((Action)delegate
                             {
                                 itemlistPauseView.Close();
                             });
                             break;
-                        case "GET_DATA_FROM_GIANTBOMB":
+                        case "GIANTBOMB_UPLOAD": //Upload from Giantbomb
+                            itemlistPauseView.Close();
+                            OpenGameRetrieverProgress(e);
+                            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_START", e.addlInfo));
                             break;
                     }
 
                     break;
-                case "FILTER_ACTION":
+                case "FILTER_ACTION": 
                     switch (e.addlInfo[0])
                     {
-                        case "FILTER_FILES":
+                        case "FILTER_FILES": //Selecting file filter
                             Canvas.SetLeft(charGetter, Double.Parse(e.addlInfo[1]));
                             Canvas.SetTop(charGetter, Double.Parse(e.addlInfo[2]));
 
                             charGetter.Visibility = Visibility.Visible;
                             break;
-                        case "FILTER_TYPE":
+                        case "FILTER_TYPE": //Selecting filter type
                             OpenVerticalOptionSelecter(e);
-
                             break;
                     }
                     break;
-                case "CHAR_CLOSE":
+                case "CHAR_CLOSE": //Close CharGetter
                     this.Dispatcher.Invoke((Action)delegate
                     {
                         charGetter.Visibility = Visibility.Hidden;
                     });
                     break;
-                case "VOS_OPTION":
+                case "VOS_OPTION": //Select an option from VOS
                     verticalOptionSelecter.Visibility = Visibility.Hidden;
                     dynamicCanvas.Children.Remove(verticalOptionSelecter);
+                    verticalOptionSelecter = null;
+                    break;
+                case "GIANTBOMB_UPLOAD_COMPLETE":
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        gameRetrieverProgress.Close();
+                    });
                     break;
 
 
@@ -175,18 +185,8 @@ namespace FilePlayer
 
         private void OpenPauseDialog(ViewEventArgs e)
         {
-            bool winMaxed = false;
-            while (!winMaxed)
-            {
-                this.Dispatcher.Invoke((Action)delegate
-                {
-                    ShellViewModel.ShellWindowState = WindowState.Maximized;
-                    Application.Current.MainWindow.Activate();
+            MaximizeShell();
 
-                    winMaxed = (ShellViewModel.ShellWindowState == WindowState.Maximized);
-                });
-            }
-                
             this.Dispatcher.Invoke((Action)delegate
             {
                 pauseDialog = new PauseDialog();
@@ -202,19 +202,11 @@ namespace FilePlayer
             });
         }
 
+
+
         private void OpenVerticalOptionSelecter(ViewEventArgs e)
         {
-            bool winMaxed = false;
-            while (!winMaxed)
-            {
-                this.Dispatcher.Invoke((Action)delegate
-                {
-                    ShellViewModel.ShellWindowState = WindowState.Maximized;
-                    Application.Current.MainWindow.Activate();
-
-                    winMaxed = (ShellViewModel.ShellWindowState == WindowState.Maximized);
-                });
-            }
+            MaximizeShell();
 
             int arrLength = (e.addlInfo.Length - 3) / 2;
             string[] options = new string[arrLength];
@@ -237,17 +229,7 @@ namespace FilePlayer
 
         private void OpenItemlistPauseView(ViewEventArgs e)
         {
-            bool winMaxed = false;
-            while (!winMaxed)
-            {
-                this.Dispatcher.Invoke((Action)delegate
-                {
-                    ShellViewModel.ShellWindowState = WindowState.Maximized;
-                    Application.Current.MainWindow.Activate();
-
-                    winMaxed = (ShellViewModel.ShellWindowState == WindowState.Maximized);
-                });
-            }
+            MaximizeShell();
 
             this.Dispatcher.Invoke((Action)delegate
             {
@@ -264,6 +246,42 @@ namespace FilePlayer
                 }
             });
             
+        }
+
+        private void OpenGameRetrieverProgress(ViewEventArgs e)
+        {
+            MaximizeShell();
+
+            this.Dispatcher.Invoke((Action)delegate
+            {
+                gameRetrieverProgress = new GameRetrieverProgress();
+                gameRetrieverProgress.ShowInTaskbar = false;
+                gameRetrieverProgress.Owner = Application.Current.MainWindow;
+                
+                while (!gameRetrieverProgress.IsVisible)
+                {
+                    gameRetrieverProgress.Show();
+                    gameRetrieverProgress.Left = (Application.Current.MainWindow.ActualWidth - gameRetrieverProgress.Width) / 2;
+                    gameRetrieverProgress.Top = (Application.Current.MainWindow.ActualHeight - gameRetrieverProgress.Height) / 2;
+                }
+            });
+        }
+
+        public bool MaximizeShell()
+        {
+            bool winMaxed = false;
+            while (!winMaxed)
+            {
+                this.Dispatcher.Invoke((Action)delegate
+                {
+                    ShellViewModel.ShellWindowState = WindowState.Maximized;
+                    Application.Current.MainWindow.Activate();
+
+                    winMaxed = (ShellViewModel.ShellWindowState == WindowState.Maximized);
+                });
+            }
+
+            return winMaxed;
         }
 
     }

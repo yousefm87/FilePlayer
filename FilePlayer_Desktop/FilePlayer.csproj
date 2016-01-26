@@ -172,6 +172,8 @@
     </ApplicationDefinition>
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="ControllerHandler.cs" />
+    <Compile Include="Converters\ImageConverter.cs" />
+    <Compile Include="Converters\ProgressConverter.cs" />
     <Compile Include="GameRetriever.cs" />
     <Compile Include="InputProvider.cs" />
     <Compile Include="JSON\consoles.cs" />
@@ -179,7 +181,7 @@
     <Compile Include="Model\GameInfo.cs" />
     <Compile Include="Model\ItemLists.cs" />
     <Compile Include="Module.cs" />
-    <Compile Include="NullConverter.cs" />
+    <Compile Include="Converters\NullConverter.cs" />
     <Compile Include="ViewModels\CharGetterModelView.cs" />
     <Compile Include="ViewModels\GameRetrieverProgressViewModel.cs" />
     <Compile Include="ViewModels\VerticalOptionSelecterViewModel.cs" />

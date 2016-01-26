@@ -24,9 +24,14 @@ namespace FilePlayer.Model
 
         }
 
+        public int GetConsoleCount()
+        {
+            return consoles["consoles"].Count();
+        }
+
         public bool SetConsoleNext()
         {
-            if((CurrConsole + 1) < consoles["consoles"].Count())
+            if((CurrConsole + 1) < GetConsoleCount())
             {
                 CurrConsole++;
                 return true;
@@ -191,7 +196,7 @@ namespace FilePlayer.Model
         {
             if (consoles != null)
             {
-                for (int i = 0; i < consoles["consoles"].Count(); i++) //for each console
+                for (int i = 0; i < GetConsoleCount(); i++) //for each console
                 {
                     String filesPath = (String)consoles["consoles"][i]["filespath"];
                     String extension = (String)consoles["consoles"][i]["extension"];

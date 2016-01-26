@@ -8,6 +8,7 @@
         xmlns:views="clr-namespace:FilePlayer.Views"
         xmlns:viewModels="clr-namespace:FilePlayer.ViewModels"
         xmlns:styles="clr-namespace:FilePlayer.Styles"
+        xmlns:converters="clr-namespace:FilePlayer.Converters"
         mc:Ignorable="d"
         SizeToContent="WidthAndHeight"
         WindowStyle="None"
@@ -20,6 +21,29 @@
 
 
     <Window.Resources>
+        <converters:ProgressConverter x:Key="progressConverter" />
+
+        <Style x:Key="StatusStyle" TargetType="TextBlock" BasedOn="{StaticResource MetroTextBlock}">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontSize" Value="25" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
+        <Style x:Key="TitleStyle" TargetType="TextBlock" BasedOn="{StaticResource MetroTextBlock}">
+            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="FontSize" Value="25" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="10,0,0,0" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
         <Style x:Key="selBtnStyle" TargetType="Button">
             <Setter Property="Background" Value="#646882" />
             <Setter Property="BorderBrush" Value="#2b2c36" />
@@ -43,16 +67,79 @@
             <Setter Property="Margin" Value="18,1,18,1" />
         </Style>
 
-        <Style x:Key="progressBarStyle" TargetType="ProgressBar">
-            <Setter Property="Background" Value="Black" />
+        <Style x:Key="progressBarStyle" TargetType="ProgressBar" BasedOn="{StaticResource MetroProgressBar}">
+            <Setter Property="Background" Value="WhiteSmoke" />
             <Setter Property="Foreground" Value="White" />
+            <Setter Property="MinWidth" Value="300" />
+            <Setter Property="MinHeight" Value="25" />
         </Style>
+        
 
     </Window.Resources>
 
     <Grid Margin="20">
-        <ProgressBar Style="{StaticResource progressBarStyle}" Minimum="0" Maximum="100" Value="75" Name="pbStatus" />
-        <TextBlock Text="{Binding ElementName=pbStatus, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Label x:Name="platformProgressLabel"  Grid.Row="0" Grid.RowSpan="1">
+            <TextBlock x:Name="platformProgressText" Style="{StaticResource StatusStyle}">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource progressConverter}"
+                                  ConverterParameter="Progress"  
+                                  StringFormat="Platforms: {0}">
+                        <Binding />
+                        <Binding Path="PlatformNumerator"  />
+                        <Binding Path="PlatformDenominator" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </Label>
+
+
+        <Label x:Name="platformLabel"  Grid.Row="1" Grid.RowSpan="1">
+            <TextBlock x:Name="platformText" Style="{StaticResource TitleStyle}" Text="{Binding PlatformName}" />
+        </Label>
+
+
+        <Grid Grid.Row="2" Grid.RowSpan="1">
+            <ProgressBar x:Name="platformProgress" Style="{StaticResource progressBarStyle}" Minimum="0" Maximum="100" Value="{Binding PlatformPercentage}"/>
+            <TextBlock Text="{Binding PlatformPercentage, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+        <Label x:Name="gameProgressLabel"  Grid.Row="3" Grid.RowSpan="1">
+            <TextBlock x:Name="gameProgressText" Style="{StaticResource StatusStyle}">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource progressConverter}"
+                                  ConverterParameter="Progress"  
+                                  UpdateSourceTrigger="Explicit"
+                                  StringFormat="Games: {0}">
+                        <Binding />
+                        <Binding Path="GameNumerator" />
+                        <Binding Path="GameDenominator" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </Label>
+
+
+        <Label x:Name="gameLabel"  Grid.Row="4" Grid.RowSpan="1">
+            <TextBlock x:Name="gameText" Style="{StaticResource TitleStyle}" Text="{Binding GameName}" />
+        </Label>
+
+        <Grid Grid.Row="5" Grid.RowSpan="1">
+            <ProgressBar x:Name="gameProgress" Style="{StaticResource progressBarStyle}" 
+                     Minimum="0" Maximum="100" Value="{Binding GamePercentage}"/>
+            <TextBlock Text="{Binding GamePercentage, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
     </Grid>
 </Window>
 

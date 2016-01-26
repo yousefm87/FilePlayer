@@ -22,8 +22,11 @@ namespace FilePlayer.Views
         private IEventAggregator iEventAggregator;
         SubscriptionToken viewActionToken;
 
+
+
         public ItemListView()
         {
+           
             ItemListViewModel = new ItemListViewModel(Event.EventInstance.EventAggregator);
             this.DataContext = ItemListViewModel;
             this.iEventAggregator = Event.EventInstance.EventAggregator;
@@ -57,14 +60,14 @@ namespace FilePlayer.Views
                 case "ITEMLIST_MOVE_LEFT":
                     this.Dispatcher.Invoke((Action)delegate
                     {
-                        ItemListViewModel.SetPreviousLists(filterControl.fileFilterText.Text);
+                        ItemListViewModel.SetPreviousLists(filterControl.fileFilterText.Text, filterControl.filterTypeText.Text);
                         SelectFirstItem();
                     });
                     break;
                 case "ITEMLIST_MOVE_RIGHT":
                     this.Dispatcher.Invoke((Action)delegate
                     {
-                        ItemListViewModel.SetNextLists(filterControl.fileFilterText.Text);
+                        ItemListViewModel.SetNextLists(filterControl.fileFilterText.Text, filterControl.filterTypeText.Text);
                         SelectFirstItem();
                     });
                     break;

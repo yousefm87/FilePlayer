@@ -57,7 +57,7 @@ namespace FilePlayer.Views
 
             selectedButtonIndex = 0;
             buttons = new Button[] { closePauseButton, exitButton, updateGameDataButton };
-            buttonActions = new string[] { "ITEMLIST_PAUSE_CLOSE", "EXIT", "GET_DATA_FROM_GIANTBOMB"};
+            buttonActions = new string[] { "ITEMLIST_PAUSE_CLOSE", "EXIT", "GIANTBOMB_UPLOAD"};
 
             for (int i = 0; i < buttons.Length; i++)
             {

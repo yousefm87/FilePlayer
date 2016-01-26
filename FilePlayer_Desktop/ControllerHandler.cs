@@ -30,6 +30,8 @@ namespace FilePlayer
             }
             switch (state)
             {
+                case "NONE":
+                    break;
                 case "ITEMLIST_BROWSE":
                     controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
                         (controllerEventArgs) =>

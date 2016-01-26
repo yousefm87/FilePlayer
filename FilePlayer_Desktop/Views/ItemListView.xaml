@@ -7,12 +7,14 @@
              xmlns:prism="http://www.codeplex.com/prism"
              xmlns:views="clr-namespace:FilePlayer.Views"
              xmlns:local="clr-namespace:FilePlayer"
+             xmlns:converters="clr-namespace:FilePlayer.Converters"
              xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d">
 
     <UserControl.Resources>
-        <local:NullConverter x:Key="imageConverter" />
-
+        <converters:NullConverter x:Key="nullConverter" />
+        <converters:ImageConverter x:Key="imageConverter" />
+        
         <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MetroTextBlock}" />
         <Style TargetType="{x:Type Label}" BasedOn="{StaticResource MetroLabel}" />
 
@@ -162,11 +164,11 @@
                    Grid.Row="0" Grid.RowSpan="7" Grid.Column="0" Grid.ColumnSpan="1" Margin="0" Stretch="Fill" />
 
             <Label x:Name="releaseDate" Grid.Row="7" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="1">
-                <TextBlock x:Name="releaseDateText" Style="{StaticResource ReleaseDateStyle}"  Text="{Binding ReleaseDate, StringFormat='Release Date: {0}', Converter={StaticResource imageConverter}}" />
+                <TextBlock x:Name="releaseDateText" Style="{StaticResource ReleaseDateStyle}"  Text="{Binding ReleaseDate, StringFormat='Release Date: {0}', Converter={StaticResource nullConverter}}" />
             </Label>
             <WebBrowser x:Name="description" Visibility="Hidden" Grid.Row="8" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="1"/>
             <Label x:Name="shortDescription" Visibility="Visible" Grid.Row="8" Grid.RowSpan="4" Grid.Column="0" Grid.ColumnSpan="1">
-                <TextBlock x:Name="shortDescriptionText" Style="{StaticResource ShortDescriptionStyle}" Text="{Binding ShortDescription, Converter={StaticResource imageConverter}}" />
+                <TextBlock x:Name="shortDescriptionText" Style="{StaticResource ShortDescriptionStyle}" Text="{Binding ShortDescription, Converter={StaticResource nullConverter}}" />
             </Label>
 
         </Grid>
