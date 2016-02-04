@@ -138,6 +138,14 @@ namespace FilePlayer.ViewModels
             set
             {
                 allItemNames = value;
+
+                if (AllItemNames.Count() == 0)
+                {
+                    ItemImage = "";
+                    ReleaseDate = "";
+                    Description = "";
+                    ShortDescription = "";
+                }
                 OnPropertyChanged("AllItemNames");
             }
         }
@@ -175,7 +183,9 @@ namespace FilePlayer.ViewModels
 
             string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
-            this.GameInfo = new GameInfo(gameInfoStr);
+            string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
+
+            this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
 
                         
             this.AllItemNames = ItemLists.GetItemNames(ItemLists.CurrConsole);
@@ -207,68 +217,20 @@ namespace FilePlayer.ViewModels
         {
             switch (e.action)
             {
-                case "CONFIRM_OPEN":
-                    if (allItemNames.Count() > 0)
+                case "SET_CONTROLLER_STATE":
+                    controllerHandler.SetControllerState(e.addlInfo[0]);
+                    if (e.addlInfo[0].Equals("ITEM_PLAY"))
                     {
-                        string currItem = allItemNames.ElementAt(SelectedItemIndex);
-                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONFIRM_OPEN_DIALOG", new String[] { currItem }));
-                        controllerHandler.SetControllerState("ITEMLIST_CONFIRM");
-                    }
-                    break;
-                case "PAUSE_OPEN":
-                    WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Minimize");
-                    break;
-                case "PAUSE_CLOSE":
-                    switch (e.addlInfo[0])
-                    {
-                        case "RETURN_TO_APP":
-                            WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
-                            controllerHandler.SetControllerState("ITEM_PLAY");
-                            break;
-                        case "CLOSE_APP":
-                            if(!appProc.HasExited)
-                                appProc.Kill();
-                            controllerHandler.SetControllerState("ITEMLIST_BROWSE");
-                            break;
-                        case "CLOSE_ALL":
-                            if (!appProc.HasExited)
-                            {
-                                appProc.Kill();
-                                gamepadThread.Abort();
-                            }
-                            break;
-                    }
-                    break;
-                case "ITEMLIST_PAUSE_CLOSE":
-                    switch (e.addlInfo[0])
-                    {
-                        case "EXIT":
-                            gamepadThread.Abort();
-                            break;
-                        case "ITEMLIST_PAUSE_CLOSE":
-                            controllerHandler.SetControllerState("ITEMLIST_BROWSE");
-                            break;
+                        WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
                     }
                     break;
                 case "ITEMLIST_MOVE_LEFT":
                     this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-
                     break;
                 case "ITEMLIST_MOVE_RIGHT":
                     this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
+                    break;
 
-                    break;
-                case "OPEN_ITEM":
-                    if (e.addlInfo[0] == "YES")
-                    {
-                        OpenSelectedItemInApp();
-                        controllerHandler.SetControllerState("ITEM_PLAY");
-                    }
-                    else
-                    {
-                        controllerHandler.SetControllerState("ITEMLIST_BROWSE");
-                    }
-                    break;
                 case "FILTER_ACTION":
                     switch (e.addlInfo[0])
                     {
@@ -297,6 +259,75 @@ namespace FilePlayer.ViewModels
                         controllerHandler.SetControllerState("ITEMLIST_BROWSE");
                     });
                     break;
+                case "EXIT":
+                    gamepadThread.Abort();
+                    break;
+                case "BUTTONDIALOG_SELECT":
+                    switch (e.addlInfo[0])
+                    {
+                        case "ITEMLIST_PAUSE":
+                            switch (e.addlInfo[1])
+                            {
+                                case "EXIT": //Exit the application
+                                    //gamepadThread.Abort();
+                                    break;
+                                case "ITEMLISTPAUSE_CLOSE":
+                                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                                    break;
+                            }
+
+                            break;
+                        case "ITEMLIST_CONFIRMATION":
+                            //buttonActions = new string[] { "FILE_OPEN", "FILE_SEARCH_DATA", "FILE_DELETE_DATA" };
+                            switch (e.addlInfo[1])
+                            {
+                                case "FILE_OPEN":
+                                    OpenSelectedItemInApp();
+                                    controllerHandler.SetControllerState("ITEM_PLAY");
+                                    break;
+                                case "FILE_DELETE_DATA":
+                                    string currGame = AllItemNames.ElementAt(SelectedItemIndex);
+                                    GameInfo.DeleteGame(currGame);
+                                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                                    SelectedItemIndex = SelectedItemIndex;
+                                    break;
+                                case "FILE_SEARCH_DATA":
+                                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GAMEDATA_SEARCH", new String[] { AllItemNames.ElementAt(SelectedItemIndex) }));
+                                    controllerHandler.SetControllerState("SEARCH_GAME_DATA");
+                                    break;
+                            }
+                            break;
+                        case "APP_PAUSE":
+                            //buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "EXIT" };
+                            switch (e.addlInfo[1])
+                            {
+                                case "RETURN_TO_APP":
+                                    WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
+                                    controllerHandler.SetControllerState("ITEM_PLAY");
+                                    break;
+                                case "CLOSE_APP":
+                                    if (!appProc.HasExited)
+                                        appProc.Kill();
+                                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                                    break;
+                                case "EXIT":
+                                    if (!appProc.HasExited)
+                                    {
+                                        appProc.Kill();
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case "SEARCHGAMEDATA_CLOSE":
+                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                    break;
+                case "GAMEDATA_SEARCH_ADD":
+                    GameInfo.AddGame(e.addlInfo[0], e.addlInfo[1], e.addlInfo[2], e.addlInfo[3]);
+                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                    SelectedItemIndex = SelectedItemIndex;
+                    break;
             }
         }
 
@@ -310,7 +341,9 @@ namespace FilePlayer.ViewModels
 
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
-                this.GameInfo = new GameInfo(gameInfoStr);
+                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
+
+                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
             }
         }
 
@@ -323,8 +356,9 @@ namespace FilePlayer.ViewModels
                 SelectedItemIndex = 0;
 
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
 
-                this.GameInfo = new GameInfo(gameInfoStr);
+                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
             }
        }
 
@@ -338,7 +372,9 @@ namespace FilePlayer.ViewModels
 
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
-                this.GameInfo = new GameInfo(gameInfoStr);
+                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
+
+                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
             }
         }
 
@@ -352,7 +388,9 @@ namespace FilePlayer.ViewModels
 
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
-                this.GameInfo = new GameInfo(gameInfoStr);
+                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
+
+                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
             }
         }
 
@@ -366,7 +404,9 @@ namespace FilePlayer.ViewModels
 
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
-                this.GameInfo = new GameInfo(gameInfoStr);
+                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
+
+                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
             }
         }
 
@@ -380,7 +420,9 @@ namespace FilePlayer.ViewModels
 
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
-                this.GameInfo = new GameInfo(gameInfoStr);
+                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
+
+                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
             }
         }
 

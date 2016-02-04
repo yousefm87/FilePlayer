@@ -24,9 +24,12 @@ namespace FilePlayer
         SubscriptionToken viewActionToken;
         private IEventAggregator iEventAggregator;
         PauseDialog pauseDialog = null;
+        ButtonDialog buttonDialog = null;
+
         ItemListPauseView itemlistPauseView = null;
         VerticalOptionSelecter verticalOptionSelecter = null;
         GameRetrieverProgress gameRetrieverProgress = null;
+        SearchGameData searchGameData = null;
 
         public Shell()
         {
@@ -53,86 +56,85 @@ namespace FilePlayer
             
             switch (e.action)
             {
-                case "CONFIRM_OPEN_DIALOG": //When Clicking an item in itemlist
-                    OpenConfirmationDialog(e);
-                    break;
-                case "CONFIRM_CLOSE": //When Click item in confirmation dialog
-                    if (e.addlInfo[0] == "YES")
-                    {
-                        this.Dispatcher.Invoke((Action)delegate
-                        {
-                            ShellViewModel.ShellWindowState = WindowState.Minimized;
-                        });
-
-                    }
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("OPEN_ITEM", e.addlInfo));
-                    
-                    break;
-                case "PAUSE_OPEN": //When opening app pause dialog
-                    this.Dispatcher.Invoke((Action)delegate
-                    {
-                        this.Activate();
-                    });
-                    
-                    OpenPauseDialog(e);
-                    break;
-                case "PAUSE_CLOSE": //When closing app pause dialog
-                    switch (e.addlInfo[0])
-                    {
-                        case "RETURN_TO_APP": //Click "Return to app"
-                            pauseDialog.Close();
-                            ShellViewModel.ShellWindowState = WindowState.Minimized;
-                            break;
-                        case "CLOSE_APP": //Click "Close App"
-                            this.Dispatcher.Invoke((Action)delegate
-                            {
-                                pauseDialog.Close();
-                                ShellViewModel.ShellWindowState = WindowState.Maximized;
-                            });
-                            break;
-                        case "CLOSE_ALL": // Click "Close App + FilePlayer"
-                            this.Dispatcher.Invoke((Action)delegate
-                            {
-                                pauseDialog.Close(); 
-                                Application.Current.Shutdown();
-                            });
-
-                            break;
-                    }
-
-                    break;
-                case "ITEMLIST_PAUSE_OPEN": //When opening itemlist pause
+               
+                case "BUTTONDIALOG_OPEN":
                     this.Dispatcher.Invoke((Action)delegate
                     {
                         this.Activate();
                     });
 
-                    OpenItemlistPauseView(e);
+                    OpenButtonDialog(e);
                     break;
+                case "BUTTONDIALOG_CLOSE":
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        buttonDialog.ButtonDialogViewModel.ReturnController();
+                        buttonDialog.Close();
+                    });
+                    break;
+                case "BUTTONDIALOG_SELECT":
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        buttonDialog.Close();
+                    });
 
-                case "ITEMLIST_PAUSE_CLOSE":  
                     switch (e.addlInfo[0])
                     {
-                        case "EXIT": //Exit the application
-                            this.Dispatcher.Invoke((Action)delegate
+                        case "ITEMLIST_PAUSE":
+                            switch(e.addlInfo[1])
                             {
-                                itemlistPauseView.Close();
-                                Application.Current.Shutdown();
-                            });
+                                case "EXIT": //Exit the application
+                                    this.Dispatcher.Invoke((Action)delegate
+                                    {
+                                        Application.Current.Shutdown();
+                                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT"));
+                                    });
+                                    break;
+                                case "ITEMLISTPAUSE_CLOSE": //Close Itemlist pause
+                                    break;
+                                case "GAMEDATA_UPLOAD": //Upload from Giantbomb
+                                    OpenGameRetrieverProgress(e);
+                                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_START", e.addlInfo));
+                                    break;
+                            }
+                           
                             break;
-                        case "ITEMLIST_PAUSE_CLOSE": //Close Itemlist pause
-                            this.Dispatcher.Invoke((Action)delegate
+                        case "ITEMLIST_CONFIRMATION":
+                            //buttonActions = new string[] { "FILE_OPEN", "FILE_SEARCH_DATA", "FILE_DELETE_DATA" };
+                            switch (e.addlInfo[1])
                             {
-                                itemlistPauseView.Close();
-                            });
+                                case "FILE_OPEN":
+                                    this.Dispatcher.Invoke((Action)delegate
+                                    {
+                                        ShellViewModel.ShellWindowState = WindowState.Minimized;
+                                    });
+                                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("OPEN_ITEM", e.addlInfo));
+                                    break;
+                            }
                             break;
-                        case "GIANTBOMB_UPLOAD": //Upload from Giantbomb
-                            itemlistPauseView.Close();
-                            OpenGameRetrieverProgress(e);
-                            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_START", e.addlInfo));
+                        case "APP_PAUSE":
+                            //buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "EXIT" };
+                            switch (e.addlInfo[1])
+                            {
+                                case "RETURN_TO_APP": //Click "Return to app"
+                                    ShellViewModel.ShellWindowState = WindowState.Minimized;
+                                    break;
+                                case "CLOSE_APP": //Click "Close App"
+                                    this.Dispatcher.Invoke((Action)delegate
+                                    {
+                                        ShellViewModel.ShellWindowState = WindowState.Maximized;
+                                    });
+                                    break;
+                                case "EXIT": // Click "Close App + FilePlayer"
+                                    this.Dispatcher.Invoke((Action)delegate
+                                    {
+                                        Application.Current.Shutdown();
+                                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT"));
+                                    });
+                                    break;
+                            }
                             break;
                     }
-
                     break;
                 case "FILTER_ACTION": 
                     switch (e.addlInfo[0])
@@ -165,23 +167,24 @@ namespace FilePlayer
                         gameRetrieverProgress.Close();
                     });
                     break;
-
-
-
+                case "GAMEDATA_SEARCH":
+                    OpenSearchGameData(e);
+                    break;
+                case "SEARCHGAMEDATA_CLOSE":
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        searchGameData.Close();
+                    });
+                    break;
+                case "GAMEDATA_SEARCH_ADD":
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        searchGameData.Close();
+                    });
+                    break;
             }
         }
-
-
-        private void OpenConfirmationDialog(ViewEventArgs e)
-        {
-            if (ShellViewModel.RaiseConfirmationCommand.CanExecute(e))
-            {
-                this.Dispatcher.Invoke((Action)delegate
-                {
-                    ShellViewModel.RaiseConfirmationCommand.Execute(e);
-                });
-            }
-        }
+        
 
         private void OpenPauseDialog(ViewEventArgs e)
         {
@@ -200,6 +203,74 @@ namespace FilePlayer
                     pauseDialog.Top = (Application.Current.MainWindow.ActualHeight - pauseDialog.Height) / 2;
                 }
             });
+        }
+
+        private void OpenSearchGameData(ViewEventArgs e)
+        {
+            MaximizeShell();
+
+            this.Dispatcher.Invoke((Action)delegate
+            {
+                searchGameData = new SearchGameData(e.addlInfo[0]);
+                searchGameData.ShowInTaskbar = false;
+                searchGameData.Owner = Application.Current.MainWindow;
+
+                while (!searchGameData.IsVisible)
+                {
+                    searchGameData.Show();
+                    searchGameData.Left = (Application.Current.MainWindow.ActualWidth - searchGameData.Width) / 2;
+                    searchGameData.Top = (Application.Current.MainWindow.ActualHeight - searchGameData.Height) / 2;
+                }
+            });
+        }
+
+        private void OpenButtonDialog(ViewEventArgs e)
+        {
+            MaximizeShell();
+
+            this.Dispatcher.Invoke((Action)delegate
+            {
+                string dialogName = "";
+                string closeEvent = "";
+                string[] buttonNames = new string[] { };
+                string[] buttonActions = new string[] { };
+
+                switch (e.addlInfo[0]) //action will be the type of dialog to open, maybe addlInfo[0]?
+                {
+                    case "ITEM_LIST_PAUSE_OPEN":
+                        dialogName = "ITEMLIST_PAUSE";
+                        buttonNames = new string[] { "Close This Dialog", "Exit", "Upload Game Data" };
+                        buttonActions = new string[] { "ITEMLISTPAUSE_CLOSE", "EXIT", "GAMEDATA_UPLOAD" };
+                        closeEvent = "ITEMLIST_BROWSE";
+                        break;
+                    case "ITEM_LIST_CONFIRMATION_OPEN":
+                        dialogName = "ITEMLIST_CONFIRMATION";
+                        buttonNames = new string[] { "Open", "Search For Data", "Delete Data" };
+                        buttonActions = new string[] { "FILE_OPEN", "FILE_SEARCH_DATA", "FILE_DELETE_DATA" };
+                        closeEvent = "ITEMLIST_BROWSE";
+                        break;
+                    case "APP_PAUSE_OPEN":
+                        dialogName = "APP_PAUSE";
+                        buttonNames = new string[] { "Return to App", "Close App", "Exit" };
+                        buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "EXIT" };
+                        closeEvent = "ITEM_PLAY";
+                        break;
+
+                }
+
+                buttonDialog = new ButtonDialog(dialogName, buttonNames, buttonActions, closeEvent);
+
+                buttonDialog.ShowInTaskbar = false;
+                buttonDialog.Owner = Application.Current.MainWindow;
+
+                while (!buttonDialog.IsVisible)
+                {
+                    buttonDialog.Show();
+                    buttonDialog.Left = (Application.Current.MainWindow.ActualWidth - buttonDialog.Width) / 2;
+                    buttonDialog.Top = (Application.Current.MainWindow.ActualHeight - buttonDialog.Height) / 2;
+                }
+            });
+
         }
 
 

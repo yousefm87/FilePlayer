@@ -71,25 +71,19 @@ namespace FilePlayer.Views
                         SelectFirstItem();
                     });
                     break;
-                case "CONFIRM_OPEN":
-                    if (ItemListViewModel.AllItemNames.Count() > 0)
-                    {
-                        AddListShade();
-                    }
-                    break;
-                case "PAUSE_OPEN":
+                case "BUTTONDIALOG_OPEN":
                     AddListShade();
                     break;
-                case "ITEMLIST_PAUSE_OPEN":
+                case "BUTTONDIALOG_CLOSE":
+                    RemoveListShade();
+                    break;
+                case "BUTTONDIALOG_SELECT":
+                    RemoveListShade();
+                    break;
+                case "GIANTBOMB_UPLOAD_START":
                     AddListShade();
                     break;
-                case "CONFIRM_CLOSE":
-                    RemoveListShade();
-                    break;
-                case "PAUSE_CLOSE":
-                    RemoveListShade();
-                    break;
-                case "ITEMLIST_PAUSE_CLOSE":
+                case "GIANTBOMB_UPLOAD_COMPLETE":
                     RemoveListShade();
                     break;
                 case "OPEN_FILTER":
@@ -125,7 +119,10 @@ namespace FilePlayer.Views
             {
                 if (this.Effect == null)
                 {
-                    this.Effect = new BlurEffect();
+                    BlurEffect blur = new BlurEffect();
+                    blur.Radius = 20;
+                    this.Effect = blur;
+
                 }
                 else
                 {

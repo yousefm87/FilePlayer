@@ -7,6 +7,7 @@
              xmlns:prism="http://www.codeplex.com/prism"
              
              xmlns:views="clr-namespace:FilePlayer.Views"
+             MinWidth="300"
              mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -31,16 +32,14 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="ListBoxItem.Background" Value="#646882"/>
-                                <Setter Property="Foreground" Value="WhiteSmoke"/>
+                                <Setter Property="ListBoxItem.Background" Value="{DynamicResource AccentColorBrush}" />
                                 <Setter Property="BorderBrush" Value="#1E202B" />
                                 <Setter Property="BorderThickness" Value="3" />
                                 <Setter Property="FontWeight" Value="UltraBold"/>
 
                             </Trigger>
                             <Trigger Property="IsSelected" Value="False">
-                                <Setter Property="Background" Value="#2b2d38"/>
-                                <Setter Property="Foreground" Value="GhostWhite"/>
+                                <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
                                 <Setter Property="BorderBrush" Value="#1E202B" />
                                 <Setter Property="BorderThickness" Value="1" />
                                 <Setter Property="FontWeight" Value="Normal" />

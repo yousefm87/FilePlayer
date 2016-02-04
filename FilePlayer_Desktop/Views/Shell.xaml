@@ -49,7 +49,7 @@
                     </styles:AppPopup.WindowContent>
                 </styles:AppPopup>
             </prism:InteractionRequestTrigger>
-            -->
+            
             <prism:InteractionRequestTrigger SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
 
                 <styles:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True">
@@ -62,12 +62,12 @@
                 </styles:AppPopup>
             </prism:InteractionRequestTrigger>
 
-
+-->
         </i:Interaction.Triggers>
 
         <UserControl prism:RegionManager.RegionName="ItemListView" />
         <Canvas x:Name="dynamicCanvas">
-            <views:CharGetter x:Name="charGetter" Style="{StaticResource CharGetterStyle}" Visibility="Hidden" />
+            <views:CharGetter x:Name="charGetter" Visibility="Hidden" />
         </Canvas>
     </Grid>
     

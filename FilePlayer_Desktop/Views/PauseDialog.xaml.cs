@@ -97,7 +97,7 @@ namespace FilePlayer.Views
         {
             if (isSelected)
             {
-                buttonPanel.Dispatcher.Invoke((Action)delegate
+                this.Dispatcher.Invoke((Action)delegate
                 {
                     button.SetResourceReference(Control.StyleProperty, "selBtnStyle");
                     //button.Background = selectedButtonBackground;
@@ -106,7 +106,7 @@ namespace FilePlayer.Views
             }
             else
             {
-                buttonPanel.Dispatcher.Invoke((Action)delegate
+                this.Dispatcher.Invoke((Action)delegate
                 {
                     button.SetResourceReference(Control.StyleProperty, "unselBtnStyle");
                     //button.Background = unselectedButtonBackground;

@@ -29,7 +29,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>10</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -174,6 +174,8 @@
     <Compile Include="ControllerHandler.cs" />
     <Compile Include="Converters\ImageConverter.cs" />
     <Compile Include="Converters\ProgressConverter.cs" />
+    <Compile Include="Converters\ReleaseConverter.cs" />
+    <Compile Include="Converters\SearchGameItemConverter.cs" />
     <Compile Include="GameRetriever.cs" />
     <Compile Include="InputProvider.cs" />
     <Compile Include="JSON\consoles.cs" />
@@ -182,14 +184,26 @@
     <Compile Include="Model\ItemLists.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Converters\NullConverter.cs" />
-    <Compile Include="ViewModels\CharGetterModelView.cs" />
+    <Compile Include="ViewModels\CharGetterViewModel.cs" />
     <Compile Include="ViewModels\GameRetrieverProgressViewModel.cs" />
+    <Compile Include="ViewModels\ButtonDialogViewModel.cs" />
+    <Compile Include="ViewModels\SearchGameDataViewModel.cs" />
+    <Compile Include="ViewModels\SearchGameItemViewModel.cs" />
     <Compile Include="ViewModels\VerticalOptionSelecterViewModel.cs" />
+    <Compile Include="Views\ButtonDialog.xaml.cs">
+      <DependentUpon>ButtonDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CharGetter.xaml.cs">
       <DependentUpon>CharGetter.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\GameRetrieverProgress.xaml.cs">
       <DependentUpon>GameRetrieverProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SearchGameData.xaml.cs">
+      <DependentUpon>SearchGameData.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SearchGameItem.xaml.cs">
+      <DependentUpon>SearchGameItem.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Shell.xaml.cs">
       <DependentUpon>Shell.xaml</DependentUpon>
@@ -220,11 +234,23 @@
       <DependentUpon>VerticalOptionSelecter.xaml</DependentUpon>
     </Compile>
     <Compile Include="WindowActions.cs" />
+    <Page Include="Views\ButtonDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\CharGetter.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\GameRetrieverProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SearchGameData.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SearchGameItem.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -304,6 +330,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Controls\" />
     <Folder Include="Services\" />
     <Folder Include="Theme\" />
   </ItemGroup>

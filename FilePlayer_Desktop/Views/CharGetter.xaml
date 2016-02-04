@@ -4,24 +4,22 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:FilePlayer.Views"
+             Style="{StaticResource CharGetterStyle}"
              mc:Ignorable="d" >
     <UserControl.Resources>
-        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MetroTextBlock}" />
-        <Style TargetType="{x:Type Label}" BasedOn="{StaticResource MetroLabel}" />
+
+
 
         <Style x:Key="SelectedCharStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource MetroLabel}">
             <Setter Property="FontSize"   Value="40" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="Background" Value="#bcbbd9" />
-            <Setter Property="Foreground" Value="#34343b" />
+            <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
 
         </Style>
         <Style x:Key="UnselectedCharStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource MetroLabel}">
             <Setter Property="FontSize"   Value="40" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="Background" Value="#34343b" />
-            <Setter Property="Foreground" Value="#bcbbd9" />
-
+            <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
         </Style>
     </UserControl.Resources>
 

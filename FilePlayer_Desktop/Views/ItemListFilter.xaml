@@ -7,16 +7,14 @@
              xmlns:prism="http://www.codeplex.com/prism"
              xmlns:local="clr-namespace:FilePlayer.Views"
              mc:Ignorable="d" >
-    
+
     <UserControl.Resources>
-        <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MetroTextBlock}" />
-        <Style TargetType="{x:Type Label}" BasedOn="{StaticResource MetroLabel}" />
         <Style x:Key="FilterBarStyle" TargetType="{x:Type Grid}">
 
             <Setter Property="Height" Value="100" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Top"/>
-            <Setter Property="Background" Value="#40404a" />
+            <Setter Property="Background" Value="{DynamicResource GrayBrush10}" />
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
         </Style>
 
@@ -25,43 +23,30 @@
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="HorizontalAlignment" Value="Right" />
             <Setter Property="VerticalAlignment" Value="Bottom" />
-            <Setter Property="Foreground" Value="Lavender" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
 
         </Style>
-        <Style x:Key="UnselectedFilterInputStyle" TargetType="{x:Type Label}" >
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Label">
-                        <Border CornerRadius="13" BorderBrush="#212129" Background="#87879e" BorderThickness="1" Padding="2">
-                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="FontSize" Value="40" />
+        <Style x:Key="UnselectedFilterInputStyle" TargetType="{x:Type TextBox}" >
+            <Setter Property="Padding" Value="20,0,0,0" />
+            <Setter Property="FontSize" Value="48" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="VerticalAlignment" Value="Bottom" />
-            <Setter Property="Height" Value="120" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="MinHeight" Value="80" />
             <Setter Property="MinWidth" Value="600" />
         </Style>
 
 
-        <Style x:Key="SelectedFilterInputStyle" TargetType="{x:Type Label}" >
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Label">
-                        <Border CornerRadius="13" BorderBrush="#212129" Background="#bcbbd9" BorderThickness="3" Padding="2">
-                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="FontSize" Value="40" />
+        <Style x:Key="SelectedFilterInputStyle" TargetType="{x:Type TextBox}" >
+            <Setter Property="Background" Value="{DynamicResource HighlightBrush}" />
+            <Setter Property="Padding" Value="20,0,0,0" />
+            <Setter Property="FontSize" Value="48" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="VerticalAlignment" Value="Bottom" />
-            <Setter Property="Height" Value="120" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="MinHeight" Value="80" />
             <Setter Property="MinWidth" Value="600" />
         </Style>
 
@@ -69,7 +54,6 @@
             <Setter Property="Height" Value="100" />
             <Setter Property="HorizontalAlignment" Value="Right" />
             <Setter Property="Height" Value="100" />
-            <Setter Property="Background" Value="#3a3a42" />
             <Setter Property="BorderBrush" Value="#07070F" />
             <Setter Property="BorderThickness" Value="1" />
         </Style>
@@ -78,7 +62,7 @@
             <Setter Property="Height" Value="100" />
             <Setter Property="HorizontalAlignment" Value="Right" />
             <Setter Property="Height" Value="100" />
-            <Setter Property="Background" Value="#bcbbd9" />
+            <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
 
             <Setter Property="BorderBrush" Value="#212129" />
             <Setter Property="BorderThickness" Value="3" />
@@ -105,24 +89,16 @@
                    Margin="30,10,10,20" 
                    Grid.Row="0" Grid.Column="0" 
                    Style="{StaticResource FilterLabelStyle}" />
-        <Label x:Name="filterType" 
-               
-                   Margin="10,10,10,10"  
-                   Grid.Row="0" Grid.Column="1" 
-                   Style="{StaticResource UnselectedFilterInputStyle}" >
-            <TextBlock Margin="10,30,0,0" x:Name="filterTypeText" Text="Contains" />
-        </Label>
         <Label x:Name="fileFilterLabel" Content="File" 
                 Margin="10,10,10,20" 
                 Grid.Row="0" Grid.Column="0" 
                 Style="{StaticResource FilterLabelStyle}" />
-        <Label x:Name="fileFilter" 
-                   Margin="10,10,10,10" 
-                   Grid.Row="0" Grid.Column="3"  
-                   Style="{StaticResource UnselectedFilterInputStyle}">
-            <TextBlock Margin="10,30,0,0" x:Name="fileFilterText">
-            </TextBlock>
-        </Label>
+
+
+        <TextBox Margin="0,0,0,0" Grid.Row="0" Grid.Column="1" x:Name="filterTypeText" Text="Contains" Style="{StaticResource UnselectedFilterInputStyle}"/>
+
+
+        <TextBox Margin="0,0,0,0" Grid.Row="0" Grid.Column="3"  x:Name="fileFilterText" Style="{StaticResource UnselectedFilterInputStyle}"/>
 
         <Label x:Name="resetBtn" 
                    Grid.Row="0" Grid.Column="5" 

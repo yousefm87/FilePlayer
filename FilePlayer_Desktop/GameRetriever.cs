@@ -5,19 +5,43 @@ using GiantBomb.Api.Model;
 using Microsoft.Practices.Prism.PubSubEvents;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace FilePlayer
 {
-    class GameRetriever
+    public class GameRetriever
     {
+
+        public class GameData
+        {
+            public string GameName { get; set; }
+            public string GameDescription { get; set; }
+            public string ImageURL { get; set; }
+            public string ReleaseDate { get; set; }
+            public string PlatformName { get; set; }
+            public List<GameData> GameReleases { get; set; }
+
+            public GameData()
+            {
+                GameName = "";
+                GameDescription = "";
+                ImageURL = "";
+                ReleaseDate = "";
+                PlatformName = "";
+                GameReleases = new List<GameData>();
+            }
+        }
+
         /// <summary>
         /// Gets Sift3 distance
         /// </summary>
@@ -231,7 +255,7 @@ namespace FilePlayer
 
         public static bool GetGameData(string gameQuery, string platformName, string imageFolderPath, bool overwriteFile, JsonWriter writer)
         {
-            const int MAX_SEARCH = 5;
+            const int MAX_SEARCH = 10;
             const string apiToken = "6b2a93c2be2eecb746c2bba7193da92fdf23b5d2";
             GiantBombRestClient giantBomb = new GiantBombRestClient(apiToken);
 
@@ -382,5 +406,141 @@ namespace FilePlayer
             }
             return false;
         }
+
+        public static bool HasProperty(object b, string property)
+        {
+            Type t = b.GetType();
+            PropertyInfo p = t.GetProperty(property);
+
+            bool hasProperty = (p != null);
+
+            return hasProperty;
+        }
+
+       
+
+        public static ObservableCollection<GameData> GetGameDataSet(string gameQuery)
+        {
+            const int MAX_SEARCH = 5;
+            const string apiToken = "6b2a93c2be2eecb746c2bba7193da92fdf23b5d2";
+            GiantBombRestClient giantBomb = new GiantBombRestClient(apiToken);
+            ArrayList gameDataSet = new ArrayList();
+            try
+            {
+                IEnumerable<Game> games = giantBomb.SearchForGames(gameQuery);
+
+                int maxCountGames = (games.Count() > MAX_SEARCH) ? MAX_SEARCH : games.Count();
+
+                ObservableCollection<GameData> currGames = new ObservableCollection<GameData>();
+
+                for (int i = 0; i < maxCountGames; i++)
+                {
+                    GameData currGame = new GameData();
+                    currGame.GameName = games.ElementAt(i).Name;
+                    currGame.GameDescription = games.ElementAt(i).Deck;
+                    if (games.ElementAt(i).Image != null)
+                    {
+                        if (games.ElementAt(i).Image.SuperUrl != null)
+                        {
+                            currGame.ImageURL = games.ElementAt(i).Image.SuperUrl;
+                        }
+                        else
+                        {
+                            if (games.ElementAt(i).Image.MediumUrl != null)
+                            {
+                                currGame.ImageURL = games.ElementAt(i).Image.MediumUrl;
+                            }
+                            else
+                            {
+                                if (games.ElementAt(i).Image.SmallUrl != null)
+                                {
+                                    currGame.ImageURL = games.ElementAt(i).Image.SmallUrl;
+                                }
+                                else
+                                {
+                                    currGame.ImageURL = "";
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        currGame.ImageURL = "";
+                    }
+                    currGame.ReleaseDate = games.ElementAt(i).OriginalReleaseDate.ToString();
+
+                    IEnumerable<Release> releases = giantBomb.GetReleasesForGame(games.ElementAt(i));
+                    int maxCountReleases = (releases.Count() > MAX_SEARCH) ? MAX_SEARCH : releases.Count();
+                    List<GameData> currGameReleases = new List<GameData>();
+
+                    for (int j = 0; j < maxCountReleases; j++)
+                    {
+
+                        GameData currRelease = new GameData();
+                        currRelease.GameName = releases.ElementAt(j).Name;
+                        if (releases.ElementAt(j).Deck != null)
+                        {
+                            currRelease.GameDescription = releases.ElementAt(j).Deck;
+                        }
+                        else
+                        {
+                            currRelease.GameDescription = games.ElementAt(i).Deck;
+                        }
+                        
+
+                       
+                        if (releases.ElementAt(j).Image != null)
+                        {
+                            if (releases.ElementAt(j).Image.SuperUrl != null)
+                            {
+                                currRelease.ImageURL = releases.ElementAt(j).Image.SuperUrl;
+                            }
+                            else
+                            {
+                                if (releases.ElementAt(j).Image.MediumUrl != null)
+                                {
+                                    currRelease.ImageURL = releases.ElementAt(j).Image.MediumUrl;
+                                }
+                                else
+                                {
+                                    if (releases.ElementAt(j).Image.SmallUrl != null)
+                                    {
+                                        currRelease.ImageURL = releases.ElementAt(j).Image.SmallUrl;
+                                    }
+                                    else
+                                    {
+                                        currRelease.ImageURL = "";
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            currRelease.ImageURL = "";
+                        }
+                        currRelease.ReleaseDate = releases.ElementAt(j).ReleaseDate.ToString();
+                        currRelease.PlatformName = releases.ElementAt(j).Platform.Name;
+
+                        currGameReleases.Add(currRelease);
+                    }
+
+                    currGame.GameReleases = currGameReleases;
+                    currGames.Add(currGame);
+
+                }
+
+                return currGames;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
     }
 }
+
+    
+
+
+
+

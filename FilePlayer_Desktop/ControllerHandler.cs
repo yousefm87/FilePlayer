@@ -96,7 +96,22 @@ namespace FilePlayer
                         }
                     );
                     break;
-
+                case "BUTTON_DIALOG":
+                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
+                        (controllerEventArgs) =>
+                        {
+                            ControllerButtonPressToActionButtonDialog(controllerEventArgs);
+                        }
+                    );
+                    break;
+                case "SEARCH_GAME_DATA":
+                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
+                        (controllerEventArgs) =>
+                        {
+                            ControllerButtonPressToActionSearchGameData(controllerEventArgs);
+                        }
+                    );
+                    break;
             }
 
         }
@@ -107,8 +122,8 @@ namespace FilePlayer
             switch (e.buttonPressed)
             {
                 case "A":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONFIRM_OPEN", new string[] { "" }));
-                    
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "ITEM_LIST_CONFIRMATION_OPEN" }));
+                    SetControllerState("BUTTON_DIALOG");
                     break;
                 case "B":
                     break;
@@ -137,8 +152,10 @@ namespace FilePlayer
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_MOVE_DOWN", new string[] { 10.ToString() }));
                     break;
                 case "GUIDE":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_PAUSE_OPEN", new string[] { 10.ToString() }));
-                    SetControllerState("ITEMLIST_PAUSE");
+                    //this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_PAUSE_OPEN", new string[] { 10.ToString() }));
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "ITEM_LIST_PAUSE_OPEN", "ITEM_LIST_BROWSE" }));
+                    
+                    SetControllerState("BUTTON_DIALOG");
                     break;
             }
         }
@@ -219,9 +236,42 @@ namespace FilePlayer
             }
         }
 
+        void ControllerButtonPressToActionButtonDialog(ControllerEventArgs e)
+        {
+            switch (e.buttonPressed)
+            {
+                case "A":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_SELECT_BUTTON"));
+                    break;
+                case "B":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_CLOSE"));
+                    break;
+                case "X":
+                    break;
+                case "Y":
+                    break;
+                case "DUP":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_MOVE_UP"));
+                    break;
+                case "DDOWN":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_MOVE_DOWN"));
+                    break;
+                case "DLEFT":
+                    break;
+                case "DRIGHT":
+                    break;
+                case "LSHOULDER":
+                    break;
+                case "RSHOULDER":
+                    break;
+                case "GUIDE":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_CLOSE"));
+                    break;
+            }
+        }
+
         void ControllerButtonPressToActionItemlistPause(ControllerEventArgs e)
         {
-
             switch (e.buttonPressed)
             {
                 case "A":
@@ -262,8 +312,9 @@ namespace FilePlayer
             switch (e.buttonPressed)
             {
                 case "GUIDE":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("PAUSE_OPEN", new string[] { "" }));
-                    SetControllerState("ITEM_PAUSE");
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "APP_PAUSE_OPEN" }));
+
+                    SetControllerState("BUTTON_DIALOG");
                     break;
             }
         }
@@ -332,8 +383,10 @@ namespace FilePlayer
                     this.iEventAggregator.GetEvent<PubSubEvent<CharGetterEventArgs>>().Publish(new CharGetterEventArgs("CHAR_MOVE_RIGHT"));
                     break;
                 case "LSHOULDER":
+                    this.iEventAggregator.GetEvent<PubSubEvent<CharGetterEventArgs>>().Publish(new CharGetterEventArgs("CHAR_SWITCHCHARSET_LEFT"));
                     break;
                 case "RSHOULDER":
+                    this.iEventAggregator.GetEvent<PubSubEvent<CharGetterEventArgs>>().Publish(new CharGetterEventArgs("CHAR_SWITCHCHARSET_RIGHT"));
                     break;
                 case "GUIDE":
                     break;
@@ -364,6 +417,43 @@ namespace FilePlayer
                 case "DLEFT":
                     break;
                 case "DRIGHT":
+                    break;
+                case "LSHOULDER":
+                    break;
+                case "RSHOULDER":
+                    break;
+                case "GUIDE":
+                    break;
+            }
+        }
+
+
+        void ControllerButtonPressToActionSearchGameData(ControllerEventArgs e)
+        {
+
+            switch (e.buttonPressed)
+            {
+                case "A":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SEARCHGAMEDATA_SELECT", new string[] { "" }));
+                    break;
+                case "B":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SEARCHGAMEDATA_CLOSE", new string[] { "" }));
+                    break;
+                case "X":
+                    break;
+                case "Y":
+                    break;
+                case "DUP":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SEARCHGAMEDATA_MOVE_UP"));
+                    break;
+                case "DDOWN":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SEARCHGAMEDATA_MOVE_DOWN"));
+                    break;
+                case "DLEFT":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SEARCHGAMEDATA_MOVE_LEFT"));
+                    break;
+                case "DRIGHT":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SEARCHGAMEDATA_MOVE_RIGHT"));
                     break;
                 case "LSHOULDER":
                     break;

@@ -18,6 +18,7 @@ namespace FilePlayer.Views
         public string[] buttonActions;
         public int selectedControlIndex;
 
+        public CharGetterViewModel CharGetterViewModel { get; set; }
         public CharGetter()
         {
             InitializeComponent();
@@ -35,13 +36,15 @@ namespace FilePlayer.Views
         {
             iEventAggregator = Event.EventInstance.EventAggregator;
 
+            CharGetterViewModel = new CharGetterViewModel();
+            
             selectedControlIndex = 0;
 
             controls = new Label[] {  char00, char01, char02, char03, char04, char05, char06, char07, char08, char09,
                                         char10, char11, char12, char13, char14, char15, char16, char17, char18, char19,
                                         char20, char21, char22, char23, char24, char25, char26, char27, char28, char29,
                                         char30 };
-
+            
             buttonActions = new string[] { "FILTER_APPS", "FILTER_FILES", "FILTER_RESET" };
 
             
@@ -50,6 +53,31 @@ namespace FilePlayer.Views
                 bool isSelected = (i == selectedControlIndex);
                 SetControlSelected(controls[i], isSelected);
             }
+        }
+
+        public void SwitchCharSetLeft()
+        {
+            CharGetterViewModel.SwitchCharSetLeft();
+            SetChars();
+        }
+
+        public void SwitchCharSetRight()
+        {
+            CharGetterViewModel.SwitchCharSetRight();
+            SetChars();
+        }
+
+        public void SetChars()
+        {
+            string[] currCharSet = CharGetterViewModel.GetCurrCharSet();
+
+            this.Dispatcher.Invoke((Action)delegate
+            {
+                for (int i = 0; i < (controls.Length - 1); i++) //(controls.Length - 1) don't consider spacebar
+                {
+                    controls[i].Content = currCharSet[i];
+                }
+            });
         }
 
 
@@ -62,6 +90,12 @@ namespace FilePlayer.Views
                     break;
                 case "CHAR_MOVE_RIGHT":
                     MoveRight();
+                    break;
+                case "CHAR_SWITCHCHARSET_LEFT":
+                    SwitchCharSetLeft();
+                    break;
+                case "CHAR_SWITCHCHARSET_RIGHT":
+                    SwitchCharSetRight();
                     break;
                 case "CHAR_MOVE_UP":
                     MoveUp();

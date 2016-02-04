@@ -26,7 +26,7 @@ namespace FilePlayer.ViewModels
         }
     }
 
-    public class ConfirmationCommand : ICommand
+    public class ConfirmationCommand 
     {
         private readonly Action<object> _handler;
 
@@ -79,15 +79,8 @@ namespace FilePlayer.ViewModels
     {
 
         private WindowState _shellWindowState = WindowState.Maximized;
-        private bool _confirmationPopupIsOpen;
-        private string _confirmationText;
         private string resultMessage;
         private IEventAggregator iEventAggregator;
-
-        public InteractionRequest<INotification> ConfirmationRequest { get; private set; }
-
-        public ConfirmationCommand RaiseConfirmationCommand { get; private set; }
-
 
 
         public WindowState ShellWindowState
@@ -100,63 +93,14 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public bool ConfirmationPopupIsOpen
-        {
-            get { return _confirmationPopupIsOpen; }
-            set
-            {
-                _confirmationPopupIsOpen = value;
-                OnPropertyChanged("ConfirmationPopupIsOpen");
-            }
-        }
-
-        public string ConfirmationText
-        {
-            get { return _confirmationText; }
-            set
-            {
-                _confirmationText = value;
-                OnPropertyChanged("ConfirmationText");
-            }
-        }
-
-        public string InteractionResultMessage
-        {
-            get
-            {
-                return this.resultMessage;
-            }
-            set
-            {
-                this.resultMessage = value;
-                this.OnPropertyChanged("InteractionResultMessage");
-            }
-        }
-
 
         public ShellViewModel(IEventAggregator iEventAggregator)
         {
             this.iEventAggregator = iEventAggregator;
-
-            ConfirmationPopupIsOpen = false;
-            ConfirmationText = "";
-
-            this.ConfirmationRequest = new InteractionRequest<INotification>();
-            this.RaiseConfirmationCommand = new ConfirmationCommand(this.RaiseConfirmation);
-
         }
 
         
-        private void RaiseConfirmation(object viewEventArgs)
-        {
-            this.InteractionResultMessage = "";
-
-            ViewEventArgs args = (ViewEventArgs)viewEventArgs;
-            String contentText = args.addlInfo[0];
-
-            this.ConfirmationRequest.Raise(
-                new Notification { Content = contentText, Title = "Confirm" });
-        }
+ 
 
     }
 }

@@ -1,4 +1,4 @@
-﻿<Window x:Class="FilePlayer.Views.PauseDialog"
+﻿<controls:MetroWindow x:Class="FilePlayer.Views.PauseDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,55 +8,63 @@
         xmlns:views="clr-namespace:FilePlayer.Views"
         xmlns:viewModels="clr-namespace:FilePlayer.ViewModels"
         xmlns:styles="clr-namespace:FilePlayer.Styles"
+        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
         SizeToContent="WidthAndHeight"
         WindowStyle="None"
         AllowsTransparency="True"
-        Background = "#9999b3"
         BorderBrush ="#1a1a1f"
+        ShowTitleBar="False"
+        ShowMinButton="False"
+        ShowMaxRestoreButton="False"
+        ShowCloseButton="False"
         MinHeight="200"
         MinWidth="150"
         Closed="Window_Closed">
     
     
     <Window.Resources>
-        <Style x:Key="selBtnStyle" TargetType="Button">
-            <Setter Property="Background" Value="#646882" />
+
+        <Style x:Key="selBtnStyle" TargetType="Button" BasedOn="{StaticResource AccentedSquareButtonStyle}">
+            <Setter Property="Background" Value="{DynamicResource GrayBrush8}" />
+            <!-- highlight for button in metro dark theme ispressed = GrayBrush7-->
             <Setter Property="BorderBrush" Value="#2b2c36" />
-            <Setter Property="Foreground" Value="WhiteSmoke" />
             <Setter Property="FontWeight" Value="UltraBold"/>
             <Setter Property="FontSize" Value="20" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="Height" Value="80" />
-            <Setter Property="Width" Value="300" />
+            <Setter Property="Width" Value="320" />
             <Setter Property="Margin" Value="18,1,18,1" />
         </Style>
-        <Style x:Key="unselBtnStyle" TargetType="Button">
-            <Setter Property="Background" Value="#2b2d38" />
+
+        <Style x:Key="unselBtnStyle" TargetType="Button" BasedOn="{StaticResource AccentedSquareButtonStyle}">
+            <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
             <Setter Property="BorderBrush" Value="#31323d" />
-            <Setter Property="Foreground" Value="GhostWhite" />
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="20" />
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="Height" Value="80" />
-            <Setter Property="Width" Value="300" />
+            <Setter Property="Width" Value="320" />
             <Setter Property="Margin" Value="18,1,18,1" />
-        </Style>
+        </Style>    </Window.Resources>
 
-    </Window.Resources>
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+       </Grid.RowDefinitions>
 
-    <Grid>
-        <StackPanel>
 
-            <StackPanel x:Name="buttonPanel" Orientation="Vertical" >
-                <AdornerDecorator Height="9"  />
-                <Button x:Name="returnToAppButton"  AutomationProperties.AutomationId="PauseReturnToAppButton" Click="Button_Click">Return to App</Button>
-                <Button x:Name="closeAppButton" AutomationProperties.AutomationId="PauseCloseAppButton" Click="Button_Click">Close App</Button>
-                <Button x:Name="closeAllButton" AutomationProperties.AutomationId="PauseCloseAllButton" Click="Button_Click">Close App And FilePlayer</Button>
-                <AdornerDecorator Height="9"  />
-            </StackPanel>
-        </StackPanel>
-
+        <Button x:Name="returnToAppButton" Margin="10,10,10,5" Grid.Row="0">
+            <TextBlock Text="Return to App" />
+        </Button>
+        <Button x:Name="closeAppButton" Margin="10,5,10,5" Grid.Row="1">
+            <TextBlock Text="Close Current App" />
+        </Button>
+        <Button x:Name="closeAllButton" Margin="10,5,10,10" Grid.Row="2">
+            <TextBlock Text="Exit" />
+        </Button>
     </Grid>
-</Window>
+</controls:MetroWindow>
 

@@ -13,8 +13,9 @@
         SizeToContent="WidthAndHeight"
         WindowStyle="None"
         AllowsTransparency="True"
-        Background = "#9999b3"
-        BorderBrush ="#1a1a1f"
+        Background = "{DynamicResource GrayBrush10}"
+        BorderBrush ="Black"
+        BorderThickness="1"
         MinHeight="200"
         MinWidth="150"
         Closed="Window_Closed">
@@ -24,7 +25,7 @@
         <converters:ProgressConverter x:Key="progressConverter" />
 
         <Style x:Key="StatusStyle" TargetType="TextBlock" BasedOn="{StaticResource MetroTextBlock}">
-            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Foreground" Value="WhiteSmoke" />
             <Setter Property="FontSize" Value="25" />
             <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -34,7 +35,7 @@
         </Style>
 
         <Style x:Key="TitleStyle" TargetType="TextBlock" BasedOn="{StaticResource MetroTextBlock}">
-            <Setter Property="Foreground" Value="Black" />
+            <Setter Property="Foreground" Value="WhiteSmoke" />
             <Setter Property="FontSize" Value="25" />
             <Setter Property="FontWeight" Value="Normal" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -68,8 +69,6 @@
         </Style>
 
         <Style x:Key="progressBarStyle" TargetType="ProgressBar" BasedOn="{StaticResource MetroProgressBar}">
-            <Setter Property="Background" Value="WhiteSmoke" />
-            <Setter Property="Foreground" Value="White" />
             <Setter Property="MinWidth" Value="300" />
             <Setter Property="MinHeight" Value="25" />
         </Style>

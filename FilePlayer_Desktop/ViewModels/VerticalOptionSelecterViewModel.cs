@@ -1,4 +1,5 @@
-﻿using Microsoft.Practices.Prism.PubSubEvents;
+﻿
+using Microsoft.Practices.Prism.PubSubEvents;
 using System.Collections.Generic;
 
 namespace FilePlayer.ViewModels

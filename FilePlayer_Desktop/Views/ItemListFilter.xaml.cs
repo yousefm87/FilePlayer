@@ -58,7 +58,7 @@ namespace FilePlayer.Views
             iEventAggregator = Event.EventInstance.EventAggregator;
 
             selectedControlIndex = 0;
-            controls = new Control[] { filterType, fileFilter, resetBtn };
+            controls = new Control[] { filterTypeText, fileFilterText, resetBtn };
             buttonActions = new string[] { "FILTER_TYPE", "FILTER_FILES", "FILTER_RESET" };
 
             fileFilterText.Text = "";
@@ -212,8 +212,8 @@ namespace FilePlayer.Views
 
                 if (responseList[0].Equals("FILTER_FILES"))
                 {
-                    Point startPoint = new Point(0, fileFilter.ActualHeight);
-                    startPoint = fileFilter.PointToScreen(startPoint);
+                    Point startPoint = new Point(0, fileFilterText.ActualHeight);
+                    startPoint = fileFilterText.PointToScreen(startPoint);
                     startPointX = startPoint.X + 10;
                     startPointY = startPoint.Y + 10;
 
@@ -223,8 +223,8 @@ namespace FilePlayer.Views
                 }
                 if (responseList[0].Equals("FILTER_TYPE"))
                 {
-                    Point startPoint = new Point(0, filterType.ActualHeight);
-                    startPoint = filterType.PointToScreen(startPoint);
+                    Point startPoint = new Point(0, filterTypeText.ActualHeight);
+                    startPoint = filterTypeText.PointToScreen(startPoint);
                     startPointX = startPoint.X + 10;
                     startPointY = startPoint.Y + 10;
 
