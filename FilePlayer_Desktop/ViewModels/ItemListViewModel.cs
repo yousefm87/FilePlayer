@@ -177,8 +177,8 @@ namespace FilePlayer.ViewModels
         {
             this.iEventAggregator = iEventAggregator;
 
-            String consolesStr = System.AppDomain.CurrentDomain.BaseDirectory + "\\JSON\\consoles.json";
-                //Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\consoles.json";
+            String consolesStr = "C:\\FPJSON\\consoles.json";//System.AppDomain.CurrentDomain.BaseDirectory + "\\JSON\\consoles.json";
+                                                          //Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\consoles.json";
             this.ItemLists = new ItemLists(consolesStr);
 
             string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";

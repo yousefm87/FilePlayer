@@ -25,9 +25,19 @@ namespace FilePlayer.Model
 
         public void Init()
         {
+            if (! File.Exists(JsonFilePath))
+            {
+                JArray gamesArr = new JArray();
+                JProperty gamesProp = new JProperty("games", gamesArr);
+
+                JObject gamesObj = new JObject(gamesProp);
+
+                string json = JsonConvert.SerializeObject(gamesObj, Formatting.Indented);
+                File.WriteAllText(JsonFilePath, json);
+            }
             games = JObject.Parse(File.ReadAllText(JsonFilePath));
 
-            if (games["consoles"] != null)
+            if (games["games"] != null)
             {
                 CurrConsole = 0;
             }
@@ -56,9 +66,7 @@ namespace FilePlayer.Model
 
         public void AddGame(string game, string description, string releaseDate, string imageLocation)
         {
-
-
-
+            
             JToken currGame = GetGame(game);
 
             string extension = imageLocation.Split('.').Last();
@@ -88,6 +96,7 @@ namespace FilePlayer.Model
             }
 
             JObject newGame = new JObject();
+            
             JProperty nameProp = new JProperty("Name", game);
             JProperty descProp = new JProperty("ShortDescription", description);
             JProperty relDateProp = new JProperty("ReleaseDate", releaseDate);
@@ -107,6 +116,13 @@ namespace FilePlayer.Model
                 if (games["games"].Children().LastOrDefault() != null)
                 {
                     games["games"].Children().LastOrDefault().AddAfterSelf(newGame);
+                }
+                else
+                {
+                    JArray gamesArr = new JArray(newGame);
+                    JProperty gamesProp = new JProperty("games", gamesArr);
+
+                    games["games"] = gamesArr;
                 }
             }
             
