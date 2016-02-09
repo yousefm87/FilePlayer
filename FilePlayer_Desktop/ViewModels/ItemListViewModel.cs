@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System;
 using System.IO;
 using System.Threading;
@@ -179,6 +179,7 @@ namespace FilePlayer.ViewModels
 
             String consolesStr = "C:\\FPJSON\\consoles.json";//System.AppDomain.CurrentDomain.BaseDirectory + "\\JSON\\consoles.json";
                                                           //Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\consoles.json";
+
             this.ItemLists = new ItemLists(consolesStr);
 
             string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
