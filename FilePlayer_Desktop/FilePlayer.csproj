@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FilePlayer</RootNamespace>
     <AssemblyName>FilePlayer</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -19,19 +19,22 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>publish\</PublishUrl>
+    <PublishUrl>C:\Users\YM\Desktop\fp\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateEnabled>true</UpdateEnabled>
     <UpdateMode>Foreground</UpdateMode>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>Days</UpdateIntervalUnits>
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
+    <UpdateUrl>http://localhost/FilePlayer/</UpdateUrl>
+    <ApplicationRevision>30</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
+    <CreateDesktopShortcut>true</CreateDesktopShortcut>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -53,9 +56,36 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>B71DC2368D4623627173642524E0EC53E200EE85</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>FilePlayer_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>FilePlayer.App</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="FuzzyString, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FuzzyString.1.0.0\lib\FuzzyString.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="GiantBomb.Api, Version=2.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GiantBomb.Api.2.3.0\lib\net452\GiantBomb.Api.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="jsonorm, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\jsonorm.1.2.0\lib\net45\jsonorm.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MahApps.Metro, Version=1.2.0.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.2.0.0\lib\net45\MahApps.Metro.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -110,31 +140,58 @@
       <HintPath>..\packages\Prism.Wpf.6.0.1\lib\net45\Prism.Wpf.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.105.2.3\lib\net452\RestSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="SharpDX">
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.XInput">
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.XInput.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Expression.Blend.Sdk.1.0.2\lib\net45\System.Windows.Interactivity.dll</HintPath>
+    <Reference Include="System">
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.1.2.0.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="WindowsBase" />
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PresentationCore">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -142,23 +199,55 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="ControllerHandler.cs" />
+    <Compile Include="Converters\ImageConverter.cs" />
+    <Compile Include="Converters\ProgressConverter.cs" />
+    <Compile Include="Converters\ReleaseConverter.cs" />
+    <Compile Include="Converters\SearchGameItemConverter.cs" />
+    <Compile Include="GameRetriever.cs" />
     <Compile Include="InputProvider.cs" />
     <Compile Include="JSON\consoles.cs" />
     <Compile Include="Model\Event.cs" />
+    <Compile Include="Model\GameInfo.cs" />
     <Compile Include="Model\ItemLists.cs" />
     <Compile Include="Module.cs" />
-    <Compile Include="Shell.xaml.cs">
+    <Compile Include="Converters\NullConverter.cs" />
+    <Compile Include="ViewModels\CharGetterViewModel.cs" />
+    <Compile Include="ViewModels\GameRetrieverProgressViewModel.cs" />
+    <Compile Include="ViewModels\ButtonDialogViewModel.cs" />
+    <Compile Include="ViewModels\SearchGameDataViewModel.cs" />
+    <Compile Include="ViewModels\SearchGameItemViewModel.cs" />
+    <Compile Include="ViewModels\VerticalOptionSelecterViewModel.cs" />
+    <Compile Include="Views\ButtonDialog.xaml.cs">
+      <DependentUpon>ButtonDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CharGetter.xaml.cs">
+      <DependentUpon>CharGetter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\GameRetrieverProgress.xaml.cs">
+      <DependentUpon>GameRetrieverProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SearchGameData.xaml.cs">
+      <DependentUpon>SearchGameData.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SearchGameItem.xaml.cs">
+      <DependentUpon>SearchGameItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Shell.xaml.cs">
       <DependentUpon>Shell.xaml</DependentUpon>
     </Compile>
     <Compile Include="Styles\Controls.cs" />
+    <Compile Include="ViewModels\ItemListPauseViewModel.cs" />
     <Compile Include="ViewModels\PauseDialogViewModel.cs" />
     <Compile Include="ViewModels\ConfirmationDialogViewModel.cs" />
     <Compile Include="ViewModels\ItemListViewModel.cs" />
-    <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\ConfirmationDialog.xaml.cs">
       <DependentUpon>ConfirmationDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ItemListPauseView.xaml.cs">
+      <DependentUpon>ItemListPauseView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ItemListView.xaml.cs">
       <DependentUpon>ItemListView.xaml</DependentUpon>
@@ -166,8 +255,34 @@
     <Compile Include="Views\PauseDialog.xaml.cs">
       <DependentUpon>PauseDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ItemListFilter.xaml.cs">
+      <DependentUpon>ItemListFilter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\VerticalOptionSelecter.xaml.cs">
+      <DependentUpon>VerticalOptionSelecter.xaml</DependentUpon>
+    </Compile>
     <Compile Include="WindowActions.cs" />
-    <Page Include="Shell.xaml">
+    <Page Include="Views\ButtonDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CharGetter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\GameRetrieverProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SearchGameData.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SearchGameItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Shell.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -179,23 +294,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ItemListView.xaml">
+    <Page Include="Views\ItemListPauseView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\MainWindow_old.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Views\ItemListView.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Views\MainWindow_old.xaml.cs">
-      <DependentUpon>MainWindow_old.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
     <Page Include="Views\PauseDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ItemListFilter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\VerticalOptionSelecter.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -218,9 +337,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Automation\maximizenestopia.au3" />
-    <None Include="Automation\maximizesnes9x.au3" />
-    <None Include="JSON\consoles.json" />
+    <Content Include="JSON\consoles.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -236,6 +355,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Automation\" />
+    <Folder Include="Controls\" />
     <Folder Include="Services\" />
     <Folder Include="Theme\" />
   </ItemGroup>
@@ -252,7 +373,56 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\genericgame.png" />
+    <Content Include="Images\genericgame.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\refreshIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="FilePlayer.pdb">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="GiantBomb.Api.pdb">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="MahApps.Metro.pdb">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Microsoft.Practices.ServiceLocation.pdb">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

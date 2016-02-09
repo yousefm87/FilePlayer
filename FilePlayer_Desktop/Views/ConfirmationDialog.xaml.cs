@@ -145,7 +145,7 @@ namespace FilePlayer.Views
                     this.FinishInteraction();
                 }
                 string response = buttonActions[selectedButtonIndex];
-                this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Publish(new ItemListViewEventArgs("CONFIRM_CLOSE", new string[] { response }));
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONFIRM_CLOSE", new string[] { response }));
 
                 Init();
             });

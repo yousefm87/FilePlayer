@@ -6,9 +6,7 @@ using FilePlayer.ViewModels;
 using FilePlayer.Model;
 
 using Microsoft.Practices.Prism.PubSubEvents;
-using System.IO;
-using System.Diagnostics;
-using System.Threading;
+using System.Linq;
 
 namespace FilePlayer.Views
 {
@@ -24,32 +22,33 @@ namespace FilePlayer.Views
         private IEventAggregator iEventAggregator;
         SubscriptionToken viewActionToken;
 
+
+
         public ItemListView()
         {
+           
             ItemListViewModel = new ItemListViewModel(Event.EventInstance.EventAggregator);
             this.DataContext = ItemListViewModel;
             this.iEventAggregator = Event.EventInstance.EventAggregator;
 
             InitializeComponent();
 
-            viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ItemListViewEventArgs>>().Subscribe(
+            viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
                     
                     PerformViewAction(this, viewEventArgs);
                 }
             );
-                        //ItemListViewModel.SendAction += PerformViewAction;
+                      
 
         }
 
-        void PerformViewAction(object sender, ItemListViewEventArgs e)
+        void PerformViewAction(object sender, ViewEventArgs e)
         {
             int numMoves;
             switch(e.action)
             {
-                case "":
-                    
                 case "ITEMLIST_MOVE_UP":
                     numMoves = Int32.Parse(e.addlInfo[0]);
                     MoveUp(numMoves);
@@ -61,44 +60,56 @@ namespace FilePlayer.Views
                 case "ITEMLIST_MOVE_LEFT":
                     this.Dispatcher.Invoke((Action)delegate
                     {
-                        ItemListViewModel.SetPreviousLists();
+                        ItemListViewModel.SetPreviousLists(filterControl.fileFilterText.Text, filterControl.filterTypeText.Text);
                         SelectFirstItem();
                     });
-
                     break;
                 case "ITEMLIST_MOVE_RIGHT":
                     this.Dispatcher.Invoke((Action)delegate
                     {
-                        ItemListViewModel.SetNextLists();
+                        ItemListViewModel.SetNextLists(filterControl.fileFilterText.Text, filterControl.filterTypeText.Text);
                         SelectFirstItem();
                     });
                     break;
-                case "CONFIRM_OPEN":
+                case "BUTTONDIALOG_OPEN":
                     AddListShade();
                     break;
-                case "PAUSE_OPEN":
+                case "BUTTONDIALOG_CLOSE":
+                    RemoveListShade();
+                    break;
+                case "BUTTONDIALOG_SELECT":
+                    RemoveListShade();
+                    break;
+                case "GIANTBOMB_UPLOAD_START":
                     AddListShade();
                     break;
-                case "CONFIRM_CLOSE":
+                case "GIANTBOMB_UPLOAD_COMPLETE":
                     RemoveListShade();
                     break;
-                case "OPEN_ITEM":
-                    //TODO: Open App after minimizing 
-                    if(e.addlInfo[0] == "YES")
+                case "OPEN_FILTER":
+                    this.Dispatcher.Invoke((Action)delegate
                     {
-                        ItemListViewModel.OpenSelectedItemInApp();
-                        //Thread.Sleep(5000);
-                        ItemListViewModel.SetControllerState("ITEM_PLAY");
-                    }
-                    else
+                        filterControl.Visibility = Visibility.Visible;
+                    });
+                    break;
+                case "CLOSE_FILTER":
+                    this.Dispatcher.Invoke((Action)delegate
                     {
-                        ItemListViewModel.SetControllerState("ITEMLIST_BROWSE");
+                        filterControl.Visibility = Visibility.Hidden;
+                    });
+                    break;
+                case "FILTER_ACTION":
+                    switch (e.addlInfo[0])
+                    {
+                        case "FILTER_RESET":
+                            break;
                     }
                     break;
-                case "PAUSE_CLOSE":
-                    RemoveListShade();
+                case "FILTER_LIST":
+                    ItemListViewModel.AllItemNames = ItemListViewModel.ItemLists.GetItemNames(ItemListViewModel.ItemLists.CurrConsole, filterControl.GetFilterFile(), filterControl.GetFilterType());
+                    ItemListViewModel.AllItemPaths = ItemListViewModel.ItemLists.GetItemFilePaths(ItemListViewModel.ItemLists.CurrConsole, filterControl.GetFilterFile(), filterControl.GetFilterType());
+                    SelectFirstItem();
                     break;
-
             }
         }
 
@@ -108,7 +119,10 @@ namespace FilePlayer.Views
             {
                 if (this.Effect == null)
                 {
-                    this.Effect = new BlurEffect();
+                    BlurEffect blur = new BlurEffect();
+                    blur.Radius = 20;
+                    this.Effect = blur;
+
                 }
                 else
                 {
@@ -216,7 +230,7 @@ namespace FilePlayer.Views
         {
             if ((itemlist.Items.Count > 0) && (itemlist.Columns.Count > 0))
             {
-                int selectedIndex = ItemListViewModel.SelectedItemIndex; //int selectedIndex = itemlist.SelectedIndex;
+                int selectedIndex = ItemListViewModel.SelectedItemIndex; 
                 int newSelectedIndex = selectedIndex - numMove;
                 int minIndex = 0;
 
@@ -236,8 +250,6 @@ namespace FilePlayer.Views
                 });
 
                 ItemListViewModel.SelectedItemIndex = newSelectedIndex;
-                
-
             }
         }
 
@@ -266,7 +278,6 @@ namespace FilePlayer.Views
                 });
 
                 ItemListViewModel.SelectedItemIndex = newSelectedIndex;
-                
             }
         }
 

@@ -1,4 +1,4 @@
-﻿<Window x:Class="FilePlayer.Shell"
+﻿<controls:MetroWindow x:Class="FilePlayer.Shell"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -8,16 +8,30 @@
         xmlns:views="clr-namespace:FilePlayer.Views"
         xmlns:viewModels="clr-namespace:FilePlayer.ViewModels"
         xmlns:styles="clr-namespace:FilePlayer.Styles"
+        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d" 
         MinWidth="300"
         MinHeight="300"
         Title="FilePlayer"
-        Icon="Images\genericgame.png"
-        WindowStyle="None"
+        Icon="..\Images\genericgame.png"
+        ShowTitleBar="False"
         AllowsTransparency="True"
         WindowState="{Binding ShellWindowState}">
-    
-    <Grid>
+
+    <Window.Resources>
+        <Style x:Key="CharGetterStyle" TargetType="{x:Type views:CharGetter}" >
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type views:CharGetter}">
+                        <Border CornerRadius="13" BorderBrush="#1a1a1f" Background="#27262b" BorderThickness="1" Padding="2">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid >
         <Grid.RowDefinitions>
             <RowDefinition />
         </Grid.RowDefinitions>
@@ -35,22 +49,26 @@
                     </styles:AppPopup.WindowContent>
                 </styles:AppPopup>
             </prism:InteractionRequestTrigger>
-            -->
+            
             <prism:InteractionRequestTrigger SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
 
                 <styles:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True">
                     <styles:AppPopup.WindowContent>
                         <views:ConfirmationDialog             
                             Background = "#87879e"
-                            BorderBrush ="#1a1a1f"/>
+                            BorderBrush ="#1a1a1f"
+                            HorizontalAlignment="Stretch"/>
                     </styles:AppPopup.WindowContent>
                 </styles:AppPopup>
             </prism:InteractionRequestTrigger>
 
-
+-->
         </i:Interaction.Triggers>
 
         <UserControl prism:RegionManager.RegionName="ItemListView" />
-
+        <Canvas x:Name="dynamicCanvas">
+            <views:CharGetter x:Name="charGetter" Visibility="Hidden" />
+        </Canvas>
     </Grid>
-</Window>
+    
+</controls:MetroWindow>

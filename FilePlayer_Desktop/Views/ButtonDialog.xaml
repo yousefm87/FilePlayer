@@ -1,0 +1,132 @@
+﻿<controls:MetroWindow x:Class="FilePlayer.Views.ButtonDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:prism="http://www.codeplex.com/prism"
+        xmlns:views="clr-namespace:FilePlayer.Views"
+        xmlns:viewModels="clr-namespace:FilePlayer.ViewModels"
+        xmlns:styles="clr-namespace:FilePlayer.Styles"
+        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        mc:Ignorable="d"
+        SizeToContent="WidthAndHeight"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ShowTitleBar="False"
+        ShowMinButton="False"
+        ShowMaxRestoreButton="False"
+        ShowCloseButton="False"
+        MinHeight="200"
+        MinWidth="150"
+        BorderBrush ="Black"
+        BorderThickness="1"
+        Closed="Window_Closed">
+
+
+    <Window.Resources>
+        <Style x:Key="DataGridCellStyle" TargetType="{x:Type DataGridCell}">
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="BorderBrush" Value="{x:Null}" />
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{x:Null}" />
+                    <Setter Property="BorderBrush" Value="{x:Null}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="DataGridRowStyle" TargetType="{x:Type DataGridRow}">
+            <Setter Property="Background" Value="{x:Null}" />
+            <Setter Property="BorderBrush" Value="{x:Null}" />
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{x:Null}" />
+                    <Setter Property="BorderBrush" Value="{x:Null}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="selBtnStyle" TargetType="Button" BasedOn="{StaticResource AccentedSquareButtonStyle}">
+            <Setter Property="Background" Value="{DynamicResource GrayBrush8}" />
+            <!-- highlight for button in metro dark theme ispressed = GrayBrush7-->
+            <Setter Property="BorderBrush" Value="#2b2c36" />
+            <Setter Property="FontWeight" Value="UltraBold"/>
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Height" Value="80" />
+            <Setter Property="Width" Value="320" />
+            <Setter Property="Margin" Value="18,1,18,1" />
+        </Style>
+
+        <Style x:Key="unselBtnStyle" TargetType="Button" BasedOn="{StaticResource AccentedSquareButtonStyle}">
+            <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
+            <Setter Property="BorderBrush" Value="#31323d" />
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Height" Value="80" />
+            <Setter Property="Width" Value="320" />
+            <Setter Property="Margin" Value="18,1,18,1" />
+        </Style>
+
+        <Style x:Key="ButtonStyle" TargetType="Button" BasedOn="{StaticResource AccentedSquareButtonStyle}">
+            
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GrayBrush8}" />
+                    <!-- highlight for button in metro dark theme ispressed = GrayBrush7-->
+                    <Setter Property="BorderBrush" Value="#2b2c36" />
+                    <Setter Property="FontWeight" Value="UltraBold"/>
+                    <Setter Property="FontSize" Value="20" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="Height" Value="80" />
+                    <Setter Property="Width" Value="320" />
+                    <Setter Property="Margin" Value="18,1,18,1" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="False">
+                    <Setter Property="Button.Background" Value="{DynamicResource AccentColorBrush}" />
+                    <Setter Property="BorderBrush" Value="#31323d" />
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="FontSize" Value="20" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="Height" Value="80" />
+                    <Setter Property="Width" Value="320" />
+                    <Setter Property="Margin" Value="18,1,18,1" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="ButtonDataGridCellStyle" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MetroDataGridCell}">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="ButtonDataGrid" TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MetroDataGrid}">
+            <Setter Property="HeadersVisibility" Value="None" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
+            <Setter Property="AutoGenerateColumns" Value="False" />
+            <Setter Property="IsSynchronizedWithCurrentItem" Value="True" />
+            <Setter Property="SelectionUnit" Value="FullRow" />
+            <Setter Property="RowHeight" Value="100" />
+            <Setter Property="GridLinesVisibility" Value="None" />
+            <Setter Property="CellStyle" Value="{StaticResource ButtonDataGridCellStyle}" />
+        </Style>
+
+    </Window.Resources>
+
+    <DataGrid x:Name="buttonGrid" RowStyle="{StaticResource DataGridRowStyle}" CellStyle="{StaticResource DataGridCellStyle}" Style="{StaticResource ButtonDataGrid}" ItemsSource="{Binding ButtonNames}" SelectedIndex="{Binding SelectedButtonIndex}">
+
+        <DataGrid.Columns>
+            <DataGridTemplateColumn>
+                <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                        <Button x:Name="dialogButton"  Style="{StaticResource ButtonStyle}">
+                            <TextBlock Text="{Binding}" />
+                        </Button>
+                    </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+        </DataGrid.Columns>
+    </DataGrid>
+</controls:MetroWindow>
+

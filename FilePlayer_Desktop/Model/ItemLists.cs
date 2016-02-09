@@ -24,9 +24,14 @@ namespace FilePlayer.Model
 
         }
 
+        public int GetConsoleCount()
+        {
+            return consoles["consoles"].Count();
+        }
+
         public bool SetConsoleNext()
         {
-            if((CurrConsole + 1) < consoles["consoles"].Count())
+            if((CurrConsole + 1) < GetConsoleCount())
             {
                 CurrConsole++;
                 return true;
@@ -49,6 +54,13 @@ namespace FilePlayer.Model
             JToken appPath = consoles["consoles"][consoleIndex]["maxandfocusscript"];
 
             return appPath.Value<String>();
+        }
+
+
+        public string GetConsoleFilePath(int consoleIndex)
+        {
+            JToken filePath = consoles["consoles"][consoleIndex]["filespath"];
+            return filePath.Value<String>();
         }
 
         public string GetConsoleAppPath(int consoleIndex)
@@ -85,17 +97,106 @@ namespace FilePlayer.Model
             return currConsoleItemList.Children()["name"].Values<String>();
         }
 
+        public IEnumerable<string> GetItemNames(int consoleIndex, string nameContains)
+        {
+            JToken currConsoleItemList = consoles["consoles"][consoleIndex]["itemlist"];
+
+            IEnumerable<string> list = currConsoleItemList.Children()["name"].Values<String>();
+            list = list.Where(x => x.ToLower().Contains(nameContains.ToLower())).ToList();
+
+            return list;
+        }
+
+        public IEnumerable<string> GetItemNames(int consoleIndex, string filterText, string filterType)
+        {
+            JToken currConsoleItemList = consoles["consoles"][consoleIndex]["itemlist"];
+
+            IEnumerable<string> list = currConsoleItemList.Children()["name"].Values<String>();
+
+            switch (filterType.ToLower())
+            {
+                case "contains":
+                    list = list.Where(x => x.ToLower().Contains(filterText.ToLower())).ToList();
+                    break;
+                case "ends with":
+                    list = list.Where(x => x.ToLower().EndsWith(filterText.ToLower())).ToList();
+                    break;
+                case "starts with":
+                    list = list.Where(x => x.ToLower().StartsWith(filterText.ToLower())).ToList();
+                    break;
+                default: //default is set to contains
+                    list = list.Where(x => x.ToLower().Contains(filterText.ToLower())).ToList();
+                    break;
+
+            }
+            return list;
+        }
+
         public IEnumerable<string> GetItemFilePaths(int consoleIndex)
         {
             JToken currConsoleItemList = consoles["consoles"][consoleIndex]["itemlist"];
             return currConsoleItemList.Children()["file"].Values<String>();
         }
 
+        public IEnumerable<string> GetItemFilePaths(int consoleIndex, string nameContains)
+        {
+            JToken currConsoleItemList = consoles["consoles"][consoleIndex]["itemlist"];
+
+            IEnumerable<string> list = currConsoleItemList.Children()["file"].Values<String>();
+            list = list.Where(x => x.ToLower().Contains(nameContains.ToLower())).ToList();
+
+            return list;
+        }
+
+        public IEnumerable<string> GetItemFilePaths(int consoleIndex, string filterText, string filterType)
+        {
+            string extension;
+            JToken currConsoleItemList = consoles["consoles"][consoleIndex]["itemlist"];
+
+            IEnumerable<string> list = currConsoleItemList.Children()["file"].Values<String>();
+
+            switch (filterType.ToLower())
+            {
+                case "contains":
+                    list = list.Where(x => x.ToLower().Contains(filterText.ToLower())).ToList();
+                    break;
+                case "ends with":
+                    extension = (String)consoles["consoles"][consoleIndex]["extension"];
+
+                    list = list.Where(x =>
+                    {
+                        String currItemName = x.Split('\\').Last();
+                        currItemName = currItemName.Substring(0, currItemName.Length - extension.Length - 1).Trim();
+                        return currItemName.ToLower().EndsWith(filterText.ToLower());
+                    }).ToList();
+                    break;
+
+                case "starts with":
+                    extension = (String)consoles["consoles"][consoleIndex]["extension"];
+
+                    list = list.Where(x =>
+                    {
+                        String currItemName = x.Split('\\').Last();
+                        currItemName = currItemName.Substring(0, currItemName.Length - extension.Length - 1).Trim();
+                        return currItemName.ToLower().StartsWith(filterText.ToLower());
+                    }).ToList();
+                    break;                
+                default:
+                    list = list.Where(x => x.ToLower().Contains(filterText.ToLower())).ToList();
+                    break;
+            }
+            
+
+            return list;
+        }
+
+
+
         public void UpdateItemLists()
         {
             if (consoles != null)
             {
-                for (int i = 0; i < consoles["consoles"].Count(); i++) //for each console
+                for (int i = 0; i < GetConsoleCount(); i++) //for each console
                 {
                     String filesPath = (String)consoles["consoles"][i]["filespath"];
                     String extension = (String)consoles["consoles"][i]["extension"];
@@ -107,7 +208,10 @@ namespace FilePlayer.Model
                         JObject currItem = new JObject();
                         String currFile = files[j];
 
-                        String currItemName = currFile.Split('\\').Last().Split('.').First().Trim();
+                        String currItemName = currFile.Split('\\').Last();
+
+
+                        currItemName = currItemName.Substring(0, currItemName.Length - extension.Length - 1).Trim();
                         currItem.Add("name", currItemName);
                         currItem.Add("file", currFile);
 
