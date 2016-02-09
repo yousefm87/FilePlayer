@@ -82,8 +82,8 @@ namespace FilePlayer.ViewModels
         {
             this.iEventAggregator = iEventAggregator;
 
-            //String consolesStr = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\consoles.json";
-            String consolesStr = "C:\\FPJSON\\consoles.json";
+            String consolesStr = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\consoles.json";
+            //String consolesStr = "C:\\FPJSON\\consoles.json";
 
             this.ItemLists = new ItemLists(consolesStr);
 
