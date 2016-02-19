@@ -218,6 +218,8 @@ namespace FilePlayer
                 while (!searchGameData.IsVisible)
                 {
                     searchGameData.Show();
+                    searchGameData.MaxHeight = Application.Current.MainWindow.ActualHeight - 100;
+                    searchGameData.MaxWidth = Application.Current.MainWindow.ActualWidth - 120;
                     searchGameData.Left = (Application.Current.MainWindow.ActualWidth - searchGameData.Width) / 2;
                     searchGameData.Top = (Application.Current.MainWindow.ActualHeight - searchGameData.Height) / 2;
                 }

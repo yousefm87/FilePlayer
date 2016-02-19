@@ -19,8 +19,6 @@
         ShowCloseButton="False"
         MinHeight="200"
         MinWidth="150"
-        BorderBrush ="Black"
-        BorderThickness="1"
         Closed="Window_Closed">
 
 
@@ -113,7 +111,7 @@
         </Style>
 
     </Window.Resources>
-
+    
     <DataGrid x:Name="buttonGrid" RowStyle="{StaticResource DataGridRowStyle}" CellStyle="{StaticResource DataGridCellStyle}" Style="{StaticResource ButtonDataGrid}" ItemsSource="{Binding ButtonNames}" SelectedIndex="{Binding SelectedButtonIndex}">
 
         <DataGrid.Columns>

@@ -15,11 +15,7 @@
         ShowMinButton="False"
         ShowMaxRestoreButton="False"
         ShowCloseButton="False"
-        MinHeight="200"
-        MinWidth="150"
-                      
-        MaxHeight="800"
-        MaxWidth="1000"
+
         Background ="{StaticResource GrayBrush10}"
         BorderBrush="Black"
         BorderThickness="1"
@@ -32,11 +28,29 @@
         <Style x:Key="UnselectedStyle" TargetType="views:SearchGameItem">
             <Setter Property="Background" Value="{StaticResource GrayBrush10}" />
         </Style>
+
+        <Style x:Key="NotFoundLabelStyle" TargetType="Label" >
+            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+            <Setter Property="FontSize" Value="40" />
+            <Setter Property="FontStyle" Value="Italic" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
     </controls:MetroWindow.Resources>
 
     <ScrollViewer x:Name="gameGridScrollViewer" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
-        <Grid x:Name="gameGrid">
-        
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid x:Name="gameGrid" Grid.Row="0" Grid.Column="0">
+            </Grid>
+
+            <Label x:Name="noItemsLabel" Grid.Row="0" Grid.Column="0"
+                   Visibility="Hidden" Content="No available listings..." />
         </Grid>
+        
     </ScrollViewer>
 </controls:MetroWindow>

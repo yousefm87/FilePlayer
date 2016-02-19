@@ -31,44 +31,48 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid >
-        <Grid.RowDefinitions>
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
+
+        <Grid >
+            <Grid.RowDefinitions>
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
 
 
-        <i:Interaction.Triggers>
-            <!--
-            <prism:InteractionRequestTrigger  SourceObject="{Binding PauseRequest}">
-                <styles:AppPopup x:Name="pausepopup"  CenterOverAssociatedObject="True">
-                    <styles:AppPopup.WindowContent >
-                        <views:PauseDialog x:Name="pauseView"/>
-                    </styles:AppPopup.WindowContent>
-                </styles:AppPopup>
-            </prism:InteractionRequestTrigger>
+            <i:Interaction.Triggers>
+                <!--
+                <prism:InteractionRequestTrigger  SourceObject="{Binding PauseRequest}">
+                    <styles:AppPopup x:Name="pausepopup"  CenterOverAssociatedObject="True">
+                        <styles:AppPopup.WindowContent >
+                            <views:PauseDialog x:Name="pauseView"/>
+                        </styles:AppPopup.WindowContent>
+                    </styles:AppPopup>
+                </prism:InteractionRequestTrigger>
             
-            <prism:InteractionRequestTrigger SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
+                <prism:InteractionRequestTrigger SourceObject="{Binding ConfirmationRequest, Mode=OneWay}">
 
-                <styles:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True">
-                    <styles:AppPopup.WindowContent>
-                        <views:ConfirmationDialog             
-                            Background = "#87879e"
-                            BorderBrush ="#1a1a1f"
-                            HorizontalAlignment="Stretch"/>
-                    </styles:AppPopup.WindowContent>
-                </styles:AppPopup>
-            </prism:InteractionRequestTrigger>
+                    <styles:AppPopup x:Name="confirmpopup" CenterOverAssociatedObject="True">
+                        <styles:AppPopup.WindowContent>
+                            <views:ConfirmationDialog             
+                                Background = "#87879e"
+                                BorderBrush ="#1a1a1f"
+                                HorizontalAlignment="Stretch"/>
+                        </styles:AppPopup.WindowContent>
+                    </styles:AppPopup>
+                </prism:InteractionRequestTrigger>
 
--->
-        </i:Interaction.Triggers>
+    -->
+            </i:Interaction.Triggers>
 
-        <UserControl prism:RegionManager.RegionName="ItemListView" />
-        <Canvas x:Name="dynamicCanvas">
-            <views:CharGetter x:Name="charGetter" Visibility="Hidden" />
-        </Canvas>
-    </Grid>
-    
+            <!-- <views:ItemListView /> -->
+            <UserControl prism:RegionManager.RegionName="ItemListView" Grid.Row="0" Grid.Column="0" />
+            <Canvas x:Name="dynamicCanvas" Grid.Row="0" Grid.Column="0">
+                <views:CharGetter x:Name="charGetter" Visibility="Hidden" />
+            </Canvas>
+        </Grid>
+
+
+
 </controls:MetroWindow>

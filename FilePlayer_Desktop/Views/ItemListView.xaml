@@ -23,18 +23,22 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Label">
-                        <Border CornerRadius="13" BorderBrush="#1a1a1f" Background="{DynamicResource AccentColorBrush2}" BorderThickness="1" Padding="2">
+                        <Border CornerRadius="1" BorderBrush="#1a1a1f" Background="{DynamicResource AccentColorBrush}" BorderThickness="1" Padding="2">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Setter Property="FontSize" Value="30" />
+            <Setter Property="FontSize" Value="32" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="TextBlock.Padding" Value="100,10,10,10" />
+            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
+            <!--<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
             <Setter Property="Height" Value="80" />
-            <Setter Property="Width" Value="600" />
+            <Setter Property="Width" Value="600" />-->
         </Style>
 
         <Style x:Key="ItemListDataGrid" TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MetroDataGrid}">
@@ -43,47 +47,15 @@
             <Setter Property="AutoGenerateColumns" Value="False" />
             <Setter Property="IsSynchronizedWithCurrentItem" Value="True" />
             <Setter Property="SelectionUnit" Value="Cell" />
-            <Setter Property="RowHeight" Value="100" />
-
-        </Style>
-
-        <Style x:Key="ItemListDataGrid2" TargetType="{x:Type DataGrid}" BasedOn="{StaticResource MetroDataGrid}">
-            <Setter Property="HeadersVisibility" Value="None" />
-            <Setter Property="VerticalScrollBarVisibility" Value="Hidden" />
-            <Setter Property="AutoGenerateColumns" Value="False" />
-            <Setter Property="IsSynchronizedWithCurrentItem" Value="True" />
-            <Setter Property="SelectionUnit" Value="Cell" />
-            <Setter Property="RowHeight" Value="100" />
+            <Setter Property="RowHeight" Value="80" />
 
         </Style>
 
         <Style x:Key="ItemListDataGridCell" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MetroDataGridCell}">
-            <Setter Property="FontSize" Value="40" />
+            <Setter Property="FontSize" Value="28" />
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#646882"/>
-                    <Setter Property="Foreground" Value="WhiteSmoke"/>
-                    <Setter Property="BorderBrush" Value="#1E202B" />
-                    <Setter Property="BorderThickness" Value="3" />
-                    <Setter Property="FontWeight" Value="UltraBold"/>
-                </Trigger>
-                <Trigger Property="IsSelected" Value="False">
-                    <Setter Property="Background" Value="#2b2d38"/>
-                    <Setter Property="Foreground" Value="GhostWhite"/>
-                    <Setter Property="BorderBrush" Value="#1E202B" />
-                    <Setter Property="BorderThickness" Value="1" />
-                    <Setter Property="FontWeight" Value="Normal" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-
-        <Style x:Key="ItemListDataGridCell2" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MetroDataGridCell}">
-            <Setter Property="FontSize" Value="40" />
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="TextBlock.TextWrapping" Value="Wrap" />
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="BorderBrush" Value="#1E202B" />
@@ -125,28 +97,20 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />            
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="2*" />
+            <RowDefinition Height="12*" />
         </Grid.RowDefinitions>
+
+        <Label x:Name="appName" Style="{StaticResource RoundedLabelStyle}" Content="{Binding CurrAppName}" Grid.Row="0" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="1" />
 
         <DataGrid x:Name="itemlist" 
                 ItemsSource="{Binding AllItemNames}" 
                 Loaded ="Itemlist_Loaded"
-                Style="{StaticResource ItemListDataGrid2}"
-                CellStyle="{StaticResource ItemListDataGridCell2}"
+                Style="{StaticResource ItemListDataGrid}"
+                CellStyle="{StaticResource ItemListDataGridCell}"
                 BorderThickness="1" BorderBrush="Black"
                 GridLinesVisibility="None" 
-                Grid.Row="0" Grid.RowSpan="12"
+                Grid.Row="1" Grid.RowSpan="1"
                 Grid.Column="0" Grid.ColumnSpan="1"
                 
                 Background="#2b2d38">
@@ -160,15 +124,13 @@
                 </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
-
+        
 
 
         <Grid x:Name="gameInfoGrid"
             Grid.Column="1" Grid.ColumnSpan="1"
             Grid.Row="0" Grid.RowSpan="12"
-            Background="{DynamicResource GrayBrush8}" Grid.IsSharedSizeScope="True"
-            
-            >
+            Background="{DynamicResource GrayBrush8}" Grid.IsSharedSizeScope="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
@@ -189,10 +151,13 @@
             </Grid.ColumnDefinitions>
 
 
-            <Image x:Name="itemImage" Source='{Binding ItemImage, Converter={StaticResource imageConverter}}'
+            <Label Grid.Row="0" Grid.RowSpan="7" Grid.Column="0" Grid.ColumnSpan="1" Background="{DynamicResource WhiteBrush}">
+                <Image x:Name="itemImage" Source='{Binding ItemImage, Converter={StaticResource imageConverter}}'
                    VerticalAlignment="Top" 
-                   Grid.Row="0" Grid.RowSpan="7" Grid.Column="0" Grid.ColumnSpan="1" Margin="0" Stretch="Fill" />
-
+                   Margin="10,10,10,10" Stretch="Fill">
+                    
+                </Image>
+            </Label>
             <Label x:Name="releaseDate" Grid.Row="7" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="1">
                 <TextBlock x:Name="releaseDateText" Style="{StaticResource ReleaseDateStyle}"  Text="{Binding ReleaseDate, Converter={StaticResource ReleaseConverter}}" />
             </Label>
@@ -206,7 +171,7 @@
 
         <views:ItemListFilter x:Name="filterControl" Visibility="Hidden" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" />
 
-        <Label x:Name="appName" Style="{StaticResource RoundedLabelStyle}" Content="{Binding CurrAppName}" Grid.Row="11" Grid.RowSpan="1" Grid.Column="1" Grid.ColumnSpan="1" />
+       
     </Grid>
 
 

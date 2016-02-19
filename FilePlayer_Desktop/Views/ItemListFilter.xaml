@@ -22,90 +22,77 @@
             <Setter Property="FontSize" Value="40" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
 
         </Style>
         <Style x:Key="UnselectedFilterInputStyle" TargetType="{x:Type TextBox}" >
             <Setter Property="Padding" Value="20,0,0,0" />
-            <Setter Property="FontSize" Value="48" />
+            <Setter Property="FontSize" Value="40" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="MinHeight" Value="80" />
-            <Setter Property="MinWidth" Value="600" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
         </Style>
 
 
         <Style x:Key="SelectedFilterInputStyle" TargetType="{x:Type TextBox}" >
             <Setter Property="Background" Value="{DynamicResource HighlightBrush}" />
             <Setter Property="Padding" Value="20,0,0,0" />
-            <Setter Property="FontSize" Value="48" />
+            <Setter Property="FontSize" Value="40" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="VerticalContentAlignment" Value="Stretch" />
-            <Setter Property="MinHeight" Value="80" />
-            <Setter Property="MinWidth" Value="600" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
         </Style>
 
         <Style x:Key="UnselectedFilterResetBtnStyle" TargetType="{x:Type Label}" >
-            <Setter Property="Height" Value="100" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="Height" Value="100" />
             <Setter Property="BorderBrush" Value="#07070F" />
             <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+
         </Style>
 
         <Style x:Key="SelectedFilterResetBtnStyle" TargetType="{x:Type Label}" >
-            <Setter Property="Height" Value="100" />
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="Height" Value="100" />
             <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
-
             <Setter Property="BorderBrush" Value="#212129" />
             <Setter Property="BorderThickness" Value="3" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
     </UserControl.Resources>
-    
+
     <Grid Style="{StaticResource FilterBarStyle}">
         <Grid.RowDefinitions>
-
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="6*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
-
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="5*" />
 
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="5*" />
+
+            <ColumnDefinition Width="9*" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-
-        <Label x:Name="filterTypeLabel" 
-                   Content="" 
-                   Margin="30,10,10,20" 
-                   Grid.Row="0" Grid.Column="0" 
-                   Style="{StaticResource FilterLabelStyle}" />
-        <Label x:Name="fileFilterLabel" Content="File" 
-                Margin="10,10,10,20" 
-                Grid.Row="0" Grid.Column="0" 
-                Style="{StaticResource FilterLabelStyle}" />
-
-
-        <TextBox Margin="0,0,0,0" Grid.Row="0" Grid.Column="1" x:Name="filterTypeText" Text="Contains" Style="{StaticResource UnselectedFilterInputStyle}"/>
-
-
-        <TextBox Margin="0,0,0,0" Grid.Row="0" Grid.Column="3"  x:Name="fileFilterText" Style="{StaticResource UnselectedFilterInputStyle}"/>
-
-        <Label x:Name="resetBtn" 
-                   Grid.Row="0" Grid.Column="5" 
-                   Style="{StaticResource UnselectedFilterResetBtnStyle}" >
+        
+        <Label x:Name="resetBtn" Margin="10,0,0,0" Grid.Row="1" Grid.RowSpan="1" Grid.Column="0" Style="{StaticResource UnselectedFilterResetBtnStyle}" >
             <StackPanel>
-                <Image Stretch="Uniform" Height="90" Width="100" Source="../Images/refreshIcon.png"/>
+                <Image Stretch="Uniform" Source="../Images/refreshIcon.png" Height="65" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center" />
             </StackPanel>
         </Label>
+
+        <TextBox Margin="20,0,10,0" Grid.Row="1" Grid.Column="1" x:Name="filterTypeText" Text="Contains" Style="{StaticResource UnselectedFilterInputStyle}"/>
+
+        <TextBox Margin="10,0,0,0" Grid.Row="1" Grid.Column="2" x:Name="fileFilterText" Style="{StaticResource UnselectedFilterInputStyle}"/>
+
+
     </Grid>
 </UserControl>

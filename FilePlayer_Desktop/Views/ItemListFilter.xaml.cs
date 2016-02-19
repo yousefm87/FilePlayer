@@ -58,8 +58,8 @@ namespace FilePlayer.Views
             iEventAggregator = Event.EventInstance.EventAggregator;
 
             selectedControlIndex = 0;
-            controls = new Control[] { filterTypeText, fileFilterText, resetBtn };
-            buttonActions = new string[] { "FILTER_TYPE", "FILTER_FILES", "FILTER_RESET" };
+            controls = new Control[] { resetBtn, filterTypeText, fileFilterText };
+            buttonActions = new string[] { "FILTER_RESET", "FILTER_TYPE", "FILTER_FILES" };
 
             fileFilterText.Text = "";
 
