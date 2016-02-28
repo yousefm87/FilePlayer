@@ -8,29 +8,56 @@ namespace FilePlayer
     {
         private IEventAggregator iEventAggregator;
         private SubscriptionToken controllerSubToken = null;
-
+        private SubscriptionToken controllerErrorSubToken = null;
+        private string CurrentState = "NONE";
+        private string PreviousState = "NONE";
+        
         public ControllerHandler(IEventAggregator iEventAggregator)
         {
             this.iEventAggregator = iEventAggregator;
 
-
-
-
             SetControllerState("ITEMLIST_BROWSE");
-
-
         }
 
         public void SetControllerState(string state)
         {
+            if (controllerErrorSubToken == null)
+            {
+                controllerErrorSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
+                    (controllerEventArgs) =>
+                    {
+                        ControllerEvent(controllerEventArgs);
+                    });
+            }
 
             if (controllerSubToken != null)
             {
                 this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Unsubscribe(controllerSubToken);
             }
+
+      
+            if (state.Equals("LAST"))
+            {
+                CurrentState = PreviousState;
+            }
+            else
+            {
+                PreviousState = CurrentState;
+                CurrentState = state;
+            }
+
             switch (state)
             {
                 case "NONE":
+                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
+                        (controllerEventArgs) =>
+                        {
+
+                        }
+                    );
+                    break;
+                case "LAST":
+                    SetControllerState(CurrentState);
                     break;
                 case "ITEMLIST_BROWSE":
                     controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
@@ -116,10 +143,23 @@ namespace FilePlayer
 
         }
 
+        void ControllerEvent(ControllerEventArgs e)
+        {
+            switch(e.action)
+            {
+                case "CONTROLLER_NOT_FOUND":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOT_FOUND", new string[] { }));
+                    break;
+                case "CONTROLLER_CONNECTED":  
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_CONNECTED", new string[] { }));
+                    break;
+            }
+        }
+
         void ControllerButtonPressToActionItemListView(ControllerEventArgs e)
         {
 
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "A":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "ITEM_LIST_CONFIRMATION_OPEN" }));
@@ -163,7 +203,7 @@ namespace FilePlayer
         void ControllerButtonPressToActionConfirmationDialog(ControllerEventArgs e)
         {
 
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "A":
                     this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
@@ -202,7 +242,7 @@ namespace FilePlayer
         void ControllerButtonPressToActionPauseDialog(ControllerEventArgs e)
         {
 
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "A":
                     this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_SELECT_BUTTON"));
@@ -238,7 +278,7 @@ namespace FilePlayer
 
         void ControllerButtonPressToActionButtonDialog(ControllerEventArgs e)
         {
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "A":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_SELECT_BUTTON"));
@@ -272,7 +312,7 @@ namespace FilePlayer
 
         void ControllerButtonPressToActionItemlistPause(ControllerEventArgs e)
         {
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "A":
                     this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Publish(new ItemListPauseViewEventArgs("ITEMLIST_PAUSE_SELECT_BUTTON"));
@@ -309,7 +349,7 @@ namespace FilePlayer
 
         void ControllerButtonPressToActionItemPlaying(ControllerEventArgs e)
         {
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "GUIDE":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "APP_PAUSE_OPEN" }));
@@ -322,7 +362,7 @@ namespace FilePlayer
         void ControllerButtonPressToActionFilter(ControllerEventArgs e)
         {
 
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "A":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_SELECT_CONTROL", new string[] { "" }));
@@ -357,7 +397,7 @@ namespace FilePlayer
         void ControllerButtonPressToActionCharGetter(ControllerEventArgs e)
         {
 
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "A":
                     this.iEventAggregator.GetEvent<PubSubEvent<CharGetterEventArgs>>().Publish(new CharGetterEventArgs("CHAR_SELECT", new string[] { "" }));
@@ -396,7 +436,7 @@ namespace FilePlayer
         void ControllerButtonPressToActionVerticalOptionSelecter(ControllerEventArgs e)
         {
 
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "A":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("VOS_SELECT", new string[] { "" }));
@@ -431,7 +471,7 @@ namespace FilePlayer
         void ControllerButtonPressToActionSearchGameData(ControllerEventArgs e)
         {
 
-            switch (e.buttonPressed)
+            switch (e.action)
             {
                 case "A":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SEARCHGAMEDATA_SELECT", new string[] { "" }));

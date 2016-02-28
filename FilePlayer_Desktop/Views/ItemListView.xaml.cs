@@ -253,6 +253,29 @@ namespace FilePlayer.Views
             }
         }
 
+        public void MoveUp2(int numMove)
+        {
+            if ((itemlist.Items.Count > 0) && (itemlist.Columns.Count > 0))
+            {
+                int selectedIndex = ItemListViewModel.SelectedItemIndex;
+                int newSelectedIndex = selectedIndex - numMove;
+                int minIndex = 0;
+
+                if (newSelectedIndex < minIndex)
+                {
+                    newSelectedIndex = minIndex;
+                }
+
+                ItemListViewModel.SelectedItemIndex = newSelectedIndex;
+                
+
+                itemlist.Dispatcher.Invoke((Action)delegate
+                {
+                    itemlist.ScrollIntoView(itemlist.SelectedCells.ElementAt(0));
+                });
+            }
+        }
+
         public void MoveDown(int numMove)
         {
 
@@ -278,6 +301,29 @@ namespace FilePlayer.Views
                 });
 
                 ItemListViewModel.SelectedItemIndex = newSelectedIndex;
+            }
+        }
+
+        public void MoveDown2(int numMove)
+        {
+
+            if ((itemlist.Items.Count > 0) && (itemlist.Columns.Count > 0))
+            {
+                int selectedIndex = ItemListViewModel.SelectedItemIndex;
+                int newSelectedIndex = selectedIndex + numMove;
+                int maxIndex = itemlist.Items.Count - 1;
+
+                if (newSelectedIndex > maxIndex)
+                {
+                    newSelectedIndex = maxIndex;
+                }
+
+                ItemListViewModel.SelectedItemIndex = newSelectedIndex;
+
+                itemlist.Dispatcher.Invoke((Action)delegate
+                {
+                    itemlist.ScrollIntoView(itemlist.CurrentCell.Item, itemlist.CurrentCell.Column);
+                });
             }
         }
 

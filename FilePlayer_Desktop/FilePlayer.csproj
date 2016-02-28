@@ -19,7 +19,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>C:\Users\YM\Desktop\fp\</PublishUrl>
+    <PublishUrl>C:\FilePlayer\Deployment\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -30,7 +30,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <UpdateUrl>http://localhost/FilePlayer/</UpdateUrl>
-    <ApplicationRevision>39</ApplicationRevision>
+    <ApplicationRevision>46</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -234,6 +234,9 @@
     <Compile Include="Views\CharGetter.xaml.cs">
       <DependentUpon>CharGetter.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\ControlerNotFound.xaml.cs">
+      <DependentUpon>ControlerNotFound.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\GameRetrieverProgress.xaml.cs">
       <DependentUpon>GameRetrieverProgress.xaml</DependentUpon>
     </Compile>
@@ -277,6 +280,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CharGetter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ControlerNotFound.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -347,6 +354,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Resource Include="Images\xbox360controller.png" />
     <Content Include="JSON\consoles.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -30,6 +30,7 @@ namespace FilePlayer
         VerticalOptionSelecter verticalOptionSelecter = null;
         GameRetrieverProgress gameRetrieverProgress = null;
         SearchGameData searchGameData = null;
+        ControllerNotFound controllerNotFound = null;
 
         public Shell()
         {
@@ -56,7 +57,31 @@ namespace FilePlayer
             
             switch (e.action)
             {
-               
+                case "CONTROLLER_NOT_FOUND":
+
+                    if (controllerNotFound == null)
+                    {
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "NONE" }));
+
+                        this.Dispatcher.Invoke((Action)delegate
+                        {
+                            this.Activate();
+                        });
+                        OpenControllerNotFound(e);
+                    }
+                    break;
+                case "CONTROLLER_CONNECTED":
+                    if (controllerNotFound != null)
+                    {
+                        this.Dispatcher.Invoke((Action)delegate
+                        {
+                            controllerNotFound.Close();
+                        });
+                        controllerNotFound = null;
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "LAST" }));
+                    }
+                    
+                    break;
                 case "BUTTONDIALOG_OPEN":
                     this.Dispatcher.Invoke((Action)delegate
                     {
@@ -225,6 +250,29 @@ namespace FilePlayer
                 }
             });
         }
+
+
+        private void OpenControllerNotFound(ViewEventArgs e)
+        {
+            MaximizeShell();
+
+            this.Dispatcher.Invoke((Action)delegate
+            {
+                controllerNotFound = new ControllerNotFound();
+                controllerNotFound.ShowInTaskbar = false;
+                controllerNotFound.Owner = Application.Current.MainWindow;
+
+                while (!controllerNotFound.IsVisible)
+                {
+                    controllerNotFound.Show();
+                    controllerNotFound.MaxHeight = Application.Current.MainWindow.ActualHeight - 100;
+                    controllerNotFound.MaxWidth = Application.Current.MainWindow.ActualWidth - 120;
+                    controllerNotFound.Left = (Application.Current.MainWindow.ActualWidth - controllerNotFound.Width) / 2;
+                    controllerNotFound.Top = (Application.Current.MainWindow.ActualHeight - controllerNotFound.Height) / 2;
+                }
+            });
+        }
+
 
         private void OpenButtonDialog(ViewEventArgs e)
         {
