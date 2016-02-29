@@ -19,6 +19,8 @@
         ShowCloseButton="False"
         MinHeight="200"
         MinWidth="150"
+        BorderBrush="Transparent"
+        BorderThickness="0"
         Closed="Window_Closed">
 
 
@@ -71,7 +73,7 @@
             
             <Style.Triggers>
                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource GrayBrush8}" />
+                    <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
                     <!-- highlight for button in metro dark theme ispressed = GrayBrush7-->
                     <Setter Property="BorderBrush" Value="#2b2c36" />
                     <Setter Property="FontWeight" Value="UltraBold"/>
@@ -82,7 +84,7 @@
                     <Setter Property="Margin" Value="18,1,18,1" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="False">
-                    <Setter Property="Button.Background" Value="{DynamicResource AccentColorBrush}" />
+                    <Setter Property="Button.Background" Value="{DynamicResource GrayBrush8}" />
                     <Setter Property="BorderBrush" Value="#31323d" />
                     <Setter Property="FontWeight" Value="Bold"/>
                     <Setter Property="FontSize" Value="20" />

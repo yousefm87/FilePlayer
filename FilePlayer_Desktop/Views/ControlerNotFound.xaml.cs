@@ -35,6 +35,7 @@ namespace FilePlayer.Views
                     PerformViewAction(this, viewEventArgs);
                 }
             );
+            this.AllowsTransparency = true;
         }
 
         void PerformViewAction(object sender, ViewEventArgs e)

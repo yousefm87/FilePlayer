@@ -9,14 +9,20 @@
         xmlns:viewModels="clr-namespace:FilePlayer.ViewModels"
         xmlns:styles="clr-namespace:FilePlayer.Styles"
         xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        mc:Ignorable="d" 
-        MinWidth="300"
-        MinHeight="300"
+        mc:Ignorable="d"
         Title="FilePlayer"
+        
         Icon="..\Images\genericgame.png"
         ShowTitleBar="False"
+        ShowMinButton="False"
+        ShowMaxRestoreButton="False"
+        ShowCloseButton="False"
         AllowsTransparency="True"
-        WindowState="{Binding ShellWindowState}">
+        IgnoreTaskbarOnMaximize="True"
+        ResizeMode="NoResize"
+        WindowState="{Binding ShellWindowState}"
+        IsHitTestVisible="False"
+        Closed="Window_Closed">
 
     <Window.Resources>
         <Style x:Key="CharGetterStyle" TargetType="{x:Type views:CharGetter}" >

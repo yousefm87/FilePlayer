@@ -171,7 +171,6 @@ namespace FilePlayer
                     break;
                 case "Y":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("OPEN_FILTER", new string[] { "" }));
-                    SetControllerState("FILTER_MAIN");
                     break;
                 case "DUP":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_MOVE_UP", new string[] { 1.ToString() }));

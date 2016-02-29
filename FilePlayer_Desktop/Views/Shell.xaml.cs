@@ -68,6 +68,8 @@ namespace FilePlayer
                             this.Activate();
                         });
                         OpenControllerNotFound(e);
+
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOTFOUND_OPEN", new string[] {}));
                     }
                     break;
                 case "CONTROLLER_CONNECTED":
@@ -78,7 +80,9 @@ namespace FilePlayer
                             controllerNotFound.Close();
                         });
                         controllerNotFound = null;
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOTFOUND_CLOSE", new string[] { }));
                         this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "LAST" }));
+
                     }
                     
                     break;
@@ -289,8 +293,8 @@ namespace FilePlayer
                 {
                     case "ITEM_LIST_PAUSE_OPEN":
                         dialogName = "ITEMLIST_PAUSE";
-                        buttonNames = new string[] { "Close This Dialog", "Exit", "Upload Game Data" };
-                        buttonActions = new string[] { "ITEMLISTPAUSE_CLOSE", "EXIT", "GAMEDATA_UPLOAD" };
+                        buttonNames = new string[] { "Exit", "Reload Consoles", "Upload Game Data" };
+                        buttonActions = new string[] { "EXIT", "UPDATE_ITEMLISTS", "GAMEDATA_UPLOAD" };
                         closeEvent = "ITEMLIST_BROWSE";
                         break;
                     case "ITEM_LIST_CONFIRMATION_OPEN":
@@ -403,6 +407,17 @@ namespace FilePlayer
             }
 
             return winMaxed;
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            this.Topmost = false;
+            if (viewActionToken != null)
+            {
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT", new String[] { }));
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Unsubscribe(viewActionToken);
+                Application.Current.Shutdown();
+            }
         }
 
     }

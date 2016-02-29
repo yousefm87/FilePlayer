@@ -172,30 +172,14 @@ namespace FilePlayer.ViewModels
         }
         Process autProc = null;
         Process appProc = null;
+        string consolesStr = "C:\\FPData\\consoles.json";
+        string sampleDestStr = "C:\\FPData\\sample.json";
 
         public ItemListViewModel(IEventAggregator iEventAggregator)
         {
             this.iEventAggregator = iEventAggregator;
-
-            String consolesStr = "C:\\FPJSON\\consoles.json";//System.AppDomain.CurrentDomain.BaseDirectory + "\\JSON\\consoles.json";
-                                                          //Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\consoles.json";
-
-            this.ItemLists = new ItemLists(consolesStr);
-
-            string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
-
-            string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
-
-            this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
-
-                        
-            this.AllItemNames = ItemLists.GetItemNames(ItemLists.CurrConsole);
-            this.AllItemPaths = ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
-
-            this.CurrAppName = ItemLists.GetConsoleName(ItemLists.CurrConsole);
-            this.SelectedItemIndex = 0;
-
-            //GameRetriever.GetConsoleData(AllItemNames, CurrAppName, ItemLists.GetConsoleFilePath(ItemLists.CurrConsole), true);
+            
+            UpdateItemLists();
 
             input = new XboxControllerInputProvider(Event.EventInstance.EventAggregator);
             
@@ -213,7 +197,53 @@ namespace FilePlayer.ViewModels
 
         }
 
+        public void GenerateSampleJson()
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(sampleDestStr)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(sampleDestStr));
+            }
 
+            if (! File.Exists(sampleDestStr))
+            {
+                string sampleSrcPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\JSON\\sample.json";
+                System.IO.File.Copy(sampleSrcPath, sampleDestStr);
+            }
+        }
+
+        public void UpdateItemLists()
+        {
+            GenerateSampleJson();
+            this.ItemLists = new ItemLists(consolesStr);
+
+            if (ItemLists.GetConsoleCount() > 0)
+            {
+                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+
+                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
+
+                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
+
+
+                this.AllItemNames = ItemLists.GetItemNames(ItemLists.CurrConsole);
+                this.AllItemPaths = ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
+
+                this.CurrAppName = ItemLists.GetConsoleName(ItemLists.CurrConsole);
+                this.SelectedItemIndex = 0;
+
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_UPDATED", new String[] { }));
+            }
+            else
+            {
+                this.AllItemNames = Enumerable.Empty<string>();
+                this.AllItemPaths = Enumerable.Empty<string>();
+
+                this.CurrAppName = "";
+                this.SelectedItemIndex = 0;
+
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_EMPTY", new String[] { }));
+            }
+        }
         public void PerformAction(ViewEventArgs e)
         {
             switch (e.action)
@@ -225,13 +255,6 @@ namespace FilePlayer.ViewModels
                         WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
                     }
                     break;
-                case "ITEMLIST_MOVE_LEFT":
-                    this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-                    break;
-                case "ITEMLIST_MOVE_RIGHT":
-                    this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-                    break;
-
                 case "FILTER_ACTION":
                     switch (e.addlInfo[0])
                     {
@@ -274,6 +297,9 @@ namespace FilePlayer.ViewModels
                                     break;
                                 case "ITEMLISTPAUSE_CLOSE":
                                     controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                                    break;
+                                case "UPDATE_ITEMLIST":
+                                    UpdateItemLists();
                                     break;
                             }
 
@@ -340,6 +366,8 @@ namespace FilePlayer.ViewModels
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
                 SelectedItemIndex = 0;
 
+                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
+
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
                 string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
@@ -356,6 +384,8 @@ namespace FilePlayer.ViewModels
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr);
                 SelectedItemIndex = 0;
 
+                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
+
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
                 string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
 
@@ -370,6 +400,8 @@ namespace FilePlayer.ViewModels
                 this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr, filterType);
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr, filterType);
                 SelectedItemIndex = 0;
+
+                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
 
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
@@ -387,6 +419,8 @@ namespace FilePlayer.ViewModels
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
                 SelectedItemIndex = 0;
 
+                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
+
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
                 string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
@@ -403,6 +437,8 @@ namespace FilePlayer.ViewModels
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr);
                 SelectedItemIndex = 0;
 
+                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
+
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
                 string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
@@ -418,6 +454,8 @@ namespace FilePlayer.ViewModels
                 this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr, filterType);
                 this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr, filterType);
                 SelectedItemIndex = 0;
+
+                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
 
                 string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 

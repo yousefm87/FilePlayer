@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Effects;
 using FilePlayer.ViewModels;
 using FilePlayer.Model;
+using System.Collections;
 
 using Microsoft.Practices.Prism.PubSubEvents;
 using System.Linq;
@@ -22,24 +23,26 @@ namespace FilePlayer.Views
         private IEventAggregator iEventAggregator;
         SubscriptionToken viewActionToken;
 
-
+        Stack shadeStack = new Stack();
 
         public ItemListView()
         {
-           
-            ItemListViewModel = new ItemListViewModel(Event.EventInstance.EventAggregator);
-            this.DataContext = ItemListViewModel;
-            this.iEventAggregator = Event.EventInstance.EventAggregator;
-
             InitializeComponent();
-
+            this.iEventAggregator = Event.EventInstance.EventAggregator;
             viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
-                    
                     PerformViewAction(this, viewEventArgs);
                 }
             );
+
+            ItemListViewModel = new ItemListViewModel(Event.EventInstance.EventAggregator);
+            this.DataContext = ItemListViewModel;
+            
+
+
+
+
                       
 
         }
@@ -49,6 +52,18 @@ namespace FilePlayer.Views
             int numMoves;
             switch(e.action)
             {
+                case "ITEMLIST_EMPTY":
+                    if (errorMessage.Visibility == Visibility.Hidden)
+                    {
+                        errorMessage.Visibility = Visibility.Visible;
+                    }
+                    break;
+                case "ITEMLIST_UPDATED":
+                    if (errorMessage.Visibility == Visibility.Visible)
+                    {
+                        errorMessage.Visibility = Visibility.Hidden;
+                    }
+                    break;
                 case "ITEMLIST_MOVE_UP":
                     numMoves = Int32.Parse(e.addlInfo[0]);
                     MoveUp(numMoves);
@@ -67,14 +82,22 @@ namespace FilePlayer.Views
                 case "ITEMLIST_MOVE_RIGHT":
                     this.Dispatcher.Invoke((Action)delegate
                     {
+                        
                         ItemListViewModel.SetNextLists(filterControl.fileFilterText.Text, filterControl.filterTypeText.Text);
                         SelectFirstItem();
                     });
                     break;
                 case "BUTTONDIALOG_OPEN":
+                    
                     AddListShade();
                     break;
                 case "BUTTONDIALOG_CLOSE":
+                    RemoveListShade();
+                    break;
+                case "CONTROLLER_NOTFOUND_OPEN":
+                    AddListShade();
+                    break;
+                case "CONTROLLER_NOTFOUND_CLOSE":
                     RemoveListShade();
                     break;
                 case "BUTTONDIALOG_SELECT":
@@ -89,7 +112,11 @@ namespace FilePlayer.Views
                 case "OPEN_FILTER":
                     this.Dispatcher.Invoke((Action)delegate
                     {
-                        filterControl.Visibility = Visibility.Visible;
+                        if (ItemListViewModel.ItemLists.GetConsoleCount() > 0)
+                        {
+                            filterControl.Visibility = Visibility.Visible;
+                            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new String[] { "FILTER_MAIN" }));
+                        }
                     });
                     break;
                 case "CLOSE_FILTER":
@@ -124,12 +151,8 @@ namespace FilePlayer.Views
                     this.Effect = blur;
 
                 }
-                else
-                {
-                    this.Effect = null;
-                }
 
-
+                shadeStack.Push(0);
             });
         }
 
@@ -138,8 +161,15 @@ namespace FilePlayer.Views
         {
             itemlist.Dispatcher.Invoke((Action)delegate
             {
-                if (this.Effect != null)
-                    this.Effect = null;
+                shadeStack.Pop();
+
+                if (shadeStack.Count == 0)
+                {
+                    if (this.Effect != null)
+                    {
+                        this.Effect = null;
+                    }
+                }
             });
         }
 

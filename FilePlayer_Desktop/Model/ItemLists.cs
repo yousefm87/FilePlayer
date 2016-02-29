@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
-
+using Newtonsoft.Json;
 
 namespace FilePlayer.Model
 {
@@ -11,17 +11,43 @@ namespace FilePlayer.Model
     {
         public JObject consoles = null;
         public int CurrConsole { get; set; }
-
+        public string JsonFilePath = null;
         public ItemLists(String jsonFilePath)
         {
-            consoles = JObject.Parse(File.ReadAllText(jsonFilePath));
+            JsonFilePath = jsonFilePath;
+            Init();
+        }
+
+        public void Init()
+        {
+            if (!File.Exists(JsonFilePath))
+            {
+                if (! Directory.Exists(Path.GetDirectoryName(JsonFilePath)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(JsonFilePath));
+                }
+
+                JArray consolesArr = new JArray();
+                JProperty consolesProp = new JProperty("consoles", consolesArr);
+                JObject consolesObj = new JObject(consolesProp);
+
+                string json = JsonConvert.SerializeObject(consolesObj, Formatting.Indented);
+                File.WriteAllText(JsonFilePath, json);
+            }
+            UpdateConsoles();
+        }
+
+
+
+        public void UpdateConsoles()
+        {
+            consoles = JObject.Parse(File.ReadAllText(JsonFilePath));
             UpdateItemLists();
 
             if (consoles["consoles"] != null)
             {
                 CurrConsole = 0;
             }
-
         }
 
         public int GetConsoleCount()
@@ -31,21 +57,29 @@ namespace FilePlayer.Model
 
         public bool SetConsoleNext()
         {
-            if((CurrConsole + 1) < GetConsoleCount())
+            if (GetConsoleCount() > 0)
             {
-                CurrConsole++;
-                return true;
+                if (CurrConsole < (GetConsoleCount() - 1))
+                {
+                    CurrConsole++;
+                    return true;
+                }
             }
+
             return false;
         }
 
         public bool SetConsolePrevious()
         {
-            if ((CurrConsole - 1) >= 0)
+            if (GetConsoleCount() > 0)
             {
-                CurrConsole--;
-                return true;
+                if (CurrConsole > 0)
+                {
+                    CurrConsole--;
+                    return true;
+                }
             }
+
             return false;
         }
 

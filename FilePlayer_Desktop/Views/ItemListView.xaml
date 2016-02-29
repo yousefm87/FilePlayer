@@ -81,6 +81,18 @@
             <Setter Property="VerticalAlignment" Value="Stretch" />
             <Setter Property="TextWrapping" Value="Wrap" />
         </Style>
+
+        <Style x:Key="ErrorMessageStyle" TargetType="{x:Type TextBlock}" >
+            <Setter Property="FontSize" Value="36" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            
+
+            <Setter Property="Padding" Value="50,50,50,20" />
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
     </UserControl.Resources>
 
 
@@ -163,6 +175,9 @@
 
         </Grid>
 
+        <Label x:Name="errorMessage" Background="{StaticResource WhiteBrush}" Visibility="Hidden"  Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" >
+            <TextBlock Style="{StaticResource ErrorMessageStyle}" Text="No consoles found. Add extra consoles in C:\FPData\consoles.json" />
+        </Label>
 
         <views:ItemListFilter x:Name="filterControl" Visibility="Hidden" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" />
 

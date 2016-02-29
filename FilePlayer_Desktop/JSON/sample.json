@@ -1,0 +1,20 @@
+﻿{"consoles": [
+  {
+    "apppath": "C:\\Program Files (x86)\\VideoLAN\\VLC\\vlc.exe",
+    "consolename": "Music",
+    "extension": "mp3",
+    "filespath": "C:\\Music\\",
+    "titlesubstring": "VLC",
+    "maxandfocusscript": "",
+    "arguments": "-fullscreen"
+  },
+  {
+    "apppath": "C:\\Snes9X\\snes9x-x64.exe",
+    "consolename": "Super Nintendo Entertainment System",
+    "extension": "smc",
+    "filespath": "C:\\ROMS\\SNES Roms\\",
+    "titlesubstring": "Snes9X",
+    "maxandfocusscript": "",
+    "arguments":  "-fullscreen"
+  }
+]}
