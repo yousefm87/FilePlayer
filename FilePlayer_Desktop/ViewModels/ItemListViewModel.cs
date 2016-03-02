@@ -213,7 +213,7 @@ namespace FilePlayer.ViewModels
 
         public void UpdateItemLists()
         {
-            GenerateSampleJson();
+            //GenerateSampleJson();
             this.ItemLists = new ItemLists(consolesStr);
 
             if (ItemLists.GetConsoleCount() > 0)

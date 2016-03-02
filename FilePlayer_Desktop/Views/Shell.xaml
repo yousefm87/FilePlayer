@@ -21,7 +21,6 @@
         IgnoreTaskbarOnMaximize="True"
         ResizeMode="NoResize"
         WindowState="{Binding ShellWindowState}"
-        IsHitTestVisible="False"
         Closed="Window_Closed">
 
     <Window.Resources>

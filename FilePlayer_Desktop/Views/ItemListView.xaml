@@ -176,7 +176,7 @@
         </Grid>
 
         <Label x:Name="errorMessage" Background="{StaticResource WhiteBrush}" Visibility="Hidden"  Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" >
-            <TextBlock Style="{StaticResource ErrorMessageStyle}" Text="No consoles found. Add extra consoles in C:\FPData\consoles.json" />
+            <TextBlock IsHitTestVisible="True" Style="{StaticResource ErrorMessageStyle}" TextWrapping="Wrap" Text="No consoles found. Add extra consoles in C:\FPData\consoles.json. Each console must have fields as described at https://github.com/yousefm87/FilePlayer/wiki/Consoles.Json" />
         </Label>
 
         <views:ItemListFilter x:Name="filterControl" Visibility="Hidden" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" />
