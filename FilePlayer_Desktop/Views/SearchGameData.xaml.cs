@@ -37,6 +37,9 @@ namespace FilePlayer.Views
 
         public string GameQuery = "";
 
+        public int MaxColumns = 0;
+        public int MaxRows = 0;
+
         public SearchGameData(string gameQuery)
         {
             InitializeComponent();
@@ -47,7 +50,7 @@ namespace FilePlayer.Views
 
             GameQuery = gameQuery;
 
-            Init();
+            Init2();
 
             this.Topmost = true;
 
@@ -59,9 +62,64 @@ namespace FilePlayer.Views
             );
         }
 
-        public void Init()
+        //public void Init()
+        //{
+        //    int maxColCount = -1;
+
+        //    for (int i = 0; i < SearchGameDataViewModel.GameData.Count(); i++) //Add Row Definitions
+        //    {
+        //        RowDefinition gridRow = new RowDefinition();
+        //        gridRow.Height = new GridLength();
+        //        gameGrid.RowDefinitions.Add(gridRow);
+
+
+        //        if(SearchGameDataViewModel.GameData.ElementAt(i).GameReleases.Count() > maxColCount) //Get Column Count
+        //        {
+        //            maxColCount = SearchGameDataViewModel.GameData.ElementAt(i).GameReleases.Count();
+        //        }
+        //    }
+
+        //    maxColCount++; //for game column
+
+        //    for (int i = 0; i < maxColCount; i++) //Add Column Definitions
+        //    {
+        //        ColumnDefinition gridCol = new ColumnDefinition();
+        //        gameGrid.ColumnDefinitions.Add(gridCol);
+        //    }
+
+        //    for (int i = 0; i < SearchGameDataViewModel.GameData.Count(); i++) //Add Game as first column
+        //    {
+        //        GameRetriever.GameData currGame = SearchGameDataViewModel.GameData.ElementAt(i);
+        //        SearchGameItem currGameItem = new SearchGameItem(currGame.GameName, currGame.ImageURL);
+
+
+        //        Grid.SetRow(currGameItem, i);
+        //        Grid.SetColumn(currGameItem, 0);
+
+        //        gameGrid.Children.Add(currGameItem);
+        //    }
+
+        //    for (int i = 0; i < SearchGameDataViewModel.GameData.Count(); i++) //Add Releases in second+ columns
+        //    {
+        //        for (int j = 0; j < SearchGameDataViewModel.GameData.ElementAt(i).GameReleases.Count(); j++)
+        //        {
+        //            GameRetriever.GameData rel = SearchGameDataViewModel.GameData.ElementAt(i).GameReleases.ElementAt(j);
+        //            SearchGameItem currGameItem = new SearchGameItem(rel.GameName, rel.ImageURL);
+
+
+        //            Grid.SetRow(currGameItem, i);
+        //            Grid.SetColumn(currGameItem, j + 1);
+
+        //            gameGrid.Children.Add(currGameItem);
+        //        }
+        //    }
+
+        //    SetItemSelected(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol, true); //select first item
+        //}
+
+        public void Init2()
         {
-            int maxColCount = -1;
+            int maxColCt = -1;
 
             for (int i = 0; i < SearchGameDataViewModel.GameData.Count(); i++) //Add Row Definitions
             {
@@ -69,55 +127,101 @@ namespace FilePlayer.Views
                 gridRow.Height = new GridLength();
                 gameGrid.RowDefinitions.Add(gridRow);
 
-
-                if(SearchGameDataViewModel.GameData.ElementAt(i).GameReleases.Count() > maxColCount) //Get Column Count
+                if (SearchGameDataViewModel.GameData.ElementAt(i).Count() > maxColCt)
                 {
-                    maxColCount = SearchGameDataViewModel.GameData.ElementAt(i).GameReleases.Count();
+                    maxColCt = SearchGameDataViewModel.GameData.ElementAt(i).Count();
                 }
             }
 
-            maxColCount++; //for game column
-
-            for (int i = 0; i < maxColCount; i++) //Add Column Definitions
+            for (int i = 0; i < maxColCt; i++) //Add Column Definitions
             {
                 ColumnDefinition gridCol = new ColumnDefinition();
                 gameGrid.ColumnDefinitions.Add(gridCol);
             }
 
-            for (int i = 0; i < SearchGameDataViewModel.GameData.Count(); i++) //Add Game as first column
+            for (int i = 0; i < SearchGameDataViewModel.GameData.Count(); i++) //Add Releases for each Game
             {
-                GameRetriever.GameData currGame = SearchGameDataViewModel.GameData.ElementAt(i);
-                SearchGameItem currGameItem = new SearchGameItem(currGame.GameName, currGame.ImageURL);
-
-
-                Grid.SetRow(currGameItem, i);
-                Grid.SetColumn(currGameItem, 0);
-
-                gameGrid.Children.Add(currGameItem);
-            }
-
-            for (int i = 0; i < SearchGameDataViewModel.GameData.Count(); i++) //Add Releases in second+ columns
-            {
-                for (int j = 0; j < SearchGameDataViewModel.GameData.ElementAt(i).GameReleases.Count(); j++)
+                int currCol = 0;
+                for (int j = 0; j < SearchGameDataViewModel.GameData.ElementAt(i).Count(); j++)
                 {
-                    GameRetriever.GameData rel = SearchGameDataViewModel.GameData.ElementAt(i).GameReleases.ElementAt(j);
-                    SearchGameItem currGameItem = new SearchGameItem(rel.GameName, rel.ImageURL);
-
-
-                    Grid.SetRow(currGameItem, i);
-                    Grid.SetColumn(currGameItem, j + 1);
-
-                    gameGrid.Children.Add(currGameItem);
+                    if (AddGameToGridRow(i, j, i, currCol))
+                    {
+                        currCol++;
+                    }
+                    
                 }
             }
+
 
             SetItemSelected(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol, true); //select first item
         }
 
+        public bool AddGameToGridRow(int gameIndex, int releaseIndex, int row, int col)
+        {
+            List<GameRetriever.GameData> currGame = SearchGameDataViewModel.GameData.ElementAt(gameIndex);
+            SearchGameItem currGameItem = null;
+
+            GameRetriever.GameData rel = currGame.ElementAt(releaseIndex);
+            currGameItem = new SearchGameItem(rel.GameName, rel.ImageURL);
+
+
+            bool gameAdded = currGameItem.IsImageValid();
+            if (gameAdded)
+            {
+                Grid.SetRow(currGameItem, row);
+                Grid.SetColumn(currGameItem, col);
+
+                gameGrid.Children.Add(currGameItem);
+                
+            }
+
+            return gameAdded;
+        }
+
+        public bool AddGameToGridRow2(int gameIndex, int releaseIndex, int gridRow)
+        {
+            List<GameRetriever.GameData> currGame = SearchGameDataViewModel.GameData.ElementAt(gameIndex);
+            SearchGameItem currGameItem = null;
+
+            GameRetriever.GameData rel = currGame.ElementAt(releaseIndex);
+            currGameItem = new SearchGameItem(rel.GameName, rel.ImageURL);
+
+            bool gameAdded = currGameItem.IsImageValid();
+            if (gameAdded)
+            {
+                bool gameAddedToGrid = false;
+                int currColumn = 0;
+
+                while (!gameAddedToGrid)
+                {
+                    SearchGameItem element = gameGrid.Children.OfType<SearchGameItem>().Where(e => Grid.GetColumn(e) == currColumn && Grid.GetRow(e) == gridRow).FirstOrDefault();
+
+                    bool itemNotFound = (element == null);
+                    if (itemNotFound)
+                    {
+                        Grid.SetRow(currGameItem, gridRow);
+                        Grid.SetColumn(currGameItem, currColumn);
+
+                        gameGrid.Children.Add(currGameItem);
+
+                        gameAddedToGrid = true;
+
+                    }
+
+                    currColumn++;
+                }
+
+
+            }
+
+            return gameAdded;
+        }
+
+
+
         public void SelectFirstItem()
         {
-            SearchGameItem element = gameGrid.Children.OfType<SearchGameItem>().
-            Where(e => Grid.GetColumn(e) == 0 && Grid.GetRow(e) == 0).First();
+            SearchGameItem element = gameGrid.Children.OfType<SearchGameItem>().Where(e => Grid.GetColumn(e) == 0 && Grid.GetRow(e) == 0).First();
 
             this.Dispatcher.Invoke((Action)delegate
             {
@@ -153,6 +257,8 @@ namespace FilePlayer.Views
 
             return itemFound;
         }
+
+
 
 
         void PerformViewAction(object sender, ViewEventArgs e)
@@ -203,18 +309,10 @@ namespace FilePlayer.Views
             string itemRel;
             string itemImgLoc;
 
-            if (SearchGameDataViewModel.SelectedCol == 0)
-            {
-                itemDesc = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).GameDescription;
-                itemRel = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ReleaseDate;
-                itemImgLoc = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ImageURL;
-            }
-            else
-            {
-                itemDesc = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).GameReleases.ElementAt(SearchGameDataViewModel.SelectedCol - 1).GameDescription;
-                itemRel = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).GameReleases.ElementAt(SearchGameDataViewModel.SelectedCol - 1).ReleaseDate;
-                itemImgLoc = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).GameReleases.ElementAt(SearchGameDataViewModel.SelectedCol - 1).ImageURL;
-            }
+
+            itemDesc = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ElementAt(SearchGameDataViewModel.SelectedCol - 1).GameDescription;
+            itemRel = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ElementAt(SearchGameDataViewModel.SelectedCol - 1).ReleaseDate;
+            itemImgLoc = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ElementAt(SearchGameDataViewModel.SelectedCol - 1).ImageURL;
 
             this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GAMEDATA_SEARCH_ADD", new String[] { itemName, itemDesc, itemRel, itemImgLoc }));
         }

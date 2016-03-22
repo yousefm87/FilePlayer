@@ -1,7 +1,27 @@
 ﻿using Microsoft.Practices.Prism.PubSubEvents;
+using System;
 
 namespace FilePlayer.Model
 {
+    public class ViewEventArgs : EventArgs
+    {
+        public string action;
+        public string[] addlInfo;
+
+
+        public ViewEventArgs(string _action)
+        {
+            action = _action;
+            addlInfo = new string[0] { };
+        }
+
+        public ViewEventArgs(string _action, string[] _addlInfo)
+        {
+            action = _action;
+            addlInfo = _addlInfo;
+        }
+    }
+
     public sealed class Event
     {
         #region Class Properties

@@ -1,3 +1,5 @@
+using FilePlayer.Model;
+using Microsoft.Practices.Prism.PubSubEvents;
 using System;
 using System.Windows;
 
@@ -22,6 +24,32 @@ namespace FilePlayer
         {
             // put your tracing or logging code here (I put a message box as an example)
             MessageBox.Show(e.ExceptionObject.ToString());
+        }
+
+        SubscriptionToken viewActionToken;
+        private IEventAggregator iEventAggregator;
+
+        App()
+        {
+            iEventAggregator = Event.EventInstance.EventAggregator;
+            viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
+                (viewEventArgs) =>
+                {
+                    PerformViewAction(viewEventArgs);
+                }
+            );
+        }
+
+        private void PerformViewAction(ViewEventArgs e)
+        {
+            if (e.action.Equals("EXIT"))
+            {
+                Dispatcher.Invoke((Action)delegate
+                {
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GAMEPAD_ABORT", new String[] { }));
+                    Application.Current.Shutdown();
+                });
+            }
         }
     }
 }

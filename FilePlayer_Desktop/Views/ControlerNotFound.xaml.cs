@@ -28,6 +28,7 @@ namespace FilePlayer.Views
             InitializeComponent();
 
             this.Topmost = true;
+            this.Topmost = false;
 
             dialogActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
@@ -45,7 +46,6 @@ namespace FilePlayer.Views
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            this.Topmost = false;
         }
     }
 

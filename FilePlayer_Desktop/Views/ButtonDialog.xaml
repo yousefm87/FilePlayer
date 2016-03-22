@@ -20,14 +20,15 @@
         MinHeight="200"
         MinWidth="150"
         BorderBrush="Transparent"
-        BorderThickness="0"
-        Closed="Window_Closed">
+        BorderThickness="0">
 
 
     <Window.Resources>
-        <Style x:Key="DataGridCellStyle" TargetType="{x:Type DataGridCell}">
+        <Style x:Key="DataGridCellStyle" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MetroDataGridCell}">
             <Setter Property="Background" Value="{x:Null}" />
             <Setter Property="BorderBrush" Value="{x:Null}" />
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="{x:Null}" />
@@ -35,6 +36,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        
         <Style x:Key="DataGridRowStyle" TargetType="{x:Type DataGridRow}">
             <Setter Property="Background" Value="{x:Null}" />
             <Setter Property="BorderBrush" Value="{x:Null}" />
@@ -109,12 +111,15 @@
             <Setter Property="SelectionUnit" Value="FullRow" />
             <Setter Property="RowHeight" Value="100" />
             <Setter Property="GridLinesVisibility" Value="None" />
-            <Setter Property="CellStyle" Value="{StaticResource ButtonDataGridCellStyle}" />
+            <Setter Property="CellStyle" Value="{StaticResource DataGridCellStyle}" />
+            <Setter Property="RowStyle" Value="{StaticResource DataGridRowStyle}" />
         </Style>
 
     </Window.Resources>
     
-    <DataGrid x:Name="buttonGrid" RowStyle="{StaticResource DataGridRowStyle}" CellStyle="{StaticResource DataGridCellStyle}" Style="{StaticResource ButtonDataGrid}" ItemsSource="{Binding ButtonNames}" SelectedIndex="{Binding SelectedButtonIndex}">
+    <DataGrid x:Name="buttonGrid" 
+              Style="{StaticResource ButtonDataGrid}" 
+              ItemsSource="{Binding ButtonNames}" SelectedIndex="{Binding SelectedButtonIndex}">
 
         <DataGrid.Columns>
             <DataGridTemplateColumn>

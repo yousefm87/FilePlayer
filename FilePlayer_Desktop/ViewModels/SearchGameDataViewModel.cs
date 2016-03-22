@@ -12,7 +12,7 @@ namespace FilePlayer.ViewModels
     public class SearchGameDataViewModel : ViewModelBase
     {
         private IEventAggregator iEventAggregator;
-        private ObservableCollection<GameRetriever.GameData> gameData;
+        private ObservableCollection<List<GameRetriever.GameData>> gameData;
         private int selectedRow;
         private int selectedCol;
         public int SelectedRow
@@ -35,7 +35,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public ObservableCollection<GameRetriever.GameData> GameData
+        public ObservableCollection<List<GameRetriever.GameData>> GameData
         {
             get { return this.gameData; }
             set
@@ -52,7 +52,7 @@ namespace FilePlayer.ViewModels
             SelectedRow = 0;
 
             
-            GameData = GameRetriever.GetGameDataSet(gameQuery);
+            GameData = GameRetriever.GetGameDataSetLists(gameQuery);
         }
 
 

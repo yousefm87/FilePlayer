@@ -44,40 +44,40 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <Label x:Name="char00" Content="A" Grid.Row="0" Grid.Column="0" />
-        <Label x:Name="char01" Content="B" Grid.Row="0" Grid.Column="1" />
-        <Label x:Name="char02" Content="C" Grid.Row="0" Grid.Column="2" />
-        <Label x:Name="char03" Content="D" Grid.Row="0" Grid.Column="3" />
-        <Label x:Name="char04" Content="E" Grid.Row="0" Grid.Column="4" />
-        <Label x:Name="char05" Content="F" Grid.Row="0" Grid.Column="5" />
-        <Label x:Name="char06" Content="G" Grid.Row="0" Grid.Column="6" />
-        <Label x:Name="char07" Content="H" Grid.Row="0" Grid.Column="7" />
-        <Label x:Name="char08" Content="I" Grid.Row="0" Grid.Column="8" />
-        <Label x:Name="char09" Content="J" Grid.Row="0" Grid.Column="9" />
+        <Label x:Name="char00" Grid.Row="0" Grid.Column="0" />
+        <Label x:Name="char01" Grid.Row="0" Grid.Column="1" />
+        <Label x:Name="char02" Grid.Row="0" Grid.Column="2" />
+        <Label x:Name="char03" Grid.Row="0" Grid.Column="3" />
+        <Label x:Name="char04" Grid.Row="0" Grid.Column="4" />
+        <Label x:Name="char05" Grid.Row="0" Grid.Column="5" />
+        <Label x:Name="char06" Grid.Row="0" Grid.Column="6" />
+        <Label x:Name="char07" Grid.Row="0" Grid.Column="7" />
+        <Label x:Name="char08" Grid.Row="0" Grid.Column="8" />
+        <Label x:Name="char09" Grid.Row="0" Grid.Column="9" />
 
-        <Label x:Name="char10" Content="K" Grid.Row="1" Grid.Column="0" />
-        <Label x:Name="char11" Content="L" Grid.Row="1" Grid.Column="1" />
-        <Label x:Name="char12" Content="M" Grid.Row="1" Grid.Column="2" />
-        <Label x:Name="char13" Content="N" Grid.Row="1" Grid.Column="3" />
-        <Label x:Name="char14" Content="O" Grid.Row="1" Grid.Column="4" />
-        <Label x:Name="char15" Content="P" Grid.Row="1" Grid.Column="5" />
-        <Label x:Name="char16" Content="Q" Grid.Row="1" Grid.Column="6" />
-        <Label x:Name="char17" Content="R" Grid.Row="1" Grid.Column="7" />
-        <Label x:Name="char18" Content="S" Grid.Row="1" Grid.Column="8" />
-        <Label x:Name="char19" Content="T" Grid.Row="1" Grid.Column="9" />
+        <Label x:Name="char10" Grid.Row="1" Grid.Column="0" />
+        <Label x:Name="char11" Grid.Row="1" Grid.Column="1" />
+        <Label x:Name="char12" Grid.Row="1" Grid.Column="2" />
+        <Label x:Name="char13" Grid.Row="1" Grid.Column="3" />
+        <Label x:Name="char14" Grid.Row="1" Grid.Column="4" />
+        <Label x:Name="char15" Grid.Row="1" Grid.Column="5" />
+        <Label x:Name="char16" Grid.Row="1" Grid.Column="6" />
+        <Label x:Name="char17" Grid.Row="1" Grid.Column="7" />
+        <Label x:Name="char18" Grid.Row="1" Grid.Column="8" />
+        <Label x:Name="char19" Grid.Row="1" Grid.Column="9" />
 
-        <Label x:Name="char20" Content="U"  Grid.Row="2" Grid.Column="0" />
-        <Label x:Name="char21" Content="V" Grid.Row="2" Grid.Column="1" />
-        <Label x:Name="char22" Content="W" Grid.Row="2" Grid.Column="2" />
-        <Label x:Name="char23" Content="X" Grid.Row="2" Grid.Column="3" />
-        <Label x:Name="char24" Content="Y" Grid.Row="2" Grid.Column="4" />
-        <Label x:Name="char25" Content="Z" Grid.Row="2" Grid.Column="5" />
-        <Label x:Name="char26" Content="" Grid.Row="2" Grid.Column="6" />
-        <Label x:Name="char27" Content="" Grid.Row="2" Grid.Column="7" />
-        <Label x:Name="char28" Content="" Grid.Row="2" Grid.Column="8" />
-        <Label x:Name="char29" Content="" Grid.Row="2" Grid.Column="9" />
+        <Label x:Name="char20" Grid.Row="2" Grid.Column="0" Selector.IsSelected="True" />
+        <Label x:Name="char21" Grid.Row="2" Grid.Column="1" />
+        <Label x:Name="char22" Grid.Row="2" Grid.Column="2" />
+        <Label x:Name="char23" Grid.Row="2" Grid.Column="3" />
+        <Label x:Name="char24" Grid.Row="2" Grid.Column="4" />
+        <Label x:Name="char25" Grid.Row="2" Grid.Column="5" />
+        <Label x:Name="char26" Grid.Row="2" Grid.Column="6" />
+        <Label x:Name="char27" Grid.Row="2" Grid.Column="7" />
+        <Label x:Name="char28" Grid.Row="2" Grid.Column="8" />
+        <Label x:Name="char29" Grid.Row="2" Grid.Column="9" />
 
-        <Label x:Name="char30" Content="___" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="10" />
+        <Label x:Name="char30" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="10" />
 
     </Grid>
 </UserControl>

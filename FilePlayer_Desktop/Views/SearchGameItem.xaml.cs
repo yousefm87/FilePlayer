@@ -19,5 +19,10 @@ namespace FilePlayer.Views
             this.DataContext = SearchGameItemViewModel;
             
         }
+
+        public bool IsImageValid()
+        {
+            return (SearchGameItemViewModel.ItemImage != null);
+        }
     }
 }

@@ -17,8 +17,7 @@
         BorderBrush ="Black"
         BorderThickness="1"
         MinHeight="200"
-        MinWidth="150"
-        Closed="Window_Closed">
+        MinWidth="150">
 
 
     <Window.Resources>

@@ -12,6 +12,9 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.Windows.Media.Effects;
+using System.Collections;
+using System.Windows;
 
 namespace FilePlayer.ViewModels
 {
@@ -25,6 +28,9 @@ namespace FilePlayer.ViewModels
 
     public class ItemListViewModel : ViewModelBase
     {
+        private Stack shadeStack = new Stack();
+
+
         private ItemLists itemLists;
         private GameInfo gameInfo;
         Thread gamepadThread;
@@ -43,8 +49,61 @@ namespace FilePlayer.ViewModels
         private string releaseDate;
         private string description;
         private string shortDescription;
-        
+        private bool shadeEffect;
+        private Visibility errorVisiblility;
+        private Visibility filterVisiblility;
+        private string filterText;
+        private string filterTypeText;
 
+        public string FilterText
+        {
+            get { return filterText; }
+            set
+            {
+                filterText = value;
+                OnPropertyChanged("FilterText");
+            }
+        }
+
+        public string FilterTypeText
+        {
+            get { return filterTypeText; }
+            set
+            {
+                filterTypeText = value;
+                OnPropertyChanged("FilterTypeTextt");
+            }
+        }
+
+        public Visibility ErrorVisiblility
+        {
+            get { return errorVisiblility; }
+            set
+            {
+                errorVisiblility = value;
+                OnPropertyChanged("ErrorVisiblility");
+            }
+        }
+
+        public Visibility FilterVisiblility
+        {
+            get { return filterVisiblility; }
+            set
+            {
+                filterVisiblility = value;
+                OnPropertyChanged("FilterVisiblility");
+            }
+        }
+
+        public bool ShadeEffect
+        {
+            get { return shadeEffect; }
+            set
+            {
+                shadeEffect = value;
+                OnPropertyChanged("ShadeEffect");
+            }
+        }
 
 
         public int SelectedItemIndex
@@ -177,6 +236,11 @@ namespace FilePlayer.ViewModels
 
         public ItemListViewModel(IEventAggregator iEventAggregator)
         {
+
+            FilterVisiblility = Visibility.Hidden;
+            ShadeEffect = false;
+            FilterText = "";
+            FilterTypeText = "";
             this.iEventAggregator = iEventAggregator;
             
             UpdateItemLists();
@@ -231,7 +295,7 @@ namespace FilePlayer.ViewModels
                 this.CurrAppName = ItemLists.GetConsoleName(ItemLists.CurrConsole);
                 this.SelectedItemIndex = 0;
 
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_UPDATED", new String[] { }));
+                ErrorVisiblility = Visibility.Hidden;
             }
             else
             {
@@ -241,13 +305,30 @@ namespace FilePlayer.ViewModels
                 this.CurrAppName = "";
                 this.SelectedItemIndex = 0;
 
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_EMPTY", new String[] { }));
+                ErrorVisiblility = Visibility.Visible;
             }
         }
         public void PerformAction(ViewEventArgs e)
         {
+            int numMoves;
             switch (e.action)
             {
+                case "ITEMLIST_MOVE_LEFT":
+                    SetPreviousLists(FilterText, FilterTypeText);
+                    break;
+                case "ITEMLIST_MOVE_RIGHT":
+                    SetNextLists(FilterText, FilterTypeText);
+                    break;
+
+                case "ITEMLIST_MOVE_UP":
+                    numMoves = Int32.Parse(e.addlInfo[0]);
+                    MoveIndexUp(numMoves);
+                    break;
+                case "ITEMLIST_MOVE_DOWN":
+                    numMoves = Int32.Parse(e.addlInfo[0]);
+                    MoveIndexDown(numMoves);
+                    break;
+
                 case "SET_CONTROLLER_STATE":
                     controllerHandler.SetControllerState(e.addlInfo[0]);
                     if (e.addlInfo[0].Equals("ITEM_PLAY"))
@@ -275,6 +356,7 @@ namespace FilePlayer.ViewModels
                     controllerHandler.SetControllerState("FILTER_MAIN");
                     break;
                 case "GIANTBOMB_UPLOAD_START":
+                    SetShade(true);
                     Task.Factory.StartNew(() =>
                     {
                         controllerHandler.SetControllerState("NONE");
@@ -283,10 +365,12 @@ namespace FilePlayer.ViewModels
                         controllerHandler.SetControllerState("ITEMLIST_BROWSE");
                     });
                     break;
-                case "EXIT":
+                case "GAMEPAD_ABORT":
                     gamepadThread.Abort();
                     break;
                 case "BUTTONDIALOG_SELECT":
+                    SetShade(false);
+
                     switch (e.addlInfo[0])
                     {
                         case "ITEMLIST_PAUSE":
@@ -347,6 +431,27 @@ namespace FilePlayer.ViewModels
                             break;
                     }
                     break;
+                case "FILTER_LIST":
+                    if (!FilterText.Equals(e.addlInfo[0]) || !FilterTypeText.Equals(e.addlInfo[1]))
+                    {
+                        FilterText = e.addlInfo[0];
+                        filterTypeText = e.addlInfo[1];
+
+                        AllItemNames = ItemLists.GetItemNames(ItemLists.CurrConsole, FilterText, FilterTypeText);
+                        AllItemPaths = ItemLists.GetItemFilePaths(ItemLists.CurrConsole, FilterText, FilterTypeText);
+
+                        SelectedItemIndex = 0;
+                    }
+                    break;
+                case "OPEN_FILTER":
+                    if (ItemLists.GetConsoleCount() > 0)
+                    {
+                        FilterVisiblility = Visibility.Visible;
+                    }
+                    break;
+                case "CLOSE_FILTER":
+                    FilterVisiblility = Visibility.Hidden;
+                    break;
                 case "SEARCHGAMEDATA_CLOSE":
                     controllerHandler.SetControllerState("ITEMLIST_BROWSE");
                     break;
@@ -355,43 +460,24 @@ namespace FilePlayer.ViewModels
                     controllerHandler.SetControllerState("ITEMLIST_BROWSE");
                     SelectedItemIndex = SelectedItemIndex;
                     break;
+                case "BUTTONDIALOG_OPEN":
+                    SetShade(true);
+                    break;
+                case "BUTTONDIALOG_CLOSE":
+                    SetShade(false);
+                    break;
+                case "CONTROLLER_NOTFOUND_OPEN":
+                    SetShade(true);
+                    break;
+                case "CONTROLLER_NOTFOUND_CLOSE":
+                    SetShade(false);
+                    break;
+                case "GIANTBOMB_UPLOAD_COMPLETE":
+                    SetShade(false);
+                    break;
             }
         }
 
-        public void SetNextLists()
-        {
-            if (ItemLists.SetConsoleNext())
-            {
-                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
-                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
-                SelectedItemIndex = 0;
-
-                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-
-                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
-
-                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
-
-                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
-            }
-        }
-
-        public void SetNextLists(string searchStr)
-        {
-            if (ItemLists.SetConsoleNext())
-            {
-                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr);
-                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr);
-                SelectedItemIndex = 0;
-
-                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-
-                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
-                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
-
-                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
-            }
-       }
 
         public void SetNextLists(string searchStr, string filterType)
         {
@@ -410,42 +496,7 @@ namespace FilePlayer.ViewModels
                 this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
             }
         }
-
-        public void SetPreviousLists()
-        {
-            if (ItemLists.SetConsolePrevious())
-            {
-                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole);
-                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
-                SelectedItemIndex = 0;
-
-                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-
-                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
-
-                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
-
-                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
-            }
-        }
-
-        public void SetPreviousLists(string searchStr)
-        {
-            if (ItemLists.SetConsolePrevious())
-            {
-                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr);
-                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr);
-                SelectedItemIndex = 0;
-
-                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-
-                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
-
-                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
-
-                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
-            }
-        }
+        
 
         public void SetPreviousLists(string searchStr, string filterType)
         {
@@ -507,19 +558,64 @@ namespace FilePlayer.ViewModels
 
                 autProc.Start();
             }
-
-            
-            
         }
 
 
-        public void SetItemImage()
+        public void SetShade(bool isShaded)
         {
-            string itemPath = AllItemPaths.ToList().ElementAt(SelectedItemIndex);
+            if (isShaded)
+            {
+                if (shadeStack.Count == 0)
+                {
+                    ShadeEffect = true;
+                }
 
+                shadeStack.Push(0);
+            }
+            else
+            {
+                shadeStack.Pop();
+
+                if (shadeStack.Count == 0)
+                {
+                    ShadeEffect = false;
+                }
+            }
         }
 
+        public int MoveIndexUp(int numMove)
+        {
+            int selectedIndex = SelectedItemIndex;
+            int newSelectedIndex = selectedIndex - numMove;
+            int minIndex = 0;
 
+            if (newSelectedIndex < minIndex)
+            {
+                newSelectedIndex = minIndex;
+            }
+
+            SelectedItemIndex = newSelectedIndex;
+            return SelectedItemIndex;
+        }
+
+        public int MoveIndexDown(int numMove)
+        {
+            int selectedIndex = SelectedItemIndex;
+
+            int newSelectedIndex = selectedIndex + numMove;
+
+
+            int minIndex = 0;
+
+            if (newSelectedIndex < minIndex)
+            {
+                newSelectedIndex = minIndex;
+            }
+
+            SelectedItemIndex = newSelectedIndex;
+
+            return SelectedItemIndex;
+        }
 
 
     }

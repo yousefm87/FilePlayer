@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FilePlayer.Model;
+using Microsoft.Practices.Prism.PubSubEvents;
+
 
 namespace FilePlayer.ViewModels
 {
@@ -13,23 +11,111 @@ namespace FilePlayer.ViewModels
         public CharGetterEventArgs(string action, string[] addlInfo) : base(action, addlInfo) { }
     }
 
-    public class CharGetterViewModel
+    public class CharGetterViewModel : ViewModelBase
     {
-        private static string[] charSetABC = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-                                                    "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-                                                    "", "", "U", "V", "W", "X", "Y", "Z", "", "" };
-        private static string[] charSetNonABC = new string[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-                                                      "", ".", "?", "!", ":", "-", "#","&", "+", "",
-                                                      "", "", "(", ")", "\\", "/", "\"", "'", "", "" };
+        private IEventAggregator iEventAggregator;
+        private SubscriptionToken charGetterActionToken;
 
+        private string spaceText;
+        private static string[] charSetABC = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                                                            "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+                                                            "", "", "U", "V", "W", "X", "Y", "Z", "", "" };
+        private static string[] charSetNonABC = new string[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+                                                              "", ".", "?", "!", ":", "-", "#","&", "+", "",
+                                                              "", "", "(", ")", "\\", "/", "\"", "'", "", "" };
         private string[][] charSets = new string[][] { charSetABC, charSetNonABC };
 
-        public int CurrCharSetIndex = 0;
+        private int currCharSetIndex = 0;
+        private int selectedControlIndex = 0;
 
-        public CharGetterViewModel()
+        private int columnCount;
+        private int rowCount;
+        private int numControls;
+
+        
+
+        public int CurrCharSetIndex
         {
+            get { return currCharSetIndex; }
+            set
+            {
+                currCharSetIndex = value;
+                OnPropertyChanged("CurrCharSetIndex");
+            }
+        }
+
+        public int SelectedControlIndex
+        {
+            get { return selectedControlIndex; }
+            set
+            {
+                selectedControlIndex = value;
+                OnPropertyChanged("SelectedControlIndex");
+            }
+        }
+
+        public string SpaceText
+        {
+            get { return spaceText; }
+            set
+            {
+                spaceText = value;
+            }
+        }
+
+
+        public CharGetterViewModel(int _columnCount, int _rowCount, int _numControls, bool _hasSpaceBar)
+        {
+            CurrCharSetIndex = 0;
+            columnCount = _columnCount;
+            rowCount = _rowCount;
+            numControls = _numControls;
+            spaceText = "___";
+            iEventAggregator = Event.EventInstance.EventAggregator;
+
+            charGetterActionToken = this.iEventAggregator.GetEvent<PubSubEvent<CharGetterEventArgs>>().Subscribe(
+                (viewEventArgs) =>
+                {
+                    PerformViewAction(this, viewEventArgs);
+                }
+            );
+        }
+
+        void PerformViewAction(object sender, CharGetterEventArgs e)
+        {
+            switch (e.action)
+            {
+                case "CHAR_MOVE_LEFT":
+                    MoveLeft();
+                    break;
+                case "CHAR_MOVE_RIGHT":
+                    MoveRight();
+                    break;
+                case "CHAR_SWITCHCHARSET_LEFT":
+                    SwitchCharSetLeft();
+                    break;
+                case "CHAR_SWITCHCHARSET_RIGHT":
+                    SwitchCharSetRight();
+                    break;
+                case "CHAR_MOVE_UP":
+                    MoveUp();
+                    break;
+                case "CHAR_MOVE_DOWN":
+                    MoveDown();
+                    break;
+                case "CHAR_SELECT":
+                    SelectControl();
+                    break;
+                case "CHAR_BACK":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CHAR_BACK", new string[] { "" }));
+                    break;
+                case "CHAR_CLOSE":
+                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CHAR_CLOSE", new string[] { "" }));
+                    break;
+            }
 
         }
+
 
         public string[] GetCurrCharSet()
         {
@@ -60,6 +146,125 @@ namespace FilePlayer.ViewModels
             }
         }
 
+        public void MoveLeft()
+        {
+            if (SelectedControlIndex != (numControls - 1)) //if not bottom label
+            {
+                int newIndex = SelectedControlIndex;
+
+                    do
+                    {
+                        bool leftEdgeSelected = ((newIndex % columnCount) == 0);
+
+                        if (leftEdgeSelected)
+                        {
+                            newIndex = newIndex + (columnCount - 1);
+                        }
+                        else
+                        {
+                            newIndex--;
+                        }
+                    } while (charSets[CurrCharSetIndex][newIndex].Equals(""));
+
+                SelectedControlIndex = newIndex;
+            }
+        }
+
+        public void MoveRight()
+        {
+            if (SelectedControlIndex != (numControls - 1)) //if not bottom label
+            {
+                int newIndex = SelectedControlIndex;
+
+                do
+                {
+                    bool rightEdgeSelected = ((newIndex % columnCount) == (columnCount - 1));
+
+                    if (rightEdgeSelected)
+                    {
+                        newIndex = newIndex - (newIndex % columnCount);
+                    }
+                    else
+                    {
+                        newIndex++;
+                    }
+                } while (charSets[CurrCharSetIndex][newIndex].Equals(""));
+
+                SelectedControlIndex = newIndex;
+            }
+        }
+
+        public void MoveUp()
+        {
+            int newIndex = SelectedControlIndex;
+            bool findNextChar = false;
+
+            do
+            {
+                bool topEdgeSelected = (newIndex < columnCount);
+
+                if (topEdgeSelected)
+                {
+                    newIndex = numControls - 1;
+                    findNextChar = false;
+                }
+                else
+                {
+                    newIndex = newIndex - columnCount;
+                    findNextChar = charSets[CurrCharSetIndex][newIndex].Equals("");
+                }
+
+            } while (findNextChar);
+            SelectedControlIndex = newIndex;
+        }
+
+        public void MoveDown()
+        {
+            int newIndex = SelectedControlIndex;
+
+            bool findNextChar = false;
+
+            do
+            {
+                bool bottomEdgeSelected = (newIndex == (numControls - 1));
+
+                if (bottomEdgeSelected)
+                {
+                    newIndex = 0;
+                }
+                else
+                {
+                    newIndex += columnCount;
+                }
+
+                if (newIndex >= (numControls - 1))
+                {
+                    newIndex = numControls - 1;
+                    findNextChar = false;
+                }
+                else
+                {
+                    findNextChar = charSets[CurrCharSetIndex][newIndex].Equals("");
+                }
+            } while (findNextChar);
+            SelectedControlIndex = newIndex;
+        }
+
+        public void SelectControl()
+        {
+            string response;
+
+            if (SelectedControlIndex == (numControls - 1))
+            {
+                response = " ";
+            }
+            else
+            {
+                response = charSets[CurrCharSetIndex][SelectedControlIndex];
+            }
+
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CHAR_SELECT", new string[] { response }));
+        }
 
     }
 }

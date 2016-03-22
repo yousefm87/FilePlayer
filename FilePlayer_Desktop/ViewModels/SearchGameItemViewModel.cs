@@ -1,7 +1,9 @@
 ﻿using Microsoft.Practices.Prism.PubSubEvents;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,8 +35,41 @@ namespace FilePlayer.ViewModels
             }
             set
             {
-                itemImage = value;
+                //if (ItemImageExists(value))
+                //{
+                    itemImage = value;
+                //}
+                //else
+                //{
+                //    itemImage = null;
+                //}
+
                 OnPropertyChanged("ItemImage");
+            }
+        }
+
+        public bool ItemImageExists(string imageURL)
+        {
+            if (imageURL.Equals(""))
+            {
+                return false;
+            }
+
+            var request = (HttpWebRequest)WebRequest.Create(imageURL);
+            request.Method = "HEAD";
+
+            try
+            {
+                using (var response = request.GetResponse())
+                {
+                    bool isImageValid = response.ContentType.ToLower(CultureInfo.InvariantCulture).StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+                    return isImageValid;
+                }
+
+            }
+            catch (WebException ex)
+            {
+                return false;
             }
         }
 

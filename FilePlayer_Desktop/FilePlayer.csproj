@@ -30,7 +30,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <UpdateUrl>http://localhost/FilePlayer/</UpdateUrl>
-    <ApplicationRevision>50</ApplicationRevision>
+    <ApplicationRevision>51</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -250,23 +250,11 @@
       <DependentUpon>Shell.xaml</DependentUpon>
     </Compile>
     <Compile Include="Styles\Controls.cs" />
-    <Compile Include="ViewModels\ItemListPauseViewModel.cs" />
-    <Compile Include="ViewModels\PauseDialogViewModel.cs" />
-    <Compile Include="ViewModels\ConfirmationDialogViewModel.cs" />
     <Compile Include="ViewModels\ItemListViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
-    <Compile Include="Views\ConfirmationDialog.xaml.cs">
-      <DependentUpon>ConfirmationDialog.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ItemListPauseView.xaml.cs">
-      <DependentUpon>ItemListPauseView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\ItemListView.xaml.cs">
       <DependentUpon>ItemListView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\PauseDialog.xaml.cs">
-      <DependentUpon>PauseDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ItemListFilter.xaml.cs">
       <DependentUpon>ItemListFilter.xaml</DependentUpon>
@@ -307,14 +295,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ConfirmationDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ItemListPauseView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\ItemListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -323,10 +303,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Views\PauseDialog.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\ItemListFilter.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

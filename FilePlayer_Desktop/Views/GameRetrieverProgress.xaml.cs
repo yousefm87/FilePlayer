@@ -33,40 +33,11 @@ namespace FilePlayer.Views
             this.DataContext = GameRetrieverProgressViewModel;
 
             this.Topmost = true;
+            this.Topmost = false;
 
             iEventAggregator = Event.EventInstance.EventAggregator;
-            progressActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
-                (viewEventArgs) =>
-                {
-                    PerformViewAction(this, viewEventArgs);
-                }
-            );
-        }
-
-        public void Init()
-        {
-            
-            
 
         }
 
-        void PerformViewAction(object sender, ViewEventArgs e)
-        {
-            switch (e.action)
-            {
-
-            }
-
-        }
-
-
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            this.Topmost = false;
-            if (progressActionToken != null)
-            {
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Unsubscribe(progressActionToken);
-            }
-        }
     }
 }

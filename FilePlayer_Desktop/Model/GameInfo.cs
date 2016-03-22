@@ -42,7 +42,10 @@ namespace FilePlayer.Model
                 CurrConsole = 0;
             }
         }
-
+        /// <summary>
+        /// Deletes Game from gameinfo.json and deletes image file from 
+        /// </summary>
+        /// <param name="game"></param>
         public void DeleteGame(string game)
         {
             JToken currGame = GetGame(game);
@@ -66,7 +69,6 @@ namespace FilePlayer.Model
 
         public void AddGame(string game, string description, string releaseDate, string imageLocation)
         {
-            
             JToken currGame = GetGame(game);
 
             string extension = imageLocation.Split('.').Last();
@@ -79,12 +81,19 @@ namespace FilePlayer.Model
             string saveToFilePath = ImagePath + game + "." + extension;
             string itemImageLocation = saveToFilePath;
 
+            //Create directory if it doesn't exist
+            if (!Directory.Exists(ImagePath))
+            {
+                Directory.CreateDirectory(ImagePath);
+            }
+
+            //Delete image file if exists - Always overwrite
             if (File.Exists(itemImageLocation))
             {
                 File.Delete(itemImageLocation);
             }
 
-
+            //Download image file
             WebClient webClient = new WebClient();
             try
             {
@@ -95,6 +104,7 @@ namespace FilePlayer.Model
                 itemImageLocation = "";
             }
 
+            //Add entry for game into gameinfo
             JObject newGame = new JObject();
             
             JProperty nameProp = new JProperty("Name", game);
@@ -126,12 +136,13 @@ namespace FilePlayer.Model
                 }
             }
             
-
+            //overwrite json file
             string json = JsonConvert.SerializeObject(games, Formatting.Indented);
             File.WriteAllText(JsonFilePath, json);
 
             games = JObject.Parse(File.ReadAllText(JsonFilePath));
         }
+
 
         public JToken GetGame(string game)
         {

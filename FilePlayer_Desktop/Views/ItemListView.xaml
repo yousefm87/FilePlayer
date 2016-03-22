@@ -10,6 +10,22 @@
              xmlns:converters="clr-namespace:FilePlayer.Converters"
              xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d">
+    <UserControl.Style>
+        <Style TargetType="{x:Type UserControl}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding ShadeEffect}" Value="True">
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <BlurEffect Radius="20"/>
+                        </Setter.Value>
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding ShadeEffect}" Value="False">
+                    <Setter Property="Effect" Value="{x:Null}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
 
     <UserControl.Resources>
         <converters:NullConverter x:Key="nullConverter" />
@@ -39,6 +55,10 @@
             <Setter Property="AutoGenerateColumns" Value="False" />
             <Setter Property="IsSynchronizedWithCurrentItem" Value="True" />
             <Setter Property="SelectionUnit" Value="Cell" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="Black" />
+            <Setter Property="GridLinesVisibility" Value="None" />
+            <Setter Property="Background" Value="#2b2d38" />
             
         </Style>
 
@@ -114,12 +134,8 @@
                 Loaded ="Itemlist_Loaded"
                 Style="{StaticResource ItemListDataGrid}"
                 CellStyle="{StaticResource ItemListDataGridCell}"
-                BorderThickness="1" BorderBrush="Black"
-                GridLinesVisibility="None" 
                 Grid.Row="1" Grid.RowSpan="1"
-                Grid.Column="0" Grid.ColumnSpan="1"
-                
-                Background="#2b2d38">
+                Grid.Column="0" Grid.ColumnSpan="1">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding}" Width="*">
                     <DataGridTextColumn.ElementStyle>
@@ -175,11 +191,11 @@
 
         </Grid>
 
-        <Label x:Name="errorMessage" Background="{StaticResource WhiteBrush}" Visibility="Hidden"  Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" >
+        <Label x:Name="errorMessage" Background="{StaticResource WhiteBrush}" Visibility="{Binding ErrorVisiblility}"  Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" >
             <TextBlock IsHitTestVisible="True" Style="{StaticResource ErrorMessageStyle}" TextWrapping="Wrap" Text="No consoles found. Add extra consoles in C:\FPData\consoles.json. Each console must have fields as described at https://github.com/yousefm87/FilePlayer/wiki/Consoles.Json" />
         </Label>
 
-        <views:ItemListFilter x:Name="filterControl" Visibility="Hidden" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" />
+        <views:ItemListFilter x:Name="filterControl" Visibility="{Binding FilterVisiblility}" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" />
 
        
     </Grid>

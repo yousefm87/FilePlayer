@@ -32,14 +32,6 @@ namespace FilePlayer.Views
         public int selectedControlIndex;
 
 
-        Brush selectedButtonBackground = Brushes.DodgerBlue;
-        Brush selectedButtonForeground = Brushes.White;
-        Brush unselectedButtonBackground = Brushes.AliceBlue;
-        Brush unselectedButtonForeground = Brushes.Black;
-
-
-        Inline cursorInline = new Run(" ") { TextDecorations = TextDecorations.Underline };
-
         public ItemListFilter()
         {
             InitializeComponent();
@@ -100,7 +92,10 @@ namespace FilePlayer.Views
                     });
                     break;
                 case "CHAR_CLOSE":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { }));
+                    this.Dispatcher.Invoke((Action)delegate
+                    {
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { fileFilterText.Text, filterTypeText.Text }));
+                    });
                     break;
                 case "FILTER_ACTION":
                     switch (e.addlInfo[0])
@@ -111,7 +106,7 @@ namespace FilePlayer.Views
                                 fileFilterText.Text = "";
                                 filterTypeText.Text = "Contains";
 
-                                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { }));
+                                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { fileFilterText.Text, filterTypeText.Text }));
                             });
                             break;
                     }
@@ -120,7 +115,7 @@ namespace FilePlayer.Views
                     this.Dispatcher.Invoke((Action)delegate
                     {
                         filterTypeText.Text = e.addlInfo[1];
-                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { }));
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { fileFilterText.Text, filterTypeText.Text }));
                     });
 
 

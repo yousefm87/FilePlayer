@@ -1,6 +1,6 @@
 ﻿using FilePlayer.ViewModels;
 using Microsoft.Practices.Prism.PubSubEvents;
-using System;
+using FilePlayer.Model;
 
 namespace FilePlayer
 {
@@ -67,35 +67,11 @@ namespace FilePlayer
                         }
                     );
                     break;
-                case "ITEMLIST_CONFIRM":
-                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
-                        (controllerEventArgs) =>
-                        {
-                            ControllerButtonPressToActionConfirmationDialog(controllerEventArgs);
-                        }
-                    );
-                    break;
                 case "ITEM_PLAY":
                     controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
                         (controllerEventArgs) =>
                         {
                             ControllerButtonPressToActionItemPlaying(controllerEventArgs);
-                        }
-                    );
-                    break;
-                case "ITEM_PAUSE":
-                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
-                        (controllerEventArgs) =>
-                        {
-                            ControllerButtonPressToActionPauseDialog(controllerEventArgs);
-                        }
-                    );
-                    break;
-                case "ITEMLIST_PAUSE":
-                    controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
-                        (controllerEventArgs) =>
-                        {
-                            ControllerButtonPressToActionItemlistPause(controllerEventArgs);
                         }
                     );
                     break;
@@ -171,6 +147,7 @@ namespace FilePlayer
                     break;
                 case "Y":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("OPEN_FILTER", new string[] { "" }));
+                    SetControllerState("FILTER_MAIN");
                     break;
                 case "DUP":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_MOVE_UP", new string[] { 1.ToString() }));
@@ -191,89 +168,14 @@ namespace FilePlayer
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_MOVE_DOWN", new string[] { 10.ToString() }));
                     break;
                 case "GUIDE":
-                    //this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_PAUSE_OPEN", new string[] { 10.ToString() }));
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "ITEM_LIST_PAUSE_OPEN", "ITEM_LIST_BROWSE" }));
                     
                     SetControllerState("BUTTON_DIALOG");
                     break;
             }
         }
-
-        void ControllerButtonPressToActionConfirmationDialog(ControllerEventArgs e)
-        {
-
-            switch (e.action)
-            {
-                case "A":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
-                    break;
-                case "B":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
-                    break;
-                case "X":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
-                    break;
-                case "Y":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_SELECT_BUTTON"));
-                    break;
-                case "DUP":
-                    break;
-                case "DDOWN":
-                    break;
-                case "DLEFT":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_LEFT"));
-                    break;
-                case "DRIGHT":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_RIGHT"));
-                    break;
-                case "LSHOULDER":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_LEFT"));
-                    break;
-                case "RSHOULDER":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ConfirmationViewEventArgs>>().Publish(new ConfirmationViewEventArgs("CONFIRM_MOVE_RIGHT"));
-                    break;
-                case "GUIDE":
-                    break;
-            }
-        }
-
-
-        void ControllerButtonPressToActionPauseDialog(ControllerEventArgs e)
-        {
-
-            switch (e.action)
-            {
-                case "A":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_SELECT_BUTTON"));
-                    break;
-                case "B":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_SELECT_BUTTON"));
-                    break;
-                case "X":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_SELECT_BUTTON"));
-                    break;
-                case "Y":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_SELECT_BUTTON"));
-                    break;
-                case "DUP":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_MOVE_UP"));
-                    break;
-                case "DDOWN":
-                    this.iEventAggregator.GetEvent<PubSubEvent<PauseViewEventArgs>>().Publish(new PauseViewEventArgs("PAUSE_MOVE_DOWN"));
-                    break;
-                case "DLEFT":
-                    break;
-                case "DRIGHT":
-                    break;
-                case "LSHOULDER":
-                    break;
-                case "RSHOULDER":
-                    break;
-                case "GUIDE":
-
-                    break;
-            }
-        }
+        
+        
 
         void ControllerButtonPressToActionButtonDialog(ControllerEventArgs e)
         {
@@ -308,43 +210,7 @@ namespace FilePlayer
                     break;
             }
         }
-
-        void ControllerButtonPressToActionItemlistPause(ControllerEventArgs e)
-        {
-            switch (e.action)
-            {
-                case "A":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Publish(new ItemListPauseViewEventArgs("ITEMLIST_PAUSE_SELECT_BUTTON"));
-                    break;
-                case "B":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Publish(new ItemListPauseViewEventArgs("ITEMLIST_PAUSE_SELECT_BUTTON"));
-                    break;
-                case "X":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Publish(new ItemListPauseViewEventArgs("ITEMLIST_PAUSE_SELECT_BUTTON"));
-                    break;
-                case "Y":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Publish(new ItemListPauseViewEventArgs("ITEMLIST_PAUSE_SELECT_BUTTON"));
-                    break;
-                case "DUP":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Publish(new ItemListPauseViewEventArgs("ITEMLIST_PAUSE_MOVE_UP"));
-                    break;
-                case "DDOWN":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListPauseViewEventArgs>>().Publish(new ItemListPauseViewEventArgs("ITEMLIST_PAUSE_MOVE_DOWN"));
-                    break;
-                case "DLEFT":
-                    break;
-                case "DRIGHT":
-                    break;
-                case "LSHOULDER":
-                    break;
-                case "RSHOULDER":
-                    break;
-                case "GUIDE":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ITEMLIST_PAUSE_CLOSE", new string[] { "ITEMLIST_PAUSE_CLOSE" }));
-
-                    break;
-            }
-        }
+        
 
         void ControllerButtonPressToActionItemPlaying(ControllerEventArgs e)
         {
