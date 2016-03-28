@@ -22,6 +22,19 @@ namespace FilePlayer.Model
         }
     }
 
+
+    public class ButtonDialogEventArgs : ViewEventArgs
+    {
+        public ButtonDialogEventArgs(string _action) : base(_action) { }
+        public ButtonDialogEventArgs(string _action, string[] _addlInfo) : base(_action, _addlInfo) { }
+    }
+
+    public class ItemListFilterEventArgs : ViewEventArgs
+    {
+        public ItemListFilterEventArgs(string _action) : base(_action) { }
+        public ItemListFilterEventArgs(string _action, string[] _addlInfo) : base(_action, _addlInfo) { }
+    }
+
     public sealed class Event
     {
         #region Class Properties

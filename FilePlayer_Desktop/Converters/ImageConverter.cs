@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
@@ -96,7 +97,7 @@ namespace FilePlayer.Converters
 
                         return bitmapImage;
                     }
-                    catch(Exception ex)
+                    catch(Exception)
                     {
                         return DependencyProperty.UnsetValue;
                     }

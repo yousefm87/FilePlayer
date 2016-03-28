@@ -1,21 +1,39 @@
 ﻿using FilePlayer.ViewModels;
 using Microsoft.Practices.Prism.PubSubEvents;
 using FilePlayer.Model;
-using System.Collections;
 
 namespace FilePlayer
 {
-    class ControllerHandler
+
+    public enum ApplicationState
+    {
+        None,
+        Last,
+        ItemlistBrowse,
+        ItemPlay,
+        FilterMain,
+        CharGetter,
+        VerticalOptionSelecter,
+        ButtonDialog,
+        SearchGameData
+    }
+    
+    class ControllerHandler2
     {
         private IEventAggregator iEventAggregator;
         private SubscriptionToken controllerSubToken = null;
         private SubscriptionToken controllerErrorSubToken = null;
-        private Stack StateStack = new Stack();
+
+        //private ApplicationState CurrentState = ApplicationState.None;
+        //private ApplicationState PreviousState = ApplicationState.None;
+
+        private string CurrentState = "NONE";
+        private string PreviousState = "NONE";
         
-        public ControllerHandler(IEventAggregator iEventAggregator)
+        public ControllerHandler2(IEventAggregator iEventAggregator)
         {
             this.iEventAggregator = iEventAggregator;
-            
+
             SetControllerState("ITEMLIST_BROWSE");
         }
 
@@ -38,14 +56,15 @@ namespace FilePlayer
       
             if (state.Equals("LAST"))
             {
-                StateStack.Pop();
+                CurrentState = PreviousState;
             }
             else
             {
-                StateStack.Push(state);
+                PreviousState = CurrentState;
+                CurrentState = state;
             }
 
-            switch ((string) StateStack.Peek())
+            switch (state)
             {
                 case "NONE":
                     controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
@@ -54,6 +73,9 @@ namespace FilePlayer
 
                         }
                     );
+                    break;
+                case "LAST":
+                    SetControllerState(CurrentState);
                     break;
                 case "ITEMLIST_BROWSE":
                     controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(

@@ -13,7 +13,7 @@ namespace FilePlayer.Views
     public partial class ControllerNotFound : MetroWindow
     {
         private IEventAggregator iEventAggregator;
-        public SubscriptionToken dialogActionToken;
+
 
         public string[] buttonActions;
         public Button[] buttons;
@@ -30,17 +30,7 @@ namespace FilePlayer.Views
             this.Topmost = true;
             this.Topmost = false;
 
-            dialogActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
-                (viewEventArgs) =>
-                {
-                    PerformViewAction(this, viewEventArgs);
-                }
-            );
             this.AllowsTransparency = true;
-        }
-
-        void PerformViewAction(object sender, ViewEventArgs e)
-        {
         }
         
 

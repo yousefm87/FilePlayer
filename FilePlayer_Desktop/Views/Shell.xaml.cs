@@ -23,9 +23,8 @@ namespace FilePlayer
     public partial class Shell : MetroWindow
     {
         public ShellViewModel ShellViewModel { get; set; }
-        SubscriptionToken viewActionToken;
         private IEventAggregator iEventAggregator;
-        public Dictionary<string, Action> PropertyChangedMap;
+        public Dictionary<string, Action> dialogStateMap;
 
         ButtonDialog buttonDialog = null;
         VerticalOptionSelecter verticalOptionSelecter = null;
@@ -45,60 +44,27 @@ namespace FilePlayer
             ShellViewModel = new ShellViewModel(Event.EventInstance.EventAggregator);
             this.DataContext = ShellViewModel;
 
-            SetPropertyChangedMap();
-            ShellViewModel.PropertyChanged += PropertyChangedHandler;
-
-        }
-
-        private void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
-        {
-            if (PropertyChangedMap.ContainsKey(e.PropertyName))
+            dialogStateMap = new Dictionary<string, Action>()
             {
-                PropertyChangedMap[e.PropertyName]();
-            }
-        }
-
-        private void SetPropertyChangedMap()
-        {
-            PropertyChangedMap = new Dictionary<string, Action>()
-            {
-                { "CharGetterState", () => {
-                    if (ShellViewModel.CharGetterState)
-                        OpenCharGetter();
-                    else
-                        CloseCharGetter();
-                }},
-                { "ControllerNotFoundState", () => {
-                    if (ShellViewModel.ControllerNotFoundState)
-                        OpenControllerNotFound();
-                    else
-                        CloseControllerNotFound();
-                }},
-                { "ButtonDialogState", () => {
-                    if (ShellViewModel.ButtonDialogState)
-                        OpenButtonDialog();
-                    else
-                        CloseButtonDialog();
-                }},
-                { "GameRetrieverProgressState", () => {
-                    if (ShellViewModel.GameRetrieverProgressState)
-                        OpenGameRetrieverProgress();
-                    else
-                        CloseGameRetrieverProgress();
-                }},
-                { "SearchGameDataState", () => {
-                    if (ShellViewModel.SearchGameDataState)
-                        OpenSearchGameData();
-                    else
-                        CloseSearchGameData();
-                }},
-                { "VerticalOptionSelecterState", () => {
-                    if (ShellViewModel.VerticalOptionSelecterState)
-                        OpenVerticalOptionSelecter();
-                    else
-                        CloseVerticalOptionSelecter();
-                }}
+                { "CharGetterState", SetCharGetterState },
+                { "ControllerNotFoundState", SetControllerNotFoundState },
+                { "ButtonDialogState", SetButtonDialogState },
+                { "GameRetrieverProgressState", SetGameRetrieverProgressState },
+                { "SearchGameDataState", SetSearchGameDataState },
+                { "VerticalOptionSelecterState", SetVerticalOptionSelecterState }
             };
+
+            ShellViewModel.PropertyChanged += DialogStateChangedHandler;
+
+        }
+
+
+        private void DialogStateChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (dialogStateMap.ContainsKey(e.PropertyName))
+            {
+                dialogStateMap[e.PropertyName]();
+            }
         }
         
         
@@ -113,12 +79,22 @@ namespace FilePlayer
             });
         }
 
+
         private void CloseCharGetter()
         {
             this.Dispatcher.Invoke((Action)delegate
             {
                 charGetter.Visibility = Visibility.Hidden;
             });
+        }
+
+
+        private void SetCharGetterState()
+        {
+            if (ShellViewModel.CharGetterState)
+                OpenCharGetter();
+            else
+                CloseCharGetter();
         }
         
 
@@ -146,6 +122,7 @@ namespace FilePlayer
             }
         }
 
+
         private void CloseSearchGameData()
         {
             if (searchGameData != null)
@@ -159,6 +136,14 @@ namespace FilePlayer
             }
         }
 
+
+        private void SetSearchGameDataState()
+        {
+            if (ShellViewModel.SearchGameDataState)
+                OpenSearchGameData();
+            else
+                CloseSearchGameData();
+        }
 
 
         private void OpenControllerNotFound()
@@ -189,6 +174,7 @@ namespace FilePlayer
             }
         }
 
+
         private void CloseControllerNotFound()
         {
             if (controllerNotFound != null)
@@ -203,6 +189,15 @@ namespace FilePlayer
                 this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOTFOUND_CLOSE", new string[] { }));
                 this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "LAST" }));
             }
+        }
+
+
+        private void SetControllerNotFoundState()
+        {
+            if (ShellViewModel.ControllerNotFoundState)
+                OpenControllerNotFound();
+            else
+                CloseControllerNotFound();
         }
             
         
@@ -232,6 +227,7 @@ namespace FilePlayer
             }
         }
 
+
         private void CloseButtonDialog()
         {
             if (buttonDialog != null)
@@ -243,6 +239,15 @@ namespace FilePlayer
 
                 buttonDialog = null;
             }
+        }
+
+
+        private void SetButtonDialogState()
+        {
+            if (ShellViewModel.ButtonDialogState)
+                OpenButtonDialog();
+            else
+                CloseButtonDialog();
         }
         
 
@@ -268,6 +273,7 @@ namespace FilePlayer
             });
         }
 
+
         private void CloseVerticalOptionSelecter()
         {
             this.Dispatcher.Invoke((Action)delegate
@@ -275,8 +281,17 @@ namespace FilePlayer
                 dynamicCanvas.Children.Remove(verticalOptionSelecter);
                 verticalOptionSelecter = null;
             });
-
         }
+
+
+        private void SetVerticalOptionSelecterState()
+        {
+            if (ShellViewModel.VerticalOptionSelecterState)
+                OpenVerticalOptionSelecter();
+            else
+                CloseVerticalOptionSelecter();
+        }
+
 
         private void OpenGameRetrieverProgress()
         {
@@ -310,6 +325,15 @@ namespace FilePlayer
                 gameRetrieverProgress = null;
             }
         }
+        
+
+        private void SetGameRetrieverProgressState()
+        {
+            if (ShellViewModel.GameRetrieverProgressState)
+                OpenGameRetrieverProgress();
+            else
+                CloseGameRetrieverProgress();
+        }
 
 
         public bool MaximizeShell()
@@ -329,155 +353,12 @@ namespace FilePlayer
             return winMaxed;
         }
 
+
         private void Window_Closed(object sender, EventArgs e)
         {
-            this.Topmost = false;
-            if (viewActionToken != null)
-            {
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT", new String[] { }));
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Unsubscribe(viewActionToken);
-            }
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT", new String[] { }));
         }
-
-        //void PerformViewAction(object sender, ViewEventArgs e)
-        //{
-
-        //    switch (e.action)
-        //    {
-        //        //case "EXIT": //Exit the application
-        //        //    this.Dispatcher.Invoke((Action)delegate
-        //        //    {
-        //        //        Application.Current.Shutdown();
-        //        //    });
-        //        //    break;
-        //        //case "CONTROLLER_NOT_FOUND":
-        //        //    if (controllerNotFound == null)
-        //        //    {
-        //        //        OpenControllerNotFound(e);
-        //        //    }
-        //        //    break;
-        //        //case "CONTROLLER_CONNECTED":
-        //        //    if (controllerNotFound != null)
-        //        //    {
-        //        //        CloseControllerNotFound();
-        //        //        //this.Dispatcher.Invoke((Action)delegate
-        //        //        //{
-        //        //        //    controllerNotFound.Close();
-        //        //        //});
-        //        //        //controllerNotFound = null;
-        //        //        //this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOTFOUND_CLOSE", new string[] { }));
-        //        //        //this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "LAST" }));
-        //        //    }
-        //        //    break;
-        //        //case "BUTTONDIALOG_OPEN":
-        //        //    OpenButtonDialog(e);
-        //        //    break;
-        //        //case "BUTTONDIALOG_CLOSE":
-        //        //    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "LAST" }));
-        //        //    CloseButtonDialog();
-        //        //    break;
-        //        //case "BUTTONDIALOG_SELECT":
-        //        //    CloseButtonDialog();
-        //        //    switch (e.addlInfo[0])
-        //        //    {
-        //        //        case "ITEMLIST_PAUSE":
-        //        //            switch(e.addlInfo[1])
-        //        //            {
-        //        //                case "EXIT": //Exit the application
-        //        //                    this.Dispatcher.Invoke((Action)delegate
-        //        //                    {
-        //        //                        Application.Current.Shutdown();
-        //        //                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT"));
-        //        //                    });
-        //        //                    break;
-        //        //                case "GAMEDATA_UPLOAD": //Upload from Giantbomb
-        //        //                    OpenGameRetrieverProgress(e);
-        //        //                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_START", e.addlInfo));
-        //        //                    break;
-        //        //            }
-        //        //            break;
-        //        //        case "ITEMLIST_CONFIRMATION":
-        //        //            //buttonActions = new string[] { "FILE_OPEN", "FILE_SEARCH_DATA", "FILE_DELETE_DATA" };
-        //        //            switch (e.addlInfo[1])
-        //        //            {
-        //        //                case "FILE_OPEN":
-        //        //                    this.Dispatcher.Invoke((Action)delegate
-        //        //                    {
-        //        //                        ShellViewModel.ShellWindowState = WindowState.Minimized;
-        //        //                    });
-        //        //                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("OPEN_ITEM", e.addlInfo));
-        //        //                    break;
-        //        //            }
-        //        //            break;
-        //        //        case "APP_PAUSE":
-        //        //            //buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "EXIT" };
-        //        //            switch (e.addlInfo[1])
-        //        //            {
-        //        //                case "RETURN_TO_APP": //Click "Return to app"
-        //        //                    ShellViewModel.ShellWindowState = WindowState.Minimized;
-        //        //                    break;
-        //        //                case "CLOSE_APP": //Click "Close App"
-        //        //                    this.Dispatcher.Invoke((Action)delegate
-        //        //                    {
-        //        //                        ShellViewModel.ShellWindowState = WindowState.Maximized;
-        //        //                    });
-        //        //                    break;
-        //        //                case "EXIT": // Click "Close App + FilePlayer"
-        //        //                    this.Dispatcher.Invoke((Action)delegate
-        //        //                    {
-        //        //                        Application.Current.Shutdown();
-        //        //                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT"));
-        //        //                    });
-        //        //                    break;
-        //        //            }
-        //        //            break;
-        //        //    }
-        //        //    break;
-        //        //case "FILTER_ACTION": 
-        //        //    switch (e.addlInfo[0])
-        //        //    {
-        //        //        case "FILTER_FILES": //Selecting file filter
-        //        //            Canvas.SetLeft(charGetter, Double.Parse(e.addlInfo[1]));
-        //        //            Canvas.SetTop(charGetter, Double.Parse(e.addlInfo[2]));
-
-        //        //            charGetter.Visibility = Visibility.Visible;
-        //        //            break;
-        //        //        case "FILTER_TYPE": //Selecting filter type
-        //        //            OpenVerticalOptionSelecter();
-        //        //            break;
-        //        //    }
-        //        //    break;
-        //        //case "CHAR_CLOSE": //Close CharGetter
-        //        //    this.Dispatcher.Invoke((Action)delegate
-        //        //    {
-        //        //        charGetter.Visibility = Visibility.Hidden;
-        //        //    });
-        //        //    break;
-        //        //case "VOS_OPTION": //Select an option from VOS
-        //        //    this.Dispatcher.Invoke((Action)delegate
-        //        //    {
-        //        //        dynamicCanvas.Children.Remove(verticalOptionSelecter);
-        //        //        verticalOptionSelecter = null;
-        //        //    });
-        //        //    break;
-        //        //case "GIANTBOMB_UPLOAD_COMPLETE":
-        //        //    this.Dispatcher.Invoke((Action)delegate
-        //        //    {
-        //        //        gameRetrieverProgress.Close();
-        //        //    });
-        //        //    break;
-        //        //case "GAMEDATA_SEARCH":
-        //        //    OpenSearchGameData(e);
-        //        //    break;
-        //        //case "SEARCHGAMEDATA_CLOSE":
-        //        //    CloseSearchGameData();
-        //        //    break;
-        //        //case "GAMEDATA_SEARCH_ADD":
-        //        //    CloseSearchGameData();
-        //        //    break;
-        //    }
-        //}
-
+        
     }
 
 

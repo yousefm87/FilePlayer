@@ -33,14 +33,11 @@ namespace FilePlayer
         {
             iEventAggregator = Event.EventInstance.EventAggregator;
             viewActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
-                (viewEventArgs) =>
-                {
-                    PerformViewAction(viewEventArgs);
-                }
+                (viewEventArgs) => { EventHandler(viewEventArgs); }
             );
         }
 
-        private void PerformViewAction(ViewEventArgs e)
+        private void EventHandler(ViewEventArgs e)
         {
             if (e.action.Equals("EXIT"))
             {

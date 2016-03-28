@@ -1,22 +1,13 @@
 ﻿using FilePlayer.Model;
 using FilePlayer.ViewModels;
 using Microsoft.Practices.Prism.PubSubEvents;
-using Prism.Interactivity.InteractionRequest;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace FilePlayer.Views
 {
@@ -27,22 +18,62 @@ namespace FilePlayer.Views
     {
         private IEventAggregator iEventAggregator;
         public SubscriptionToken filterActionToken;
+        public Dictionary<string, Action> propertyChangedMap;
+        public Dictionary<string, Action> eventMap;
+        
         public Control[] controls;
         public string[] buttonActions;
-        public int selectedControlIndex;
+        private int selectedControlIndex = 0;
 
+        public ItemListFilterViewModel ItemListFilterViewModel { get; set; }
 
         public ItemListFilter()
         {
             InitializeComponent();
             Init();
 
+            ItemListFilterViewModel = new ItemListFilterViewModel(iEventAggregator, controls.Length);
+            this.DataContext = ItemListFilterViewModel;
+
+            propertyChangedMap = new Dictionary<string, Action>()
+            {
+                { "SelectedControlIndex", () => {
+                    SetControlSelected(controls[selectedControlIndex], false);
+                    selectedControlIndex = ItemListFilterViewModel.SelectedControlIndex;
+                    SetControlSelected(controls[selectedControlIndex], true);
+                }},
+
+            };
+
+            ItemListFilterViewModel.PropertyChanged += PropertyChangedHandler;
+
+            eventMap = new Dictionary<string, Action>()
+            {
+                {"FILTER_SELECT_CONTROL", SelectControl }
+            };
+
             filterActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
-                    PerformViewAction(this, viewEventArgs);
+                    EventHandler(viewEventArgs);
                 }
             );
+        }
+
+        void EventHandler(ViewEventArgs e)
+        {
+            if(eventMap.ContainsKey(e.action))
+            {
+                eventMap[e.action]();
+            }
+        }
+
+        private void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (propertyChangedMap.ContainsKey(e.PropertyName))
+            {
+                propertyChangedMap[e.PropertyName]();
+            }
         }
 
         public void Init()
@@ -62,67 +93,6 @@ namespace FilePlayer.Views
             }
         }
 
-
-        void PerformViewAction(object sender, ViewEventArgs e)
-        {
-            switch (e.action)
-            {
-                case "FILTER_MOVE_LEFT":
-                    MoveLeft();
-                    break;
-                case "FILTER_MOVE_RIGHT":
-                    MoveRight();
-                    break;
-                case "FILTER_SELECT_CONTROL":
-                    SelectControl();
-                    break;
-                case "CHAR_SELECT":
-                    this.Dispatcher.Invoke((Action)delegate
-                    {
-                        fileFilterText.Text = fileFilterText.Text + e.addlInfo[0];
-                    });
-                    break;
-                case "CHAR_BACK":
-                    this.Dispatcher.Invoke((Action)delegate
-                    {
-                        if (fileFilterText.Text.Length > 0)
-                        {
-                            fileFilterText.Text = fileFilterText.Text.Substring(0, fileFilterText.Text.Length - 1);
-                        }
-                    });
-                    break;
-                case "CHAR_CLOSE":
-                    this.Dispatcher.Invoke((Action)delegate
-                    {
-                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { fileFilterText.Text, filterTypeText.Text }));
-                    });
-                    break;
-                case "FILTER_ACTION":
-                    switch (e.addlInfo[0])
-                    {
-                        case "FILTER_RESET":
-                            this.Dispatcher.Invoke((Action)delegate
-                            {
-                                fileFilterText.Text = "";
-                                filterTypeText.Text = "Contains";
-
-                                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { fileFilterText.Text, filterTypeText.Text }));
-                            });
-                            break;
-                    }
-                    break;
-                case "VOS_OPTION":
-                    this.Dispatcher.Invoke((Action)delegate
-                    {
-                        filterTypeText.Text = e.addlInfo[1];
-                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { fileFilterText.Text, filterTypeText.Text }));
-                    });
-
-
-                    break;
-            }
-
-        }
 
         public void SetControlSelected(Control ctrl, bool isSelected)
         {
@@ -155,24 +125,7 @@ namespace FilePlayer.Views
                 });
             }
         }
-
-        public void MoveLeft()
-        {
-            if (selectedControlIndex != 0)
-            {
-                SetControlSelected(controls[selectedControlIndex--], false);
-                SetControlSelected(controls[selectedControlIndex], true);
-            }
-        }
-
-        public void MoveRight()
-        {
-            if (selectedControlIndex != (controls.Length - 1))
-            {
-                SetControlSelected(controls[selectedControlIndex++], false);
-                SetControlSelected(controls[selectedControlIndex], true);
-            }
-        }
+        
         public string GetFilterType()
         {
             string typeText = "";
@@ -198,38 +151,44 @@ namespace FilePlayer.Views
         {
             this.Dispatcher.Invoke((Action)delegate
             {
-                ArrayList responseList = new ArrayList();
-                responseList.Add(buttonActions[selectedControlIndex]);
-                double startPointX = -1;
-                double startPointY = -1;
-
-
-
-                if (responseList[0].Equals("FILTER_FILES"))
+                if (buttonActions[selectedControlIndex].Equals("FILTER_RESET"))
                 {
-                    Point startPoint = new Point(0, fileFilterText.ActualHeight);
-                    startPoint = fileFilterText.PointToScreen(startPoint);
-                    startPointX = startPoint.X + 10;
-                    startPointY = startPoint.Y + 10;
-
-                    responseList.Add(startPointX.ToString());
-                    responseList.Add(startPointY.ToString());
-
+                    ItemListFilterViewModel.ResetFilters();
                 }
-                if (responseList[0].Equals("FILTER_TYPE"))
+                else
                 {
-                    Point startPoint = new Point(0, filterTypeText.ActualHeight);
-                    startPoint = filterTypeText.PointToScreen(startPoint);
-                    startPointX = startPoint.X + 10;
-                    startPointY = startPoint.Y + 10;
+                    ArrayList responseList = new ArrayList();
+                    responseList.Add(buttonActions[selectedControlIndex]);
+                    double startPointX = -1;
+                    double startPointY = -1;
 
-                    responseList.Add(startPointX.ToString());
-                    responseList.Add(startPointY.ToString());
-                    responseList.AddRange(new string[] { "Contains", "Starts With", "Ends With" });
-                    responseList.AddRange(new string[] { "CONTAINS", "STARTS_WITH", "ENDS_WITH" });
+                    if (responseList[0].Equals("FILTER_FILES"))
+                    {
+                        Point startPoint = new Point(0, fileFilterText.ActualHeight);
+                        startPoint = fileFilterText.PointToScreen(startPoint);
+                        startPointX = startPoint.X + 10;
+                        startPointY = startPoint.Y + 10;
+
+                        responseList.Add(startPointX.ToString());
+                        responseList.Add(startPointY.ToString());
+                    }
+                    if (responseList[0].Equals("FILTER_TYPE"))
+                    {
+                        Point startPoint = new Point(0, filterTypeText.ActualHeight);
+                        startPoint = filterTypeText.PointToScreen(startPoint);
+                        startPointX = startPoint.X + 10;
+                        startPointY = startPoint.Y + 10;
+
+                        responseList.Add(startPointX.ToString());
+                        responseList.Add(startPointY.ToString());
+                        responseList.AddRange(new string[] { "Contains", "Starts With", "Ends With" });
+                        responseList.AddRange(new string[] { "CONTAINS", "STARTS_WITH", "ENDS_WITH" });
+                    }
+
+
+                    string[] response = (string[])responseList.ToArray(typeof(string));
+                    this.iEventAggregator.GetEvent<PubSubEvent<ItemListFilterEventArgs>>().Publish(new ItemListFilterEventArgs(response[0], response));
                 }
-                string[] response = (string[]) responseList.ToArray(typeof(string));
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_ACTION", response));
             });
         }
     }

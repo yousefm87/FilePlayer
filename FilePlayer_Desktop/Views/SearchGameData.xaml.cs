@@ -314,7 +314,7 @@ namespace FilePlayer.Views
             itemRel = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ElementAt(SearchGameDataViewModel.SelectedCol - 1).ReleaseDate;
             itemImgLoc = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ElementAt(SearchGameDataViewModel.SelectedCol - 1).ImageURL;
 
-            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GAMEDATA_SEARCH_ADD", new String[] { itemName, itemDesc, itemRel, itemImgLoc }));
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GAMEDATA_ADD_ITEM", new String[] { itemName, itemDesc, itemRel, itemImgLoc }));
         }
 
         private void Window_Closed(object sender, EventArgs e)

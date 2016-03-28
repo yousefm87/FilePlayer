@@ -112,7 +112,7 @@ namespace FilePlayer.ViewModels
                 string response = Responses.ElementAt(SelectedOptionIndex);
                 string optionVal = VertOptions.ElementAt(SelectedOptionIndex);
 
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("VOS_OPTION", new string[] { response, optionVal }));
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("VOS_OPTION", new string[] { optionVal, response }));
 
                 this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Unsubscribe(optionToken);
         }

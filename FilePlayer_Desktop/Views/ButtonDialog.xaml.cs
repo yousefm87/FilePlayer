@@ -15,14 +15,7 @@ namespace FilePlayer.Views
     {
         private IEventAggregator iEventAggregator;
 
-        public string[] buttonActions;
-        public Button[] buttons;
-        public int selectedButtonIndex;
-
-
-
         public ButtonDialogViewModel ButtonDialogViewModel { get; set; }
-
 
         public ButtonDialog(string dialogType)
         {
@@ -35,6 +28,11 @@ namespace FilePlayer.Views
 
             this.Topmost = true;
             this.Topmost = false;
+        }
+
+        public void OnWindowClosed(object sender, EventArgs e)
+        {
+            ButtonDialogViewModel.OnWindowClosed(sender, e);
         }
         
     }

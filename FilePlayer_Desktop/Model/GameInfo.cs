@@ -99,7 +99,7 @@ namespace FilePlayer.Model
             {
                 webClient.DownloadFile(imageLocation, saveToFilePath);
             }
-            catch (WebException ex)
+            catch (WebException)
             {
                 itemImageLocation = "";
             }

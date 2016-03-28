@@ -209,6 +209,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="ControllerHandler2.cs" />
     <Compile Include="ControllerHandler.cs" />
     <Compile Include="Converters\ImageConverter.cs" />
     <Compile Include="Converters\ProgressConverter.cs" />
@@ -225,6 +226,7 @@
     <Compile Include="ViewModels\CharGetterViewModel.cs" />
     <Compile Include="ViewModels\GameRetrieverProgressViewModel.cs" />
     <Compile Include="ViewModels\ButtonDialogViewModel.cs" />
+    <Compile Include="ViewModels\ItemListFilterViewModel.cs" />
     <Compile Include="ViewModels\SearchGameDataViewModel.cs" />
     <Compile Include="ViewModels\SearchGameItemViewModel.cs" />
     <Compile Include="ViewModels\VerticalOptionSelecterViewModel.cs" />

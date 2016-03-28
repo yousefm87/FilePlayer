@@ -1,8 +1,6 @@
 ﻿using FilePlayer.Model;
 using FilePlayer.ViewModels;
 using Microsoft.Practices.Prism.PubSubEvents;
-using System;
-using System.Linq;
 using System.Windows.Controls;
 
 namespace FilePlayer.Views

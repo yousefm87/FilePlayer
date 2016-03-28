@@ -67,7 +67,7 @@ namespace FilePlayer.ViewModels
                 }
 
             }
-            catch (WebException ex)
+            catch (WebException)
             {
                 return false;
             }

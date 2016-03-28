@@ -1,6 +1,7 @@
 ﻿using FilePlayer.Model;
 using Microsoft.Practices.Prism.PubSubEvents;
-
+using System;
+using System.Collections.Generic;
 
 namespace FilePlayer.ViewModels
 {
@@ -15,6 +16,7 @@ namespace FilePlayer.ViewModels
     {
         private IEventAggregator iEventAggregator;
         private SubscriptionToken charGetterActionToken;
+        private Dictionary<string, Action> eventMap;
 
         private string spaceText;
         private static string[] charSetABC = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
@@ -73,47 +75,42 @@ namespace FilePlayer.ViewModels
             spaceText = "___";
             iEventAggregator = Event.EventInstance.EventAggregator;
 
+
+            eventMap = new Dictionary<string, Action>()
+            {
+                { "CHAR_MOVE_LEFT", MoveLeft },
+                { "CHAR_MOVE_RIGHT", MoveRight },
+                { "CHAR_SWITCHCHARSET_LEFT", SwitchCharSetLeft },
+                { "CHAR_SWITCHCHARSET_RIGHT", SwitchCharSetRight },
+                { "CHAR_MOVE_UP", MoveUp },
+                { "CHAR_MOVE_DOWN", MoveDown },
+                { "CHAR_SELECT", SelectControl },
+                { "CHAR_BACK", () =>
+                    {
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CHAR_BACK"));
+                    }
+                },
+                { "CHAR_CLOSE", () =>
+                    {
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CHAR_CLOSE"));
+                    }
+                }
+            };
+
             charGetterActionToken = this.iEventAggregator.GetEvent<PubSubEvent<CharGetterEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
-                    PerformViewAction(this, viewEventArgs);
+                    EventHandler(this, viewEventArgs);
                 }
             );
         }
 
-        void PerformViewAction(object sender, CharGetterEventArgs e)
+        void EventHandler(object sender, CharGetterEventArgs e)
         {
-            switch (e.action)
+            if (eventMap.ContainsKey(e.action))
             {
-                case "CHAR_MOVE_LEFT":
-                    MoveLeft();
-                    break;
-                case "CHAR_MOVE_RIGHT":
-                    MoveRight();
-                    break;
-                case "CHAR_SWITCHCHARSET_LEFT":
-                    SwitchCharSetLeft();
-                    break;
-                case "CHAR_SWITCHCHARSET_RIGHT":
-                    SwitchCharSetRight();
-                    break;
-                case "CHAR_MOVE_UP":
-                    MoveUp();
-                    break;
-                case "CHAR_MOVE_DOWN":
-                    MoveDown();
-                    break;
-                case "CHAR_SELECT":
-                    SelectControl();
-                    break;
-                case "CHAR_BACK":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CHAR_BACK", new string[] { "" }));
-                    break;
-                case "CHAR_CLOSE":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CHAR_CLOSE", new string[] { "" }));
-                    break;
+                eventMap[e.action]();
             }
-
         }
 
 

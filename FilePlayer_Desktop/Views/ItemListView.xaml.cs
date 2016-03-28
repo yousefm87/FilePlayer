@@ -9,6 +9,7 @@ using System.Collections;
 using Microsoft.Practices.Prism.PubSubEvents;
 using System.Linq;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace FilePlayer.Views
 {
@@ -19,7 +20,7 @@ namespace FilePlayer.Views
     {
         public ItemListViewModel ItemListViewModel { get; set; }
         private IEventAggregator iEventAggregator;
-        
+        public Dictionary<string, Action> PropertyChangedMap;
 
         public ItemListView()
         {
@@ -29,20 +30,33 @@ namespace FilePlayer.Views
             ItemListViewModel = new ItemListViewModel(Event.EventInstance.EventAggregator);
             this.DataContext = ItemListViewModel;
 
+            SetPropertyChangedMap();
             ItemListViewModel.PropertyChanged += PropertyChangedHandler;
 
         }
 
+
         private void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
         {
-            switch (e.PropertyName)
+            if (PropertyChangedMap.ContainsKey(e.PropertyName))
             {
-                case "SelectedItemIndex":
-                    SetItemSelected(ItemListViewModel.SelectedItemIndex);
-                    break;
+                PropertyChangedMap[e.PropertyName]();
             }
         }
-        
+
+        private void SetPropertyChangedMap()
+        {
+            PropertyChangedMap = new Dictionary<string, Action>()
+            {
+                { "SelectedItemIndex", () => {
+                    SetItemSelected(ItemListViewModel.SelectedItemIndex);
+                }},
+                { "FilterVisibility", () => {
+                    filterControl.ItemListFilterViewModel.FilterVisibility = ItemListViewModel.FilterVisibility;
+                }}
+            };
+        }
+
         private void Itemlist_Loaded(object sender, RoutedEventArgs e)
         {
             SetItemSelected(ItemListViewModel.SelectedItemIndex); 

@@ -1,6 +1,7 @@
 ﻿using FilePlayer.Model;
 using Microsoft.Practices.Prism.PubSubEvents;
-
+using System;
+using System.Collections.Generic;
 
 namespace FilePlayer.ViewModels
 {
@@ -18,6 +19,7 @@ namespace FilePlayer.ViewModels
     {
         private IEventAggregator iEventAggregator;
         private SubscriptionToken progressToken;
+        private Dictionary<string, Action<string[]>> eventMap;
 
         private string platformDenominator;
         private string platformNumerator;
@@ -113,12 +115,21 @@ namespace FilePlayer.ViewModels
         {
             this.iEventAggregator = iEventAggregator;
 
-            progressToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe((viewEventArgs) =>
-                                                                                                    {
-                                                                                                        PerformViewAction(this, viewEventArgs);
-                                                                                                    }
-                                                                                                    );
+            eventMap = new Dictionary<string, Action<string[]>>()
+            {
+                { "GIANTBOMB_PLATFORM_UPLOAD_START", UpdatePlatformInfo },
+                { "GIANTBOMB_GAME_UPLOAD_START", UpdateGameInfo }
+            };
+
+            progressToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
+                (viewEventArgs) =>
+                {
+                    PerformViewAction(this, viewEventArgs);
+                }
+            );
             Init();
+
+
         }
 
         public void Init()
@@ -137,27 +148,27 @@ namespace FilePlayer.ViewModels
 
         void PerformViewAction(object sender, ViewEventArgs e)
         {
-            switch (e.action)
+            if(eventMap.ContainsKey(e.action))
             {
-
-                case "GIANTBOMB_PLATFORM_UPLOAD_START":
-                    PlatformName = e.addlInfo[0];
-                    PlatformNumerator = e.addlInfo[1];
-                    PlatformDenominator = e.addlInfo[2];
-                    PlatformPercentage = e.addlInfo[3];
-                    break;
-
-                case "GIANTBOMB_GAME_UPLOAD_START":
-                    //gameProgressText.Dispatcher.Invoke((Action)delegate
-                    //{
-                    GameName = e.addlInfo[0];
-                    GameNumerator = e.addlInfo[1];
-                    GameDenominator = e.addlInfo[2];
-                    GamePercentage = e.addlInfo[3];
-                    //});
-                    break;
+                eventMap[e.action](e.addlInfo);
             }
 
+        }
+
+        public void UpdatePlatformInfo(string[] platformInfo)
+        {
+            PlatformName = platformInfo[0];
+            PlatformNumerator = platformInfo[1];
+            PlatformDenominator = platformInfo[2];
+            PlatformPercentage = platformInfo[3];
+        }
+
+        public void UpdateGameInfo(string[] gameInfo)
+        {
+            GameName = gameInfo[0];
+            GameNumerator = gameInfo[1];
+            GameDenominator = gameInfo[2];
+            GamePercentage = gameInfo[3];
         }
     }
 }

@@ -6,13 +6,7 @@ using FilePlayer.Model;
 using Microsoft.Practices.Prism.PubSubEvents;
 using System.Linq;
 using System.Diagnostics;
-using GiantBomb.Api;
-using GiantBomb.Api.Model;
-using System.Net;
-using System.Text;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
-using System.Windows.Media.Effects;
 using System.Collections;
 using System.Windows;
 
@@ -28,30 +22,33 @@ namespace FilePlayer.ViewModels
 
     public class ItemListViewModel : ViewModelBase
     {
-        private Stack shadeStack = new Stack();
-
-
         private ItemLists itemLists;
-        private GameInfo gameInfo;
-        Thread gamepadThread;
-        public XboxControllerInputProvider input;
-        
+        private GameInfo gameInfo;        
 
         private IEventAggregator iEventAggregator;
-        private ControllerHandler controllerHandler;
-        
         private SubscriptionToken itemListToken = null;
+        private SubscriptionToken buttonDialogToken = null;
+
+        private Dictionary<string, Action> buttonDialogEventMap;
+        private Dictionary<string, Action> eventMap;
+        private Dictionary<string, Action<string[]>> eventMapParams;
+        
+
         private IEnumerable<string> allItemNames;
         private IEnumerable<string> allItemPaths;
+        private int selectedItemIndex;
         private string currAppName;
         private string itemImage;
-        private int selectedItemIndex;
         private string releaseDate;
         private string description;
         private string shortDescription;
+
         private bool shadeEffect;
-        private Visibility errorVisiblility;
-        private Visibility filterVisiblility;
+        private Stack shadeStack = new Stack();
+
+        private Visibility errorVisibility;
+        private Visibility filterVisibility;
+
         private string filterText;
         private string filterTypeText;
 
@@ -64,7 +61,6 @@ namespace FilePlayer.ViewModels
                 OnPropertyChanged("FilterText");
             }
         }
-
         public string FilterTypeText
         {
             get { return filterTypeText; }
@@ -77,24 +73,22 @@ namespace FilePlayer.ViewModels
 
         public Visibility ErrorVisiblility
         {
-            get { return errorVisiblility; }
+            get { return errorVisibility; }
             set
             {
-                errorVisiblility = value;
+                errorVisibility = value;
                 OnPropertyChanged("ErrorVisiblility");
             }
         }
-
-        public Visibility FilterVisiblility
+        public Visibility FilterVisibility
         {
-            get { return filterVisiblility; }
+            get { return filterVisibility; }
             set
             {
-                filterVisiblility = value;
-                OnPropertyChanged("FilterVisiblility");
+                filterVisibility = value;
+                OnPropertyChanged("FilterVisibility");
             }
         }
-
         public bool ShadeEffect
         {
             get { return shadeEffect; }
@@ -134,7 +128,6 @@ namespace FilePlayer.ViewModels
                 OnPropertyChanged("itemLists");
             }
         }
-
         public GameInfo GameInfo
         {
             get { return this.gameInfo; }
@@ -161,7 +154,6 @@ namespace FilePlayer.ViewModels
                 OnPropertyChanged("ReleaseDate");
             }
         }
-
         public string Description
         {
             get { return this.description; }
@@ -180,7 +172,6 @@ namespace FilePlayer.ViewModels
                 OnPropertyChanged("ShortDescription");
             }
         }
-
         public string CurrAppName
         {
             get { return this.currAppName; }
@@ -208,8 +199,6 @@ namespace FilePlayer.ViewModels
                 OnPropertyChanged("AllItemNames");
             }
         }
-
-
         public IEnumerable<string> AllItemPaths
         {
             get { return this.allItemPaths; }
@@ -229,6 +218,7 @@ namespace FilePlayer.ViewModels
                 OnPropertyChanged("ItemImage");
             }
         }
+
         Process autProc = null;
         Process appProc = null;
         string consolesStr = "C:\\FPData\\consoles.json";
@@ -236,8 +226,7 @@ namespace FilePlayer.ViewModels
 
         public ItemListViewModel(IEventAggregator iEventAggregator)
         {
-
-            FilterVisiblility = Visibility.Hidden;
+            FilterVisibility = Visibility.Hidden;
             ShadeEffect = false;
             FilterText = "";
             FilterTypeText = "";
@@ -245,20 +234,93 @@ namespace FilePlayer.ViewModels
             
             UpdateItemLists();
 
-            input = new XboxControllerInputProvider(Event.EventInstance.EventAggregator);
-            
-            gamepadThread = new Thread(new ThreadStart(input.PollGamepad));
-            gamepadThread.Start();
+            InitializeEventMaps(); 
 
-            controllerHandler = new ControllerHandler(Event.EventInstance.EventAggregator);
-
-            itemListToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
-                (controllerEventArgs) =>
-                {
-                    PerformAction(controllerEventArgs);
-                }
+            buttonDialogToken = this.iEventAggregator.GetEvent<PubSubEvent<ButtonDialogEventArgs>>().Subscribe(
+                (viewEventArgs) => { ButtonDialogHandler(viewEventArgs); }
             );
+            
+            itemListToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
+                (controllerEventArgs) => { EventHandler(controllerEventArgs); }
+            );
+        }
 
+        private void InitializeEventMaps()
+        {
+            buttonDialogEventMap = new Dictionary<string, Action>()
+            {
+                { "EXIT", CloseCurrentApplication },
+                { "FILE_OPEN", OpenSelectedItemInApp }, //Click "Open File"
+                { "FILE_DELETE_DATA", DeleteCurrentGameData }, //Click "Delete Game Data"
+                { "FILE_SEARCH_DATA", SendSearchGameDataEvent },
+                { "RETURN_TO_APP", MaximizeCurrentApp }, //Click "Return to app"
+                { "CLOSE_APP", CloseCurrentApplication }
+            };
+
+            eventMap = new Dictionary<string, Action>()
+            {
+                { "MAXIMIZE_CURR_APP", MaximizeCurrentApp },
+                { "ITEMLIST_MOVE_LEFT", SetPreviousLists },
+                { "ITEMLIST_MOVE_RIGHT", SetNextLists },
+                { "GIANTBOMB_UPLOAD_START", UploadFromGiantbomb },
+                { "OPEN_FILTER", OpenFilter },
+                { "CLOSE_FILTER", CloseFilter },
+                { "ADD_SHADE", () => { SetShade(true); } },
+                { "REMOVE_SHADE", () => { SetShade(false); } }
+            };
+
+            eventMapParams = new Dictionary<string, Action<string[]>>()
+            {
+                { "ITEMLIST_MOVE_UP", MoveIndexUp },
+                { "ITEMLIST_MOVE_DOWN", MoveIndexDown },
+                { "FILTER_LIST", FilterItemlist },
+                { "GAMEDATA_ADD_ITEM", AddGameDataItem }
+            };
+
+        }
+
+        private void DeleteCurrentGameData()
+        {
+            string currGame = AllItemNames.ElementAt(SelectedItemIndex);
+            GameInfo.DeleteGame(currGame);
+            SelectedItemIndex = SelectedItemIndex;
+        }
+
+        private void SendSearchGameDataEvent()
+        {
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GAMEDATA_SEARCH", new String[] { AllItemNames.ElementAt(SelectedItemIndex) }));
+        }
+
+        private void CloseCurrentApplication()
+        {
+            if (appProc != null)
+            {
+                if (!appProc.HasExited)
+                {
+                    appProc.Kill();
+                }
+            }
+        }
+
+        private void ButtonDialogHandler(ButtonDialogEventArgs e)
+        {
+            if (buttonDialogEventMap.ContainsKey(e.action))
+            {
+                buttonDialogEventMap[e.action]();
+            }
+        }
+
+        public void EventHandler(ViewEventArgs e)
+        {
+            if (eventMap.ContainsKey(e.action))
+            {
+                eventMap[e.action]();
+            }
+
+            if (eventMapParams.ContainsKey(e.action))
+            {
+                eventMapParams[e.action](e.addlInfo);
+            }
         }
 
         public void GenerateSampleJson()
@@ -308,175 +370,57 @@ namespace FilePlayer.ViewModels
                 ErrorVisiblility = Visibility.Visible;
             }
         }
-        public void PerformAction(ViewEventArgs e)
+
+
+        public void AddGameDataItem(string[] gameDataItem)
         {
-            int numMoves;
-            switch (e.action)
+            GameInfo.AddGame(gameDataItem[0], gameDataItem[1], gameDataItem[2], gameDataItem[3]);
+            SelectedItemIndex = SelectedItemIndex;
+        }
+
+        public void UploadFromGiantbomb()
+        {
+            Task.Factory.StartNew(() =>
             {
-                case "ITEMLIST_MOVE_LEFT":
-                    SetPreviousLists(FilterText, FilterTypeText);
-                    break;
-                case "ITEMLIST_MOVE_RIGHT":
-                    SetNextLists(FilterText, FilterTypeText);
-                    break;
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "NONE" }));
 
-                case "ITEMLIST_MOVE_UP":
-                    numMoves = Int32.Parse(e.addlInfo[0]);
-                    MoveIndexUp(numMoves);
-                    break;
-                case "ITEMLIST_MOVE_DOWN":
-                    numMoves = Int32.Parse(e.addlInfo[0]);
-                    MoveIndexDown(numMoves);
-                    break;
+                GameRetriever.GetAllPlatformsData(itemLists, iEventAggregator);
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_COMPLETE", new String[] { }));
+                
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "ITEMLIST_BROWSE" }));
+            });
+        }
 
-                case "SET_CONTROLLER_STATE":
-                    controllerHandler.SetControllerState(e.addlInfo[0]);
-                    if (e.addlInfo[0].Equals("ITEM_PLAY"))
-                    {
-                        WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
-                    }
-                    break;
-                case "FILTER_ACTION":
-                    switch (e.addlInfo[0])
-                    {
-                        case "FILTER_FILES":
-                            controllerHandler.SetControllerState("CHAR_GETTER");
-                            break;
-                        case "FILTER_APPLY":
-                            break;
-                        case "FILTER_TYPE":
-                            controllerHandler.SetControllerState("VERTICAL_OPTION_SELECTER");
-                            break;
-                    }
-                    break;
-                case "CHAR_CLOSE":
-                    controllerHandler.SetControllerState("FILTER_MAIN");
-                    break;
-                case "VOS_OPTION":
-                    controllerHandler.SetControllerState("FILTER_MAIN");
-                    break;
-                case "GIANTBOMB_UPLOAD_START":
-                    SetShade(true);
-                    Task.Factory.StartNew(() =>
-                    {
-                        controllerHandler.SetControllerState("NONE");
-                        GameRetriever.GetAllPlatformsData(itemLists, iEventAggregator);
-                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_COMPLETE", new String[] { }));
-                        controllerHandler.SetControllerState("ITEMLIST_BROWSE");
-                    });
-                    break;
-                case "GAMEPAD_ABORT":
-                    gamepadThread.Abort();
-                    break;
-                case "BUTTONDIALOG_SELECT":
-                    SetShade(false);
+        public void MaximizeCurrentApp()
+        {
+            WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
+        }
 
-                    switch (e.addlInfo[0])
-                    {
-                        case "ITEMLIST_PAUSE":
-                            switch (e.addlInfo[1])
-                            {
-                                case "EXIT": //Exit the application
-                                    //gamepadThread.Abort();
-                                    break;
-                                case "ITEMLISTPAUSE_CLOSE":
-                                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
-                                    break;
-                                case "UPDATE_ITEMLIST":
-                                    UpdateItemLists();
-                                    break;
-                            }
+        public void OpenFilter()
+        {
+            FilterVisibility = Visibility.Visible;
+        }
 
-                            break;
-                        case "ITEMLIST_CONFIRMATION":
-                            //buttonActions = new string[] { "FILE_OPEN", "FILE_SEARCH_DATA", "FILE_DELETE_DATA" };
-                            switch (e.addlInfo[1])
-                            {
-                                case "FILE_OPEN":
-                                    OpenSelectedItemInApp();
-                                    controllerHandler.SetControllerState("ITEM_PLAY");
-                                    break;
-                                case "FILE_DELETE_DATA":
-                                    string currGame = AllItemNames.ElementAt(SelectedItemIndex);
-                                    GameInfo.DeleteGame(currGame);
-                                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
-                                    SelectedItemIndex = SelectedItemIndex;
-                                    break;
-                                case "FILE_SEARCH_DATA":
-                                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GAMEDATA_SEARCH", new String[] { AllItemNames.ElementAt(SelectedItemIndex) }));
-                                    controllerHandler.SetControllerState("SEARCH_GAME_DATA");
-                                    break;
-                            }
-                            break;
-                        case "APP_PAUSE":
-                            //buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "EXIT" };
-                            switch (e.addlInfo[1])
-                            {
-                                case "RETURN_TO_APP":
-                                    WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
-                                    controllerHandler.SetControllerState("ITEM_PLAY");
-                                    break;
-                                case "CLOSE_APP":
-                                    if (!appProc.HasExited)
-                                        appProc.Kill();
-                                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
-                                    break;
-                                case "EXIT":
-                                    if (!appProc.HasExited)
-                                    {
-                                        appProc.Kill();
-                                    }
-                                    break;
-                            }
-                            break;
-                    }
-                    break;
-                case "FILTER_LIST":
-                    if (!FilterText.Equals(e.addlInfo[0]) || !FilterTypeText.Equals(e.addlInfo[1]))
-                    {
-                        FilterText = e.addlInfo[0];
-                        filterTypeText = e.addlInfo[1];
+        public void CloseFilter()
+        {
+            FilterVisibility = Visibility.Hidden;
+        }
 
-                        AllItemNames = ItemLists.GetItemNames(ItemLists.CurrConsole, FilterText, FilterTypeText);
-                        AllItemPaths = ItemLists.GetItemFilePaths(ItemLists.CurrConsole, FilterText, FilterTypeText);
+        public void FilterItemlist(string[] filterData)
+        {
 
-                        SelectedItemIndex = 0;
-                    }
-                    break;
-                case "OPEN_FILTER":
-                    if (ItemLists.GetConsoleCount() > 0)
-                    {
-                        FilterVisiblility = Visibility.Visible;
-                    }
-                    break;
-                case "CLOSE_FILTER":
-                    FilterVisiblility = Visibility.Hidden;
-                    break;
-                case "SEARCHGAMEDATA_CLOSE":
-                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
-                    break;
-                case "GAMEDATA_SEARCH_ADD":
-                    GameInfo.AddGame(e.addlInfo[0], e.addlInfo[1], e.addlInfo[2], e.addlInfo[3]);
-                    controllerHandler.SetControllerState("ITEMLIST_BROWSE");
-                    SelectedItemIndex = SelectedItemIndex;
-                    break;
-                case "BUTTONDIALOG_OPEN":
-                    SetShade(true);
-                    break;
-                case "BUTTONDIALOG_CLOSE":
-                    SetShade(false);
-                    break;
-                case "CONTROLLER_NOTFOUND_OPEN":
-                    SetShade(true);
-                    break;
-                case "CONTROLLER_NOTFOUND_CLOSE":
-                    SetShade(false);
-                    break;
-                case "GIANTBOMB_UPLOAD_COMPLETE":
-                    SetShade(false);
-                    break;
+            if (!FilterText.Equals(filterData[0]) || !FilterTypeText.Equals(filterData[1]))
+            {
+                FilterText = filterData[0];
+                FilterTypeText = filterData[1];
+
+                AllItemNames = ItemLists.GetItemNames(ItemLists.CurrConsole, FilterText, FilterTypeText);
+                AllItemPaths = ItemLists.GetItemFilePaths(ItemLists.CurrConsole, FilterText, FilterTypeText);
+
+                SelectedItemIndex = 0;
             }
         }
+
 
 
         public void SetNextLists(string searchStr, string filterType)
@@ -496,7 +440,12 @@ namespace FilePlayer.ViewModels
                 this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
             }
         }
-        
+
+        public void SetNextLists()
+        {
+            SetNextLists(FilterText, FilterTypeText);
+        }
+
 
         public void SetPreviousLists(string searchStr, string filterType)
         {
@@ -514,6 +463,12 @@ namespace FilePlayer.ViewModels
 
                 this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
             }
+        }
+
+
+        public void SetPreviousLists()
+        {
+            SetPreviousLists(FilterText, FilterTypeText);
         }
 
         public void OpenSelectedItemInApp()
@@ -598,6 +553,13 @@ namespace FilePlayer.ViewModels
             return SelectedItemIndex;
         }
 
+        public void MoveIndexUp(string[] numMoves)
+        {
+            int numMove = Int32.Parse(numMoves[0]);
+
+            MoveIndexUp(numMove);
+        }
+
         public int MoveIndexDown(int numMove)
         {
             int selectedIndex = SelectedItemIndex;
@@ -615,6 +577,13 @@ namespace FilePlayer.ViewModels
             SelectedItemIndex = newSelectedIndex;
 
             return SelectedItemIndex;
+        }
+
+        public void MoveIndexDown(string[] numMoves)
+        {
+            int numMove = Int32.Parse(numMoves[0]);
+
+            MoveIndexDown(numMove);
         }
 
 

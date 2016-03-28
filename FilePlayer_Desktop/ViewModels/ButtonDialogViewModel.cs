@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using FilePlayer.Model;
+using System;
 
 namespace FilePlayer.ViewModels
 {
@@ -45,26 +46,16 @@ namespace FilePlayer.ViewModels
     {
         private IEventAggregator iEventAggregator;
         private SubscriptionToken dialogActionToken;
+        public Dictionary<string, Action> EventMap { get; private set; }
+        
         private IEnumerable<string> buttonNames;
         private IEnumerable<string> buttonResponses;
         private int selectedButtonIndex;
         private string dialogName;
-        private string closeEvent;
-        
-
-        public string CloseEvent
-        {
-            get { return this.closeEvent; }
-            set
-            {
-                closeEvent = value;
-                OnPropertyChanged("CloseEvent");
-            }
-        }
 
         public int SelectedButtonIndex
         {
-            get { return this.selectedButtonIndex; }
+            get { return selectedButtonIndex; }
             set
             {
                 selectedButtonIndex = value;
@@ -73,7 +64,7 @@ namespace FilePlayer.ViewModels
         }
         public IEnumerable<string> ButtonNames
         {
-            get { return this.buttonNames; }
+            get { return buttonNames; }
             set
             {
                 buttonNames = value;
@@ -83,7 +74,7 @@ namespace FilePlayer.ViewModels
 
         public IEnumerable<string> ButtonResponses
         {
-            get { return this.buttonResponses; }
+            get { return buttonResponses; }
             set
             {
                 buttonResponses = value;
@@ -93,7 +84,7 @@ namespace FilePlayer.ViewModels
 
         public string DialogName
         {
-            get { return this.dialogName; }
+            get { return dialogName; }
             set
             {
                 dialogName = value;
@@ -101,6 +92,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
+        
 
         public ButtonDialogViewModel(IEventAggregator iEventAggregator, string dialogType)
         {
@@ -114,40 +106,39 @@ namespace FilePlayer.ViewModels
 
             this.SelectedButtonIndex = 0;
 
+            EventMap = new Dictionary<string, Action>()
+            {
+                { "BUTTONDIALOG_MOVE_UP", MoveUp},
+                { "BUTTONDIALOG_MOVE_DOWN", MoveDown},
+                { "BUTTONDIALOG_SELECT_BUTTON", SelectButton}
+            };
+
             dialogActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
-                    PerformViewAction(this, viewEventArgs);
+                    EventHandler(viewEventArgs);
                 }
             );
         }
 
-
-        void PerformViewAction(object sender, ViewEventArgs e)
+        void EventHandler(ViewEventArgs e)
         {
-            switch (e.action)
+            if (EventMap.ContainsKey(e.action))
             {
-                case "BUTTONDIALOG_MOVE_UP":
-                    MoveUp();
-                    break;
-                case "BUTTONDIALOG_MOVE_DOWN":
-                    MoveDown();
-                    break;
-                case "BUTTONDIALOG_SELECT_BUTTON":
-                    SelectButton();
-                    break;
+                EventMap[e.action]();
             }
-
         }
 
-        public void ReturnController()
+        public void OnWindowClosed(object sender, EventArgs e)
         {
-            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { CloseEvent }));
+            if (dialogActionToken != null)
+            {
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Unsubscribe(dialogActionToken);
+            }
         }
 
 
-
-        public void MoveUp()
+        private void MoveUp()
         {
             if (SelectedButtonIndex > 0)
             {
@@ -155,7 +146,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public void MoveDown()
+        private void MoveDown()
         {
             if (SelectedButtonIndex < (buttonNames.Count() - 1))
             {
@@ -163,9 +154,9 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public void SelectButton()
+        private void SelectButton()
         {
-            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_SELECT", new string[] { DialogName, ButtonResponses.ElementAt(SelectedButtonIndex) }));
+            iEventAggregator.GetEvent<PubSubEvent<ButtonDialogEventArgs>>().Publish(new ButtonDialogEventArgs(ButtonResponses.ElementAt(SelectedButtonIndex), new string[] { }));
         }
 
     }

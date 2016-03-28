@@ -1,10 +1,10 @@
 ﻿using System;
 using Microsoft.Practices.Prism.PubSubEvents;
-using Prism.Interactivity.InteractionRequest;
 using System.Windows.Input;
 using System.Windows;
 using System.Collections.Generic;
 using FilePlayer.Model;
+using System.Threading;
 
 namespace FilePlayer.ViewModels
 {
@@ -63,10 +63,15 @@ namespace FilePlayer.ViewModels
     {
 
         private WindowState _shellWindowState = WindowState.Maximized;
-        private string resultMessage;
 
         private IEventAggregator iEventAggregator;
         private SubscriptionToken shellActionToken;
+        private SubscriptionToken buttonDialogToken;
+        private SubscriptionToken filterToken;
+        private Dictionary<string, Action> eventMap;
+        private Dictionary<string, Action<string[]>> eventMapParam;
+        private Dictionary<string, Action> buttonDialogEventMap;
+        private Dictionary<string, Action<string[]>> filterEventMap;
 
         private bool buttonDialogState = false;
         private bool charGetterState = false;
@@ -76,6 +81,9 @@ namespace FilePlayer.ViewModels
         private bool verticalOptionSelecterState = false;
         private string buttonDialogType;
         private string searchGameDataQuery;
+        private XboxControllerInputProvider input;
+        private Thread gamepadThread;
+        private ControllerHandler controllerHandler;
 
         public string[] VerticalOptionData { get; private set; }
         public string[] CharGetterPoint { get; private set; }
@@ -86,6 +94,7 @@ namespace FilePlayer.ViewModels
             set
             {
                 buttonDialogState = value;
+                SendItemListShadeEvent(value);
                 OnPropertyChanged("ButtonDialogState");
             }
         }
@@ -114,8 +123,14 @@ namespace FilePlayer.ViewModels
             get { return controllerNotFoundState; }
             set
             {
-                controllerNotFoundState = value;
-                OnPropertyChanged("ControllerNotFoundState");
+                if (value != controllerNotFoundState)
+                {
+                    SendItemListShadeEvent(value);
+                    controllerNotFoundState = value;
+
+                    OnPropertyChanged("ControllerNotFoundState");
+                }
+
             }
         }
 
@@ -125,6 +140,7 @@ namespace FilePlayer.ViewModels
             set
             {
                 gameRetrieverProgressState = value;
+                SendItemListShadeEvent(value);
                 OnPropertyChanged("GameRetrieverProgressState");
             }
         }
@@ -135,11 +151,11 @@ namespace FilePlayer.ViewModels
             set
             {
                 searchGameDataState = value;
+                SendItemListShadeEvent(value);
                 OnPropertyChanged("SearchGameDataState");
             }
         }
-
-
+        
 
         public string SearchGameDataQuery
         {
@@ -177,109 +193,224 @@ namespace FilePlayer.ViewModels
         {
             this.iEventAggregator = iEventAggregator;
 
+            InitializeEventMaps();
+
             shellActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
-                (viewEventArgs) =>
+                (viewEventArgs) => 
                 {
-                    PerformViewAction(this, viewEventArgs);
+                    EventHandler(viewEventArgs);
                 }
             );
+
+
+            
+
+            buttonDialogToken = this.iEventAggregator.GetEvent<PubSubEvent<ButtonDialogEventArgs>>().Subscribe(
+                (viewEventArgs) =>
+                {
+                    ButtonDialogHandler(viewEventArgs);
+                }
+            );
+
+
+
+            filterToken = this.iEventAggregator.GetEvent<PubSubEvent<ItemListFilterEventArgs>>().Subscribe(
+                (viewEventArgs) =>
+                {
+                    FilterHandler(viewEventArgs);
+                }
+            );
+
+
+
+            input = new XboxControllerInputProvider(Event.EventInstance.EventAggregator);
+
+            gamepadThread = new Thread(new ThreadStart(input.PollGamepad));
+            gamepadThread.Start();
+
+            controllerHandler = new ControllerHandler(Event.EventInstance.EventAggregator);
+
         }
 
-        private void PerformViewAction(object sender, ViewEventArgs e)
+
+        private void ButtonDialogHandler(ButtonDialogEventArgs e)
         {
-            switch (e.action)
+            if (buttonDialogEventMap.ContainsKey(e.action))
             {
-                case "FILTER_ACTION":
-                    switch (e.addlInfo[0])
-                    {
-                        case "FILTER_FILES": //Selecting file filter
-                            CharGetterPoint = e.addlInfo;
-                            CharGetterState = true;
-                            break;
-                        case "FILTER_TYPE": //Selecting filter type
-                            VerticalOptionData = e.addlInfo;
-                            VerticalOptionSelecterState = true;
-                            break;
-                    }
-                    break;
-                case "CHAR_CLOSE": //Close CharGetter
-                    CharGetterState = false;
-                    break;
-                case "CONTROLLER_NOT_FOUND":
-                    ControllerNotFoundState = true;
-                    break;
-                case "CONTROLLER_CONNECTED":
-                    ControllerNotFoundState = false;
-                    break;
-                case "BUTTONDIALOG_OPEN":
-                    ButtonDialogType = e.addlInfo[0];
-                    ButtonDialogState = true;
-                    break;
-                case "BUTTONDIALOG_CLOSE":
-                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "LAST" }));
-                    ButtonDialogState = false;
-                    break;
-                case "BUTTONDIALOG_SELECT":
-                    ButtonDialogState = false;
-                    switch (e.addlInfo[0])
-                    {
-                        case "ITEMLIST_PAUSE":
-                            switch (e.addlInfo[1])
-                            {
-                                case "EXIT": //Exit the application
-                                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT"));
-                                    break;
-                                case "GAMEDATA_UPLOAD": //Upload from Giantbomb
-                                    GameRetrieverProgressState = true;
-                                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_START", e.addlInfo));
-                                    break;
-                            }
-                            break;
-                        case "ITEMLIST_CONFIRMATION":
-                            //buttonActions = new string[] { "FILE_OPEN", "FILE_SEARCH_DATA", "FILE_DELETE_DATA" };
-                            switch (e.addlInfo[1])
-                            {
-                                case "FILE_OPEN":
-                                    ShellWindowState = WindowState.Minimized;
-                                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("OPEN_ITEM", e.addlInfo));
-                                    break;
-                            }
-                            break;
-                        case "APP_PAUSE":
-                            //buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "EXIT" };
-                            switch (e.addlInfo[1])
-                            {
-                                case "RETURN_TO_APP": //Click "Return to app"
-                                    ShellWindowState = WindowState.Minimized;
-                                    break;
-                                case "CLOSE_APP": //Click "Close App"
-                                    ShellWindowState = WindowState.Maximized;
-                                    break;
-                                case "EXIT": // Click "Close App + FilePlayer
-                                    this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT"));
-                                    break;
-                            }
-                            break;
-                    }
-                    break;
-                    case "GAMEDATA_SEARCH":
-                        SearchGameDataQuery = e.addlInfo[0];
-                        SearchGameDataState = true;
-                        break;
-                    case "SEARCHGAMEDATA_CLOSE":
-                        SearchGameDataState = false;
-                        break;
-                    case "GAMEDATA_SEARCH_ADD":
-                        SearchGameDataState = false;
-                        break;
-                    case "GIANTBOMB_UPLOAD_COMPLETE":
-                        GameRetrieverProgressState = false;
-                        break;
-                    case "VOS_OPTION": //Select an option from VOS
-                        VerticalOptionSelecterState = false;
-                        break;
-                    
+                ButtonDialogState = false;
+                buttonDialogEventMap[e.action]();
             }
+        }
+
+        private void FilterHandler(ItemListFilterEventArgs e)
+        {
+            if (filterEventMap.ContainsKey(e.action))
+            {
+                filterEventMap[e.action](e.addlInfo);
+            }
+        }
+
+        private void SendItemListShadeEvent(bool setShade)
+        {
+            if(setShade)
+            {
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ADD_SHADE"));
+            }
+            else
+            {
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("REMOVE_SHADE"));
+            }
+        }
+
+        private void EventHandler(ViewEventArgs e)
+        {
+            if (eventMap.ContainsKey(e.action))
+            {
+                eventMap[e.action]();
+            }
+
+            if (eventMapParam.ContainsKey(e.action))
+            {
+                eventMapParam[e.action](e.addlInfo);
+            }
+
+        }
+
+        private void InitializeEventMaps()
+        {
+            eventMap = new Dictionary<string, Action>() 
+            {
+                { "CHAR_CLOSE", () => //Close CharGetter  
+                    {
+                        CharGetterState = false;
+                        controllerHandler.SetControllerState("LAST");
+                    }
+                },
+                { "CONTROLLER_NOT_FOUND", () => 
+                    {
+                        ControllerNotFoundState = true;
+                    }
+                },
+                { "CONTROLLER_CONNECTED", () => 
+                    {
+                        ControllerNotFoundState = false;
+                    }
+                },
+                { "BUTTONDIALOG_CLOSE", () =>
+                    {
+                        controllerHandler.SetControllerState("LAST");
+                        ButtonDialogState = false;
+                    }
+                },
+                { "SEARCHGAMEDATA_CLOSE", () =>
+                    {
+                        SearchGameDataState = false;
+                        controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                    }
+                },
+                {"GAMEDATA_ADD_ITEM", () =>
+                    {
+                        SearchGameDataState = false;
+                        controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                    }
+                },
+                { "GIANTBOMB_UPLOAD_COMPLETE", () =>
+                    {
+                        GameRetrieverProgressState = false;
+                    }
+                },
+                { "VOS_OPTION", () =>
+                    {
+                        VerticalOptionSelecterState = false;
+                        controllerHandler.SetControllerState("LAST");
+                    }
+                },
+                { "GAMEPAD_ABORT", () => { gamepadThread.Abort(); }}
+            
+            };
+
+            eventMapParam = new Dictionary<string, Action<string[]>>()
+            {
+                { "SET_CONTROLLER_STATE", (controllerInfo) =>
+                    {
+                        controllerHandler.SetControllerState(controllerInfo[0]);
+                    }
+                },
+                { "BUTTONDIALOG_OPEN", (dialogInfo) =>
+                    {
+                        ButtonDialogType = dialogInfo[0];
+                        ButtonDialogState = true;
+                    }
+                },
+                { "GAMEDATA_SEARCH", (searchData) =>
+                    {
+                        SearchGameDataQuery = searchData[0];
+                        SearchGameDataState = true;
+                    }
+                }
+            };
+
+            filterEventMap = new Dictionary<string, Action<string[]>>()
+            {
+                { "FILTER_FILES", (point) =>
+                    {
+                        CharGetterPoint = point;
+                        CharGetterState = true;
+                        controllerHandler.SetControllerState("CHAR_GETTER");
+                    }
+                },
+                { "FILTER_TYPE", (selecterData) =>
+                    {
+                        VerticalOptionData = selecterData;
+                        VerticalOptionSelecterState = true;
+                        controllerHandler.SetControllerState("VERTICAL_OPTION_SELECTER");
+                    }
+                }
+            };
+
+            buttonDialogEventMap = new Dictionary<string, Action>()
+            {
+                { "EXIT", () =>
+                    {
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT"));
+                    }
+                },
+                { "GAMEDATA_UPLOAD", () =>
+                    {
+                        GameRetrieverProgressState = true;
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_START"));
+                    }
+                },
+                { "FILE_OPEN", () =>
+                    {
+                        ShellWindowState = WindowState.Minimized;
+                        controllerHandler.SetControllerState("ITEM_PLAY");
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("MAXIMIZE_CURR_APP"));
+                    }
+                },
+                { "FILE_DELETE_DATA", () => //Click "Delete Game Data"
+                    {
+                        controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                    }
+                },
+                { "FILE_SEARCH_DATA", () => //Click "Search Game Data"
+                    {
+                        controllerHandler.SetControllerState("SEARCH_GAME_DATA");
+                    }
+                },
+                { "RETURN_TO_APP", () => //Click "Return to app"
+                    {
+                        ShellWindowState = WindowState.Minimized;
+                        controllerHandler.SetControllerState("ITEM_PLAY");
+                    }
+                },
+                { "CLOSE_APP", () => //Click "Close App"
+                    {
+                        ShellWindowState = WindowState.Maximized;
+                        controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                    }
+                }
+            };
         }
     }
 }

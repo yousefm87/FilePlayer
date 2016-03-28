@@ -375,7 +375,7 @@ namespace FilePlayer
                             {
                                 webClient.DownloadFile(itemImageURL, saveToFilePath);
                             }
-                            catch (WebException ex)
+                            catch (WebException)
                             {
                                 itemImageLocation = "";
                             }
@@ -414,7 +414,7 @@ namespace FilePlayer
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 
             }
@@ -553,7 +553,7 @@ namespace FilePlayer
 
                 return currGames;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
@@ -578,7 +578,7 @@ namespace FilePlayer
                 }
 
             }
-            catch (WebException ex)
+            catch (WebException)
             {
                 return false;
             }
@@ -715,7 +715,7 @@ namespace FilePlayer
 
                 return currGames;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 return null;
             }

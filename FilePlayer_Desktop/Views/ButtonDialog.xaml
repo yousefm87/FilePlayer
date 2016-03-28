@@ -20,7 +20,8 @@
         MinHeight="200"
         MinWidth="150"
         BorderBrush="Transparent"
-        BorderThickness="0">
+        BorderThickness="0"
+        Closed="OnWindowClosed">
 
 
     <Window.Resources>
