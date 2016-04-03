@@ -237,6 +237,7 @@ namespace FilePlayer.ViewModels
         public ItemListViewModel(IEventAggregator iEventAggregator)
         {
             FilterVisibility = Visibility.Hidden;
+            ErrorVisiblility = Visibility.Hidden;
             ShadeEffect = false;
             FilterText = "";
             FilterTypeText = "";
