@@ -79,11 +79,13 @@ namespace FilePlayer.ViewModels
         private bool gameRetrieverProgressState = false;
         private bool searchGameDataState = false;
         private bool verticalOptionSelecterState = false;
+
         private string buttonDialogType;
         private string searchGameDataQuery;
         private XboxControllerInputProvider input;
         private Thread gamepadThread;
-        private ControllerHandler controllerHandler;
+        //private ControllerHandler controllerHandler;
+        private ControllerHandler2 controllerHandler;
 
         public string[] VerticalOptionData { get; private set; }
         public string[] CharGetterPoint { get; private set; }
@@ -228,16 +230,17 @@ namespace FilePlayer.ViewModels
             gamepadThread = new Thread(new ThreadStart(input.PollGamepad));
             gamepadThread.Start();
 
-            controllerHandler = new ControllerHandler(Event.EventInstance.EventAggregator);
+            controllerHandler = new ControllerHandler2(Event.EventInstance.EventAggregator);
 
         }
 
 
         private void ButtonDialogHandler(ButtonDialogEventArgs e)
         {
+            ButtonDialogState = false;
+
             if (buttonDialogEventMap.ContainsKey(e.action))
             {
-                ButtonDialogState = false;
                 buttonDialogEventMap[e.action]();
             }
         }
@@ -325,7 +328,27 @@ namespace FilePlayer.ViewModels
                         controllerHandler.SetControllerState("LAST");
                     }
                 },
-                { "GAMEPAD_ABORT", () => { gamepadThread.Abort(); }}
+                { "GAMEPAD_ABORT", () => 
+                    {
+                        gamepadThread.Abort();
+                    }
+                },
+                { "OPEN_FILTER", () => 
+                    {
+                        controllerHandler.SetControllerState("FILTER_MAIN");
+                    }
+                },
+                { "CLOSE_FILTER", () =>
+                    {
+                        controllerHandler.SetControllerState("ITEMLIST_BROWSE");
+                    }
+                },
+                { "MINIMIZE_SHELL", () =>
+                    {
+                        ShellWindowState = WindowState.Minimized;
+                    }
+
+                }
             
             };
 
@@ -340,6 +363,7 @@ namespace FilePlayer.ViewModels
                     {
                         ButtonDialogType = dialogInfo[0];
                         ButtonDialogState = true;
+                        controllerHandler.SetControllerState("BUTTON_DIALOG");
                     }
                 },
                 { "GAMEDATA_SEARCH", (searchData) =>
@@ -379,13 +403,6 @@ namespace FilePlayer.ViewModels
                     {
                         GameRetrieverProgressState = true;
                         this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_START"));
-                    }
-                },
-                { "FILE_OPEN", () =>
-                    {
-                        ShellWindowState = WindowState.Minimized;
-                        controllerHandler.SetControllerState("ITEM_PLAY");
-                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("MAXIMIZE_CURR_APP"));
                     }
                 },
                 { "FILE_DELETE_DATA", () => //Click "Delete Game Data"

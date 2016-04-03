@@ -9,6 +9,8 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections;
 using System.Windows;
+using Microsoft.Practices.Prism.Commands;
+
 
 namespace FilePlayer.ViewModels
 {
@@ -23,7 +25,9 @@ namespace FilePlayer.ViewModels
     public class ItemListViewModel : ViewModelBase
     {
         private ItemLists itemLists;
-        private GameInfo gameInfo;        
+        private GameInfo gameInfo;
+
+        private const string consolesSamplesURL = "https://github.com/yousefm87/FilePlayer/wiki/Consoles.Json";
 
         private IEventAggregator iEventAggregator;
         private SubscriptionToken itemListToken = null;
@@ -32,7 +36,13 @@ namespace FilePlayer.ViewModels
         private Dictionary<string, Action> buttonDialogEventMap;
         private Dictionary<string, Action> eventMap;
         private Dictionary<string, Action<string[]>> eventMapParams;
-        
+
+        public DelegateCommand<string[]> MoveUpCommand { get; private set; }
+        public DelegateCommand<string[]> MoveDownCommand { get; private set; }
+        public DelegateCommand MoveLeftCommand { get; private set; }
+        public DelegateCommand MoveRightCommand { get; private set; }
+        public DelegateCommand OpenAppCommand { get; private set; }
+        public DelegateCommand OpenSampleCommand { get; private set; }
 
         private IEnumerable<string> allItemNames;
         private IEnumerable<string> allItemPaths;
@@ -219,7 +229,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        Process autProc = null;
+
         Process appProc = null;
         string consolesStr = "C:\\FPData\\consoles.json";
         string sampleDestStr = "C:\\FPData\\sample.json";
@@ -232,7 +242,7 @@ namespace FilePlayer.ViewModels
             FilterTypeText = "";
             this.iEventAggregator = iEventAggregator;
             
-            UpdateItemLists();
+            InitializeList();
 
             InitializeEventMaps(); 
 
@@ -243,6 +253,15 @@ namespace FilePlayer.ViewModels
             itemListToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
                 (controllerEventArgs) => { EventHandler(controllerEventArgs); }
             );
+
+            MoveUpCommand = new DelegateCommand<string[]>(MoveIndexUp, CanMoveIndex);
+            MoveDownCommand = new DelegateCommand<string[]>(MoveIndexDown, CanMoveIndex);
+            MoveLeftCommand = new DelegateCommand(SetPreviousList, CanSetPreviousList);
+            MoveRightCommand = new DelegateCommand(SetNextList, CanSetNextList);
+
+            OpenAppCommand = new DelegateCommand(OpenSelectedItemInApp, CanOpenSelectedItem);
+            OpenSampleCommand = new DelegateCommand(OpenConsoleSamplePage, CanOpenConsoleSamplePage);
+
         }
 
         private void InitializeEventMaps()
@@ -250,7 +269,14 @@ namespace FilePlayer.ViewModels
             buttonDialogEventMap = new Dictionary<string, Action>()
             {
                 { "EXIT", CloseCurrentApplication },
-                { "FILE_OPEN", OpenSelectedItemInApp }, //Click "Open File"
+                { "FILE_OPEN", () =>
+                    {
+                        if (OpenAppCommand.CanExecute())
+                        {
+                            OpenAppCommand.Execute();
+                        }
+                    }
+                }, //Click "Open File"
                 { "FILE_DELETE_DATA", DeleteCurrentGameData }, //Click "Delete Game Data"
                 { "FILE_SEARCH_DATA", SendSearchGameDataEvent },
                 { "RETURN_TO_APP", MaximizeCurrentApp }, //Click "Return to app"
@@ -260,19 +286,55 @@ namespace FilePlayer.ViewModels
             eventMap = new Dictionary<string, Action>()
             {
                 { "MAXIMIZE_CURR_APP", MaximizeCurrentApp },
-                { "ITEMLIST_MOVE_LEFT", SetPreviousLists },
-                { "ITEMLIST_MOVE_RIGHT", SetNextLists },
                 { "GIANTBOMB_UPLOAD_START", UploadFromGiantbomb },
                 { "OPEN_FILTER", OpenFilter },
                 { "CLOSE_FILTER", CloseFilter },
                 { "ADD_SHADE", () => { SetShade(true); } },
-                { "REMOVE_SHADE", () => { SetShade(false); } }
+                { "REMOVE_SHADE", () => { SetShade(false); } },
+                { "ITEMLIST_MOVE_LEFT", () =>
+                    {
+                        if (MoveLeftCommand.CanExecute())
+                        {
+                            MoveLeftCommand.Execute();
+                        }
+                    }
+                },
+                { "ITEMLIST_MOVE_RIGHT", () =>
+                    {
+                        if (MoveRightCommand.CanExecute())
+                        {
+                            MoveRightCommand.Execute();
+                        }
+                    }
+                },
+                { "OPEN_CONSOLE_SAMPLE", () =>
+                    {
+                        if (OpenSampleCommand.CanExecute())
+                        {
+                            OpenSampleCommand.Execute();
+                        }
+                    }
+                }
             };
 
             eventMapParams = new Dictionary<string, Action<string[]>>()
             {
-                { "ITEMLIST_MOVE_UP", MoveIndexUp },
-                { "ITEMLIST_MOVE_DOWN", MoveIndexDown },
+                { "ITEMLIST_MOVE_UP", (numMoves) =>
+                    {
+                        if(MoveUpCommand.CanExecute(numMoves))
+                        {
+                            MoveUpCommand.Execute(numMoves);
+                        }
+                    }
+                },
+                { "ITEMLIST_MOVE_DOWN", (numMoves) =>
+                    {
+                        if (MoveDownCommand.CanExecute(numMoves))
+                        {
+                            MoveDownCommand.Execute(numMoves);
+                        }
+                    }
+                },
                 { "FILTER_LIST", FilterItemlist },
                 { "GAMEDATA_ADD_ITEM", AddGameDataItem }
             };
@@ -337,9 +399,8 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public void UpdateItemLists()
+        public void InitializeList()
         {
-            //GenerateSampleJson();
             this.ItemLists = new ItemLists(consolesStr);
 
             if (ItemLists.GetConsoleCount() > 0)
@@ -421,66 +482,64 @@ namespace FilePlayer.ViewModels
             }
         }
 
-
-
-        public void SetNextLists(string searchStr, string filterType)
+        private void RefreshList()
         {
-            if (ItemLists.SetConsoleNext())
-            {
-                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr, filterType);
-                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr, filterType);
-                SelectedItemIndex = 0;
+            this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, FilterText, FilterTypeText);
+            this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, FilterText, FilterTypeText);
 
-                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
 
-                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+            this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
 
-                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
+            string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
 
-                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
-            }
-        }
+            string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
 
-        public void SetNextLists()
-        {
-            SetNextLists(FilterText, FilterTypeText);
+            this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
         }
 
 
-        public void SetPreviousLists(string searchStr, string filterType)
+        private bool CanSetNextList()
         {
-            if (ItemLists.SetConsolePrevious())
-            {
-                this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, searchStr, filterType);
-                this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, searchStr, filterType);
-                SelectedItemIndex = 0;
-
-                this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-
-                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
-
-                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
-
-                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
-            }
+            return (ItemLists.GetConsoleCount() > 0) && (ItemLists.CurrConsole < (ItemLists.GetConsoleCount() - 1));
         }
 
 
-        public void SetPreviousLists()
+        public void SetNextList()
         {
-            SetPreviousLists(FilterText, FilterTypeText);
+            ItemLists.SetConsoleNext();
+            RefreshList();
+            SelectedItemIndex = 0;
+        }
+
+
+        public bool CanSetPreviousList()
+        {
+            return (ItemLists.GetConsoleCount() > 0) && (ItemLists.CurrConsole > 0);
+        }
+
+        public void SetPreviousList()
+        {
+            ItemLists.SetConsolePrevious();
+            RefreshList();
+            SelectedItemIndex = 0;
+        }
+
+        private bool CanOpenSelectedItem()
+        {
+            string appPath = ItemLists.GetConsoleAppPath(ItemLists.CurrConsole);
+            string itemPath = AllItemPaths.ToList().ElementAt(SelectedItemIndex);
+
+            return File.Exists(appPath) && File.Exists(itemPath);
         }
 
         public void OpenSelectedItemInApp()
         {
-            string autPath = "C:\\Program Files (x86)\\AutoIt3\\AutoIt3.exe";
-            string maximizeActionPath_old = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.FullName + "\\Automation\\maximize.au3";
-            string maximizeActionPath = ItemLists.GetConsoleMaxAndFocus(ItemLists.CurrConsole);
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "NONE" }));
+
             string appPath = ItemLists.GetConsoleAppPath(ItemLists.CurrConsole);
             string itemPath = AllItemPaths.ToList().ElementAt(SelectedItemIndex);
             string consoleArgs = ItemLists.GetConsoleArguments(ItemLists.CurrConsole);
-
-
+            
             appProc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -494,27 +553,28 @@ namespace FilePlayer.ViewModels
             };
 
             appProc.Start();
-            string windowTitle = appProc.MainWindowTitle;
             appProc.WaitForInputIdle();
 
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("MINIMIZE_SHELL"));
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "ITEM_PLAY" }));
 
-            if (maximizeActionPath != "")
-            {
-                autProc = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = autPath,
-                        Arguments = "\"" + maximizeActionPath + "\" \"" + windowTitle + "\"",
-                        UseShellExecute = true,
-                        CreateNoWindow = false
-                    }
-                };
-
-                autProc.Start();
-            }
+            MaximizeCurrentApp();
         }
 
+        private bool CanOpenConsoleSamplePage()
+        {
+            return (ErrorVisiblility == Visibility.Visible);
+        }
+
+
+        private void OpenConsoleSamplePage()
+        {
+            appProc = Process.Start(consolesSamplesURL);
+
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("MINIMIZE_SHELL"));
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "ITEM_PLAY" }));
+            
+        }
 
         public void SetShade(bool isShaded)
         {
@@ -536,6 +596,11 @@ namespace FilePlayer.ViewModels
                     ShadeEffect = false;
                 }
             }
+        }
+        
+        public bool CanMoveIndex(string[] numMoves)
+        {
+            return (AllItemNames.Count() > 0);
         }
 
         public int MoveIndexUp(int numMove)
@@ -567,11 +632,11 @@ namespace FilePlayer.ViewModels
             int newSelectedIndex = selectedIndex + numMove;
 
 
-            int minIndex = 0;
+            int maxIndex = AllItemNames.Count() - 1;
 
-            if (newSelectedIndex < minIndex)
+            if (newSelectedIndex > maxIndex)
             {
-                newSelectedIndex = minIndex;
+                newSelectedIndex = maxIndex;
             }
 
             SelectedItemIndex = newSelectedIndex;

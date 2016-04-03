@@ -108,10 +108,15 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
             <Setter Property="TextWrapping" Value="Wrap" />
-            
-
+            <Setter Property="Foreground" Value="{StaticResource BlackBrush}" />
             <Setter Property="Padding" Value="50,50,50,20" />
+        </Style>
+
+        <Style x:Key="ErrorMessageTitle" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource ErrorMessageStyle}">
             <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="ErrorMessageBody" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource ErrorMessageStyle}">
+            <Setter Property="TextAlignment" Value="Left" />
         </Style>
     </UserControl.Resources>
 
@@ -191,9 +196,13 @@
 
         </Grid>
 
-        <Label x:Name="errorMessage" Background="{StaticResource WhiteBrush}" Visibility="{Binding ErrorVisiblility}"  Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" >
-            <TextBlock IsHitTestVisible="True" Style="{StaticResource ErrorMessageStyle}" TextWrapping="Wrap" Text="No consoles found. Add extra consoles in C:\FPData\consoles.json. Each console must have fields as described at https://github.com/yousefm87/FilePlayer/wiki/Consoles.Json" />
-        </Label>
+        <StackPanel x:Name="errorMessage" Background="{StaticResource WhiteBrush}" Visibility="{Binding ErrorVisiblility}"  Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" >
+            <TextBlock Style="{StaticResource ErrorMessageTitle}" Text="No Consoles Found"/>
+            <TextBlock Style="{StaticResource ErrorMessageBody}" Text="Add consoles in:&#x0a;    C:\FPData\consoles.json.&#x0a;Each console must have fields as described at:&#x0a;    https://github.com/yousefm87/FilePlayer/wiki/Consoles.Json"/>
+            <TextBlock Style="{StaticResource ErrorMessageStyle}" />
+            <TextBlock Style="{StaticResource ErrorMessageTitle}" Text="Press &lt;Start&gt; to open this page in your browser."/>
+
+        </StackPanel>
 
         <views:ItemListFilter x:Name="filterControl" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" />
 

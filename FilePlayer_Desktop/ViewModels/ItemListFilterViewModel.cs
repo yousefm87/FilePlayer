@@ -107,19 +107,14 @@ namespace FilePlayer.ViewModels
 
         void EventHandler(ViewEventArgs e)
         {
-            if (e.addlInfo.Length > 0)
+            if (EventMapParam.ContainsKey(e.action))
             {
-                if (EventMapParam.ContainsKey(e.action))
-                {
-                    EventMapParam[e.action](e.addlInfo[0]);
-                }
+                EventMapParam[e.action](e.addlInfo[0]);
             }
-            else
+
+            if (EventMap.ContainsKey(e.action))
             {
-                if (EventMap.ContainsKey(e.action))
-                {
-                    EventMap[e.action]();
-                }
+                EventMap[e.action]();
             }
         }
 

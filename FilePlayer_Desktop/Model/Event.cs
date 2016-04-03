@@ -20,6 +20,7 @@ namespace FilePlayer.Model
             action = _action;
             addlInfo = _addlInfo;
         }
+
     }
 
 
@@ -88,4 +89,6 @@ namespace FilePlayer.Model
         #endregion
 
     }
+
+    
 }
