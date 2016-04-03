@@ -152,7 +152,7 @@ namespace FilePlayer
             {
                 MaximizeShell();
 
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "NONE" }));
+                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None));
                 this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOTFOUND_OPEN", new string[] { })); //for shade
 
                 this.Dispatcher.Invoke((Action)delegate
@@ -187,7 +187,7 @@ namespace FilePlayer
                 controllerNotFound = null;
 
                 this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOTFOUND_CLOSE", new string[] { }));
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "LAST" }));
+                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.Last));
             }
         }
 

@@ -23,6 +23,17 @@ namespace FilePlayer.Model
 
     }
 
+    public class StateEventArgs : EventArgs
+    {
+        public ApplicationState state;
+
+        public StateEventArgs(ApplicationState _state)
+        {
+            state = _state;
+        }
+       
+    }
+
 
     public class ButtonDialogEventArgs : ViewEventArgs
     {

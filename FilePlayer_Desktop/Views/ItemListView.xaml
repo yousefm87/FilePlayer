@@ -200,8 +200,9 @@
             <TextBlock Style="{StaticResource ErrorMessageTitle}" Text="No Consoles Found"/>
             <TextBlock Style="{StaticResource ErrorMessageBody}" Text="Add consoles in:&#x0a;    C:\FPData\consoles.json.&#x0a;Each console must have fields as described at:&#x0a;    https://github.com/yousefm87/FilePlayer/wiki/Consoles.Json"/>
             <TextBlock Style="{StaticResource ErrorMessageStyle}" />
-            <TextBlock Style="{StaticResource ErrorMessageTitle}" Text="Press &lt;Start&gt; to open this page in your browser."/>
 
+            <TextBlock Style="{StaticResource ErrorMessageTitle}" Text="Press &lt;BACK&gt; to open folder containing consoles.json."/>
+            <TextBlock Style="{StaticResource ErrorMessageTitle}" Text="Press &lt;START&gt; to open this page in your browser."/>
         </StackPanel>
 
         <views:ItemListFilter x:Name="filterControl" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" />

@@ -43,6 +43,7 @@ namespace FilePlayer.ViewModels
         public DelegateCommand MoveRightCommand { get; private set; }
         public DelegateCommand OpenAppCommand { get; private set; }
         public DelegateCommand OpenSampleCommand { get; private set; }
+        public DelegateCommand OpenDataFolderCommand { get; private set; }
 
         private IEnumerable<string> allItemNames;
         private IEnumerable<string> allItemPaths;
@@ -262,7 +263,7 @@ namespace FilePlayer.ViewModels
 
             OpenAppCommand = new DelegateCommand(OpenSelectedItemInApp, CanOpenSelectedItem);
             OpenSampleCommand = new DelegateCommand(OpenConsoleSamplePage, CanOpenConsoleSamplePage);
-
+            OpenDataFolderCommand = new DelegateCommand(OpenDataFolder, CanOpenDataFolder);
         }
 
         private void InitializeEventMaps()
@@ -315,6 +316,15 @@ namespace FilePlayer.ViewModels
                             OpenSampleCommand.Execute();
                         }
                     }
+                },
+                { "OPEN_DATA_FOLDER", () =>
+                    {
+                        if (OpenDataFolderCommand.CanExecute())
+                        {
+                            OpenDataFolderCommand.Execute();
+                        }
+                    }
+
                 }
             };
 
@@ -444,12 +454,12 @@ namespace FilePlayer.ViewModels
         {
             Task.Factory.StartNew(() =>
             {
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "NONE" }));
+                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None));
 
                 GameRetriever.GetAllPlatformsData(itemLists, iEventAggregator);
                 this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_COMPLETE", new String[] { }));
                 
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "ITEMLIST_BROWSE" }));
+                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.ItemlistBrowse));
             });
         }
 
@@ -535,7 +545,7 @@ namespace FilePlayer.ViewModels
 
         public void OpenSelectedItemInApp()
         {
-            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "NONE" }));
+            this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None));
 
             string appPath = ItemLists.GetConsoleAppPath(ItemLists.CurrConsole);
             string itemPath = AllItemPaths.ToList().ElementAt(SelectedItemIndex);
@@ -555,9 +565,9 @@ namespace FilePlayer.ViewModels
 
             appProc.Start();
             appProc.WaitForInputIdle();
-
+            
             this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("MINIMIZE_SHELL"));
-            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "ITEM_PLAY" }));
+            this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.ItemPlay));
 
             MaximizeCurrentApp();
         }
@@ -570,12 +580,20 @@ namespace FilePlayer.ViewModels
 
         private void OpenConsoleSamplePage()
         {
-            appProc = Process.Start(consolesSamplesURL);
-
-            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("MINIMIZE_SHELL"));
-            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("SET_CONTROLLER_STATE", new string[] { "ITEM_PLAY" }));
-            
+            Process.Start(consolesSamplesURL);
         }
+
+        private bool CanOpenDataFolder()
+        {
+            return (ErrorVisiblility == Visibility.Visible) && (File.Exists(consolesStr));
+        }
+
+        private void OpenDataFolder()
+        {
+            Process.Start(Path.GetDirectoryName(consolesStr));
+
+        }
+
 
         public void SetShade(bool isShaded)
         {
