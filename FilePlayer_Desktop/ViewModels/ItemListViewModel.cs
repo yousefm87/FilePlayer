@@ -230,8 +230,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
-
-        Process appProc = null;
+        
         string consolesStr = "C:\\FPData\\consoles.json";
         string sampleDestStr = "C:\\FPData\\sample.json";
 
@@ -261,33 +260,14 @@ namespace FilePlayer.ViewModels
             MoveLeftCommand = new DelegateCommand(SetPreviousList, CanSetPreviousList);
             MoveRightCommand = new DelegateCommand(SetNextList, CanSetNextList);
 
-            OpenAppCommand = new DelegateCommand(OpenSelectedItemInApp, CanOpenSelectedItem);
-            OpenSampleCommand = new DelegateCommand(OpenConsoleSamplePage, CanOpenConsoleSamplePage);
+            
             OpenDataFolderCommand = new DelegateCommand(OpenDataFolder, CanOpenDataFolder);
         }
 
         private void InitializeEventMaps()
         {
-            buttonDialogEventMap = new Dictionary<string, Action>()
-            {
-                { "EXIT", CloseCurrentApplication },
-                { "FILE_OPEN", () =>
-                    {
-                        if (OpenAppCommand.CanExecute())
-                        {
-                            OpenAppCommand.Execute();
-                        }
-                    }
-                }, //Click "Open File"
-                { "FILE_DELETE_DATA", DeleteCurrentGameData }, //Click "Delete Game Data"
-                { "FILE_SEARCH_DATA", SendSearchGameDataEvent },
-                { "RETURN_TO_APP", MaximizeCurrentApp }, //Click "Return to app"
-                { "CLOSE_APP", CloseCurrentApplication }
-            };
-
             eventMap = new Dictionary<string, Action>()
             {
-                { "MAXIMIZE_CURR_APP", MaximizeCurrentApp },
                 { "GIANTBOMB_UPLOAD_START", UploadFromGiantbomb },
                 { "OPEN_FILTER", OpenFilter },
                 { "CLOSE_FILTER", CloseFilter },
@@ -350,6 +330,24 @@ namespace FilePlayer.ViewModels
                 { "GAMEDATA_ADD_ITEM", AddGameDataItem }
             };
 
+            buttonDialogEventMap = new Dictionary<string, Action>()
+            {
+                { "FILE_OPEN", () => //Click "Open File"
+                    {
+                        string appPath = ItemLists.GetConsoleAppPath(ItemLists.CurrConsole);
+                        string itemPath = AllItemPaths.ToList().ElementAt(SelectedItemIndex);
+                        string consoleArgs = ItemLists.GetConsoleArguments(ItemLists.CurrConsole);
+                        string appCaption = ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole);
+
+                        string[] appData = {appPath, itemPath, consoleArgs, appCaption};
+
+                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("OPEN_APP", appData));
+                    }
+                }, 
+                { "FILE_DELETE_DATA", DeleteCurrentGameData }, //Click "Delete Game Data"
+                { "FILE_SEARCH_DATA", SendSearchGameDataEvent }
+            };
+
         }
 
         private void DeleteCurrentGameData()
@@ -364,16 +362,6 @@ namespace FilePlayer.ViewModels
             this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GAMEDATA_SEARCH", new String[] { AllItemNames.ElementAt(SelectedItemIndex) }));
         }
 
-        private void CloseCurrentApplication()
-        {
-            if (appProc != null)
-            {
-                if (!appProc.HasExited)
-                {
-                    appProc.Kill();
-                }
-            }
-        }
 
         private void ButtonDialogHandler(ButtonDialogEventArgs e)
         {
@@ -462,12 +450,7 @@ namespace FilePlayer.ViewModels
                 this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.ItemlistBrowse));
             });
         }
-
-        public void MaximizeCurrentApp()
-        {
-            WindowActions.PerformWindowAction(this.ItemLists.GetConsoleTitleSubString(ItemLists.CurrConsole), "Maximize");
-        }
-
+        
         public void OpenFilter()
         {
             FilterVisibility = Visibility.Visible;
@@ -542,35 +525,7 @@ namespace FilePlayer.ViewModels
 
             return File.Exists(appPath) && File.Exists(itemPath);
         }
-
-        public void OpenSelectedItemInApp()
-        {
-            this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None));
-
-            string appPath = ItemLists.GetConsoleAppPath(ItemLists.CurrConsole);
-            string itemPath = AllItemPaths.ToList().ElementAt(SelectedItemIndex);
-            string consoleArgs = ItemLists.GetConsoleArguments(ItemLists.CurrConsole);
-            
-            appProc = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = appPath,
-                    Arguments = consoleArgs + " \"" + itemPath + "\"",
-                    UseShellExecute = true,
-                    CreateNoWindow = false
-                }
-                
-            };
-
-            appProc.Start();
-            appProc.WaitForInputIdle();
-            
-            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("MINIMIZE_SHELL"));
-            this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.ItemPlay));
-
-            MaximizeCurrentApp();
-        }
+        
 
         private bool CanOpenConsoleSamplePage()
         {

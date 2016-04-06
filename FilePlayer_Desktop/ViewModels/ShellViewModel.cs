@@ -5,65 +5,15 @@ using System.Windows;
 using System.Collections.Generic;
 using FilePlayer.Model;
 using System.Threading;
+using Microsoft.Practices.Prism.Commands;
 
 namespace FilePlayer.ViewModels
 {
-
-
-    public class ConfirmationCommand 
-    {
-        private readonly Action<object> _handler;
-
-        public ConfirmationCommand(Action<object> handler)
-        {
-            _handler = handler;
-        }
-
-
-        public bool CanExecute(object parameter)
-        {
-            return (parameter != null);
-        }
-
-        
-        public event EventHandler CanExecuteChanged;
-
-        public void Execute(object parameter)
-        {
-            _handler(parameter);
-        }
-    }
-
-
-    public class PauseCommand : ICommand
-    {
-        private readonly Action<object> _handler;
-
-        public PauseCommand(Action<object> handler)
-        {
-            _handler = handler;
-        }
-
-
-        public bool CanExecute(object parameter)
-        {
-            return (parameter != null);
-        }
-
-
-        public event EventHandler CanExecuteChanged;
-
-        public void Execute(object parameter)
-        {
-            _handler(parameter);
-        }
-    }
-
     public class ShellViewModel : ViewModelBase
     {
 
         private WindowState _shellWindowState = WindowState.Maximized;
-
+        private ExternalAppController extAppController;
         private IEventAggregator iEventAggregator;
         private SubscriptionToken shellActionToken;
         private SubscriptionToken buttonDialogToken;
@@ -91,6 +41,7 @@ namespace FilePlayer.ViewModels
 
         public string[] VerticalOptionData { get; private set; }
         public string[] CharGetterPoint { get; private set; }
+        
 
         public bool ButtonDialogState
         {
@@ -143,6 +94,7 @@ namespace FilePlayer.ViewModels
             get { return gameRetrieverProgressState; }
             set
             {
+                
                 gameRetrieverProgressState = value;
                 SendItemListShadeEvent(value);
                 OnPropertyChanged("GameRetrieverProgressState");
@@ -191,7 +143,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        
+        public DelegateCommand OpenAppCommand { get; private set; }
 
         public ShellViewModel(IEventAggregator iEventAggregator)
         {
@@ -234,6 +186,8 @@ namespace FilePlayer.ViewModels
             gamepadThread.Start();
 
             controllerHandler = new ControllerHandler(Event.EventInstance.EventAggregator);
+
+            
 
         }
 
@@ -286,6 +240,14 @@ namespace FilePlayer.ViewModels
         {
             eventMap = new Dictionary<string, Action>() 
             {
+                { "RETURN_TO_APP", () =>
+                    {
+                        if (extAppController != null)
+                        {
+                            extAppController.MaximizeCurrentApp();
+                        }
+                    }
+                }, //Click "Return to app"
                 { "CHAR_CLOSE", () => //Close CharGetter  
                     {
                         CharGetterState = false;
@@ -362,12 +324,18 @@ namespace FilePlayer.ViewModels
                         ButtonDialogType = dialogInfo[0];
                         ButtonDialogState = true;
                         controllerHandler.SetState(ApplicationState.ButtonDialog);
+
                     }
                 },
                 { "GAMEDATA_SEARCH", (searchData) =>
                     {
                         SearchGameDataQuery = searchData[0];
                         SearchGameDataState = true;
+                    }
+                },
+                { "OPEN_APP", (appData) =>
+                    {
+                        OpenSelectedItemInApp(appData);
                     }
                 }
             };
@@ -394,6 +362,11 @@ namespace FilePlayer.ViewModels
             {
                 { "EXIT", () =>
                     {
+                        if (extAppController != null)
+                        {
+                            extAppController.CloseCurrentApplication();
+                        }
+
                         this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("EXIT"));
                     }
                 },
@@ -416,16 +389,43 @@ namespace FilePlayer.ViewModels
                 { "RETURN_TO_APP", () => //Click "Return to app"
                     {
                         ShellWindowState = WindowState.Minimized;
+                        extAppController.MaximizeCurrentApp();
                         controllerHandler.SetState(ApplicationState.ItemPlay);
                     }
                 },
                 { "CLOSE_APP", () => //Click "Close App"
                     {
+                        extAppController.CloseCurrentApplication();
                         ShellWindowState = WindowState.Maximized;
                         controllerHandler.SetState(ApplicationState.ItemlistBrowse);
                     }
                 }
             };
+        }
+
+        public void OpenSelectedItemInApp(string[] appData)
+        {
+            string appPath = appData[0];
+            string filePath = appData[1];
+            string args = appData[2];
+            string caption = appData[3];
+
+            controllerHandler.SetState(ApplicationState.None);
+            ShellWindowState = WindowState.Minimized;
+
+            extAppController = new ExternalAppController(appPath, filePath, args, caption);
+            OpenAppCommand = new DelegateCommand(extAppController.OpenSelectedItemInApp, extAppController.CanOpenSelectedItem);
+
+            if (OpenAppCommand.CanExecute())
+            {
+                OpenAppCommand.Execute();
+
+                Thread.Sleep(5000);
+            }
+
+            controllerHandler.SetState(ApplicationState.ItemPlay);
+
+
         }
     }
 }

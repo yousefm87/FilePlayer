@@ -30,7 +30,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <UpdateUrl>http://localhost/FilePlayer/</UpdateUrl>
-    <ApplicationRevision>55</ApplicationRevision>
+    <ApplicationRevision>56</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -214,6 +214,7 @@
     <Compile Include="Converters\ProgressConverter.cs" />
     <Compile Include="Converters\ReleaseConverter.cs" />
     <Compile Include="Converters\SearchGameItemConverter.cs" />
+    <Compile Include="ExternalAppController.cs" />
     <Compile Include="GameRetriever.cs" />
     <Compile Include="InputProvider.cs" />
     <Compile Include="JSON\consoles.cs" />

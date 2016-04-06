@@ -102,7 +102,7 @@ namespace FilePlayer
         {
             if (searchGameData == null)
             {
-                MaximizeShell();
+                //MaximizeShell();
 
                 this.Dispatcher.Invoke((Action)delegate
                 {
@@ -113,10 +113,10 @@ namespace FilePlayer
                     while (!searchGameData.IsVisible)
                     {
                         searchGameData.Show();
-                        searchGameData.MaxHeight = Application.Current.MainWindow.ActualHeight - 100;
-                        searchGameData.MaxWidth = Application.Current.MainWindow.ActualWidth - 120;
-                        searchGameData.Left = (Application.Current.MainWindow.ActualWidth - searchGameData.Width) / 2;
-                        searchGameData.Top = (Application.Current.MainWindow.ActualHeight - searchGameData.Height) / 2;
+                        //searchGameData.MaxHeight = Application.Current.MainWindow.ActualHeight - 100;
+                        //searchGameData.MaxWidth = Application.Current.MainWindow.ActualWidth - 120;
+                        //searchGameData.Left = (Application.Current.MainWindow.ActualWidth - searchGameData.Width) / 2;
+                        //searchGameData.Top = (Application.Current.MainWindow.ActualHeight - searchGameData.Height) / 2;
                     }
                 });
             }
@@ -150,7 +150,7 @@ namespace FilePlayer
         {
             if (controllerNotFound == null)
             {
-                MaximizeShell();
+                //MaximizeShell();
 
                 this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None));
                 this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOTFOUND_OPEN", new string[] { })); //for shade
@@ -165,10 +165,10 @@ namespace FilePlayer
                     while (!controllerNotFound.IsVisible)
                     {
                         controllerNotFound.Show();
-                        controllerNotFound.MaxHeight = Application.Current.MainWindow.ActualHeight - 100;
-                        controllerNotFound.MaxWidth = Application.Current.MainWindow.ActualWidth - 120;
-                        controllerNotFound.Left = (Application.Current.MainWindow.ActualWidth - controllerNotFound.Width) / 2;
-                        controllerNotFound.Top = (Application.Current.MainWindow.ActualHeight - controllerNotFound.Height) / 2;
+                        //controllerNotFound.MaxHeight = Application.Current.MainWindow.ActualHeight - 100;
+                        //controllerNotFound.MaxWidth = Application.Current.MainWindow.ActualWidth - 120;
+                        //controllerNotFound.Left = (Application.Current.MainWindow.ActualWidth - controllerNotFound.Width) / 2;
+                        //controllerNotFound.Top = (Application.Current.MainWindow.ActualHeight - controllerNotFound.Height) / 2;
                     }
                 });
             }
@@ -203,9 +203,8 @@ namespace FilePlayer
         
         private void OpenButtonDialog()
         {
-            if (buttonDialog == null)
             {
-                MaximizeShell();
+                //MaximizeShell();
                 
 
                 this.Dispatcher.Invoke((Action)delegate
@@ -215,11 +214,14 @@ namespace FilePlayer
                     buttonDialog = new ButtonDialog(ShellViewModel.ButtonDialogType);
 
                     buttonDialog.ShowInTaskbar = false;
-                    buttonDialog.Owner = Application.Current.MainWindow;
+                    buttonDialog.Topmost = true;
+
+                    //buttonDialog.Owner = Application.Current.MainWindow;
 
                     while (!buttonDialog.IsVisible)
                     {
                         buttonDialog.Show();
+
                         buttonDialog.Left = (Application.Current.MainWindow.ActualWidth - buttonDialog.Width) / 2;
                         buttonDialog.Top = (Application.Current.MainWindow.ActualHeight - buttonDialog.Height) / 2;
                     }
@@ -253,7 +255,7 @@ namespace FilePlayer
 
         private void OpenVerticalOptionSelecter()
         {
-            MaximizeShell();
+           // MaximizeShell();
 
             int arrLength = (ShellViewModel.VerticalOptionData.Length - 3) / 2;
             string[] options = new string[arrLength];
@@ -295,7 +297,7 @@ namespace FilePlayer
 
         private void OpenGameRetrieverProgress()
         {
-            MaximizeShell();
+            //MaximizeShell();
 
             this.Dispatcher.Invoke((Action)delegate
             {
@@ -336,22 +338,23 @@ namespace FilePlayer
         }
 
 
-        public bool MaximizeShell()
-        {
-            bool winMaxed = false;
-            while (!winMaxed)
-            {
-                this.Dispatcher.Invoke((Action)delegate
-                {
-                    ShellViewModel.ShellWindowState = WindowState.Maximized;
-                    Application.Current.MainWindow.Activate();
+        //public bool MaximizeShell()
+        //{
+        //    bool winMaxed = false;
+        //    while (!winMaxed)
+        //    {
+        //        this.Dispatcher.Invoke((Action)delegate
+        //        {
+        //            ShellViewModel.ShellWindowState = WindowState.Maximized;
+        //            Application.Current.MainWindow.Activate();
 
-                    winMaxed = (ShellViewModel.ShellWindowState == WindowState.Maximized);
-                });
-            }
+        //            winMaxed = (ShellViewModel.ShellWindowState == WindowState.Maximized);
+        //        });
+        //    }
 
-            return winMaxed;
-        }
+        //    return winMaxed;
+        //}
+
 
 
         private void Window_Closed(object sender, EventArgs e)

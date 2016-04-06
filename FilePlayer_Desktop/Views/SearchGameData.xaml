@@ -19,6 +19,7 @@
         Background ="{StaticResource GrayBrush10}"
         BorderBrush="Black"
         BorderThickness="1"
+        WindowStartupLocation="CenterOwner"
         Closed="Window_Closed">
 
     <controls:MetroWindow.Resources>

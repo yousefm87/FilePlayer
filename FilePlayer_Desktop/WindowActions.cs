@@ -41,7 +41,6 @@ namespace FilePlayer
 
         private class SearchData
         {
-            // You can put any dicks or Doms in here...
             public string Wndclass;
             public string Title;
             public IntPtr hWnd;
@@ -79,73 +78,15 @@ namespace FilePlayer
         }
 
 
-        public static bool PerformWindowAction(string title, string action)
+        public static bool MaximizeWindow(string title)
         {
             IntPtr hWnd = SearchForWindow("", title);
             bool foundWin = (hWnd.ToInt32() != 0);
 
-            WindowShowStyle winStyle = WindowShowStyle.ShowMinNoActivate;
+            ShowWindow(hWnd, WindowShowStyle.ShowMaximized);
 
-            switch (action.ToLower())
-            {
-                case "maximize":
-                    winStyle = WindowShowStyle.ShowMaximized;
-                    break;
-                case "minimize":
-                    winStyle = WindowShowStyle.Hide;
-                    break;
-                default:
-                    action = "";
-                    break;
-            }
-            
-            StringBuilder sb = new StringBuilder(1024);
-            GetWindowText(hWnd, sb, sb.Capacity);
-
-            if (foundWin && (action != ""))
-            {
-                Console.WriteLine("PerformWindowAction: Attempting to '" + action + "' window '" + sb.ToString() + "'.");
-
-                Stopwatch stopwatch;
-                long currMilliseconds;
-                switch (winStyle)
-                {
-                    case WindowShowStyle.Maximize:
-                        SwitchToThisWindow(hWnd, true);
-                        SetForegroundWindow(hWnd);
-
-                        stopwatch = new Stopwatch();
-                        stopwatch.Start();
-                        currMilliseconds = stopwatch.ElapsedMilliseconds;
-                        while (currMilliseconds < 5000 && GetForegroundWindow() != hWnd)
-                        {
-                            SetForegroundWindow(hWnd);
-                            currMilliseconds = stopwatch.ElapsedMilliseconds;
-                        }
-                        stopwatch.Stop();
-
-                        break;
-                    case WindowShowStyle.Minimize:
-                        ShowWindow(hWnd, WindowShowStyle.Hide);
-                        stopwatch = new Stopwatch();
-                        stopwatch.Start();
-                        currMilliseconds = stopwatch.ElapsedMilliseconds;
-                        while (currMilliseconds < 5000 && GetForegroundWindow() == hWnd)
-                        {
-                            ShowWindow(hWnd, WindowShowStyle.Hide);
-                            currMilliseconds = stopwatch.ElapsedMilliseconds;
-                        }
-                        stopwatch.Stop();
-                        break;
-                    default:
-                        action = "";
-                        break;
-                }
-            }
-            else
-            {
-                Console.WriteLine("PerformWindowAction: Failed to find to window '" + sb.ToString() + "'.");
-            }
+            SwitchToThisWindow(hWnd, true);
+            //SetForegroundWindow(hWnd);
 
             return foundWin;
         }
@@ -153,7 +94,7 @@ namespace FilePlayer
 
         /// <summary>Enumeration of the different ways of showing a window using 
         /// ShowWindow</summary>
-        private enum WindowShowStyle : uint
+        public enum WindowShowStyle : uint
         {
             /// <summary>Hides the window and activates another window.</summary>
             /// <remarks>See SW_HIDE</remarks>
