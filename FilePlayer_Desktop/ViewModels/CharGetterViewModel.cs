@@ -80,10 +80,10 @@ namespace FilePlayer.ViewModels
             {
                 { "CHAR_MOVE_LEFT", MoveLeft },
                 { "CHAR_MOVE_RIGHT", MoveRight },
-                { "CHAR_SWITCHCHARSET_LEFT", SwitchCharSetLeft },
-                { "CHAR_SWITCHCHARSET_RIGHT", SwitchCharSetRight },
                 { "CHAR_MOVE_UP", MoveUp },
                 { "CHAR_MOVE_DOWN", MoveDown },
+                { "CHAR_SWITCHCHARSET_LEFT", SwitchCharSetPrev },
+                { "CHAR_SWITCHCHARSET_RIGHT", SwitchCharSetNext },
                 { "CHAR_SELECT", SelectControl },
                 { "CHAR_BACK", () =>
                     {
@@ -119,7 +119,7 @@ namespace FilePlayer.ViewModels
             return charSets[CurrCharSetIndex];
         }
 
-        public void SwitchCharSetLeft()
+        public void SwitchCharSetPrev()
         {
             if (CurrCharSetIndex > 0)
             {
@@ -131,7 +131,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public void SwitchCharSetRight()
+        public void SwitchCharSetNext()
         {
             if (CurrCharSetIndex < (charSets.Length - 1))
             {
@@ -218,7 +218,6 @@ namespace FilePlayer.ViewModels
         public void MoveDown()
         {
             int newIndex = SelectedControlIndex;
-
             bool findNextChar = false;
 
             do

@@ -80,8 +80,6 @@ namespace FilePlayer.Converters
                 {
                     try
                     {
-
-
                         //create new stream and create bitmap frame
                         BitmapImage bitmapImage = new BitmapImage();
                         bitmapImage.BeginInit();

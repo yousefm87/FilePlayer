@@ -36,6 +36,7 @@ namespace FilePlayer.ViewModels
         private string searchGameDataQuery;
         private XboxControllerInputProvider input;
         private Thread gamepadThread;
+
         //private ControllerHandler controllerHandler;
         private ControllerHandler controllerHandler;
 
@@ -49,8 +50,9 @@ namespace FilePlayer.ViewModels
             set
             {
                 buttonDialogState = value;
-                SendItemListShadeEvent(value);
                 OnPropertyChanged("ButtonDialogState");
+
+                SendItemListShadeEvent(value, "ButtonDialogState");
             }
         }
 
@@ -80,10 +82,10 @@ namespace FilePlayer.ViewModels
             {
                 if (value != controllerNotFoundState)
                 {
-                    SendItemListShadeEvent(value);
                     controllerNotFoundState = value;
-
                     OnPropertyChanged("ControllerNotFoundState");
+
+                    SendItemListShadeEvent(value, "ControllerNotFound");
                 }
 
             }
@@ -96,8 +98,9 @@ namespace FilePlayer.ViewModels
             {
                 
                 gameRetrieverProgressState = value;
-                SendItemListShadeEvent(value);
                 OnPropertyChanged("GameRetrieverProgressState");
+
+                SendItemListShadeEvent(value, "GameRetriever");
             }
         }
 
@@ -107,8 +110,9 @@ namespace FilePlayer.ViewModels
             set
             {
                 searchGameDataState = value;
-                SendItemListShadeEvent(value);
                 OnPropertyChanged("SearchGameDataState");
+
+                SendItemListShadeEvent(value, "SearchGameData");
             }
         }
         
@@ -175,7 +179,7 @@ namespace FilePlayer.ViewModels
             stateToken = this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Subscribe(
                 (stateEventArgs) =>
                 {
-                    controllerHandler.SetState(stateEventArgs.state);
+                    controllerHandler.SetState(stateEventArgs.state, stateEventArgs.isOn);
                 }
             );
             
@@ -195,6 +199,7 @@ namespace FilePlayer.ViewModels
         private void ButtonDialogHandler(ButtonDialogEventArgs e)
         {
             ButtonDialogState = false;
+            controllerHandler.SetState(ApplicationState.ButtonDialog, false);
 
             if (buttonDialogEventMap.ContainsKey(e.action))
             {
@@ -210,15 +215,15 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        private void SendItemListShadeEvent(bool setShade)
+        private void SendItemListShadeEvent(bool setShade, string winName)
         {
             if(setShade)
             {
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ADD_SHADE"));
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("ADD_SHADE", new string[]{ winName }));
             }
             else
             {
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("REMOVE_SHADE"));
+                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("REMOVE_SHADE", new string[] { winName }));
             }
         }
 
@@ -251,7 +256,7 @@ namespace FilePlayer.ViewModels
                 { "CHAR_CLOSE", () => //Close CharGetter  
                     {
                         CharGetterState = false;
-                        controllerHandler.SetState(ApplicationState.Last);
+                        controllerHandler.SetState(ApplicationState.CharGetter, false);
                     }
                 },
                 { "CONTROLLER_NOT_FOUND", () => 
@@ -266,23 +271,23 @@ namespace FilePlayer.ViewModels
                 },
                 { "BUTTONDIALOG_CLOSE", () =>
                     {
-                        controllerHandler.SetState(ApplicationState.Last);
+                        controllerHandler.SetState(ApplicationState.ButtonDialog, false);
                         ButtonDialogState = false;
                     }
                 },
                 { "SEARCHGAMEDATA_CLOSE", () =>
                     {
                         SearchGameDataState = false;
-                        controllerHandler.SetState(ApplicationState.ItemlistBrowse);
+                        controllerHandler.SetState(ApplicationState.SearchGameData, false);
                     }
                 },
                 {"GAMEDATA_ADD_ITEM", () =>
                     {
                         SearchGameDataState = false;
-                        controllerHandler.SetState(ApplicationState.ItemlistBrowse);
+                        controllerHandler.SetState(ApplicationState.SearchGameData, false);
                     }
                 },
-                { "GIANTBOMB_UPLOAD_COMPLETE", () =>
+                { "GIANTBOMB_PLATFORM_UPLOAD_FINISH", () =>
                     {
                         GameRetrieverProgressState = false;
                     }
@@ -290,7 +295,7 @@ namespace FilePlayer.ViewModels
                 { "VOS_OPTION", () =>
                     {
                         VerticalOptionSelecterState = false;
-                        controllerHandler.SetState(ApplicationState.Last);
+                        controllerHandler.SetState(ApplicationState.VerticalOptionSelecter, false);
                     }
                 },
                 { "GAMEPAD_ABORT", () => 
@@ -300,12 +305,12 @@ namespace FilePlayer.ViewModels
                 },
                 { "OPEN_FILTER", () => 
                     {
-                        controllerHandler.SetState(ApplicationState.FilterMain);
+                        controllerHandler.SetState(ApplicationState.FilterMain, true);
                     }
                 },
                 { "CLOSE_FILTER", () =>
                     {
-                        controllerHandler.SetState(ApplicationState.ItemlistBrowse);
+                        controllerHandler.SetState(ApplicationState.FilterMain, false);
                     }
                 },
                 { "MINIMIZE_SHELL", () =>
@@ -323,7 +328,7 @@ namespace FilePlayer.ViewModels
                     {
                         ButtonDialogType = dialogInfo[0];
                         ButtonDialogState = true;
-                        controllerHandler.SetState(ApplicationState.ButtonDialog);
+                        controllerHandler.SetState(ApplicationState.ButtonDialog, true);
 
                     }
                 },
@@ -346,14 +351,14 @@ namespace FilePlayer.ViewModels
                     {
                         CharGetterPoint = point;
                         CharGetterState = true;
-                        controllerHandler.SetState(ApplicationState.CharGetter);
+                        controllerHandler.SetState(ApplicationState.CharGetter, true);
                     }
                 },
                 { "FILTER_TYPE", (selecterData) =>
                     {
                         VerticalOptionData = selecterData;
                         VerticalOptionSelecterState = true;
-                        controllerHandler.SetState(ApplicationState.VerticalOptionSelecter);
+                        controllerHandler.SetState(ApplicationState.VerticalOptionSelecter, true);
                     }
                 }
             };
@@ -378,26 +383,31 @@ namespace FilePlayer.ViewModels
                 },
                 { "FILE_DELETE_DATA", () => //Click "Delete Game Data"
                     {
-                        controllerHandler.SetState(ApplicationState.ItemlistBrowse);
+                        //controllerHandler.SetState(ApplicationState.ItemlistBrowse);
                     }
                 },
                 { "FILE_SEARCH_DATA", () => //Click "Search Game Data"
                     {
-                        controllerHandler.SetState(ApplicationState.SearchGameData);
+                        controllerHandler.SetState(ApplicationState.SearchGameData, true);
                     }
                 },
                 { "RETURN_TO_APP", () => //Click "Return to app"
                     {
                         ShellWindowState = WindowState.Minimized;
                         extAppController.MaximizeCurrentApp();
-                        controllerHandler.SetState(ApplicationState.ItemPlay);
+                        controllerHandler.SetState(ApplicationState.ItemPlay, true);
                     }
                 },
                 { "CLOSE_APP", () => //Click "Close App"
                     {
                         extAppController.CloseCurrentApplication();
                         ShellWindowState = WindowState.Maximized;
-                        controllerHandler.SetState(ApplicationState.ItemlistBrowse);
+                        controllerHandler.SetState(ApplicationState.ItemPlay, false);
+                    }
+                },
+                { "UPDATE_ITEMLISTS", () =>
+                    {
+                        //controllerHandler.SetState(ApplicationState.ItemlistBrowse);
                     }
                 }
             };
@@ -410,7 +420,7 @@ namespace FilePlayer.ViewModels
             string args = appData[2];
             string caption = appData[3];
 
-            controllerHandler.SetState(ApplicationState.None);
+            controllerHandler.SetState(ApplicationState.None, true);
             ShellWindowState = WindowState.Minimized;
 
             extAppController = new ExternalAppController(appPath, filePath, args, caption);
@@ -422,8 +432,8 @@ namespace FilePlayer.ViewModels
 
                 Thread.Sleep(5000);
             }
-
-            controllerHandler.SetState(ApplicationState.ItemPlay);
+            controllerHandler.SetState(ApplicationState.None, false);
+            controllerHandler.SetState(ApplicationState.ItemPlay, true);
 
 
         }

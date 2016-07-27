@@ -64,9 +64,9 @@ namespace FilePlayer.Views
 
         public void SetItemSelected(int newSelectedIndex)
         {
-            if ((itemlist.Items.Count > 0) && (itemlist.Columns.Count > 0))
+            itemlist.Dispatcher.Invoke((Action)delegate
             {
-                itemlist.Dispatcher.Invoke((Action)delegate
+                if ((itemlist.Items.Count > 0) && (itemlist.Columns.Count > 0))
                 {
                     if (itemlist.CurrentCell.IsValid)
                     {
@@ -77,8 +77,9 @@ namespace FilePlayer.Views
                     itemlist.SelectedCells.Add(itemlist.CurrentCell);
 
                     itemlist.ScrollIntoView(itemlist.CurrentCell.Item, itemlist.CurrentCell.Column);
-                });
-            }
+                }
+            });
+            
         }
 
     }

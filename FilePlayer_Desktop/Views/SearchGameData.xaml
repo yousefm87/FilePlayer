@@ -6,21 +6,21 @@
         xmlns:local="clr-namespace:FilePlayer.Views"
         xmlns:views="clr-namespace:FilePlayer.Views"
         xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        mc:Ignorable="d"
-                      
-        Title="SearchGameData"        SizeToContent="WidthAndHeight"
-        WindowStyle="None"
+        xmlns:viewModels="clr-namespace:FilePlayer.ViewModels"
+        mc:Ignorable="d"    
+        WindowStyle="SingleBorderWindow"
         AllowsTransparency="True"
-        ShowTitleBar="False"
         ShowMinButton="False"
         ShowMaxRestoreButton="False"
         ShowCloseButton="False"
+        Background ="{StaticResource GrayBrush10}"        
+        BorderBrush ="{StaticResource AccentColorBrush2}"
+        BorderThickness="5"
+        Title="{Binding TitleBarText}"
+        TitleAlignment="Center"
+        TitlebarHeight="40"
+        WindowStartupLocation="CenterOwner" >
 
-        Background ="{StaticResource GrayBrush10}"
-        BorderBrush="Black"
-        BorderThickness="1"
-        WindowStartupLocation="CenterOwner"
-        Closed="Window_Closed">
 
     <controls:MetroWindow.Resources>
         <Style x:Key="SelectedStyle" TargetType="views:SearchGameItem">
@@ -39,18 +39,18 @@
     </controls:MetroWindow.Resources>
 
     <ScrollViewer x:Name="gameGridScrollViewer" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto">
-        <Grid>
+        <Grid >
             <Grid.RowDefinitions>
                 <RowDefinition />
             </Grid.RowDefinitions>
+            
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Grid x:Name="gameGrid" Grid.Row="0" Grid.Column="0">
-            </Grid>
-
-            <Label x:Name="noItemsLabel" Grid.Row="0" Grid.Column="0"
-                   Visibility="Hidden" Content="No available listings..." />
+            
+            <Grid x:Name="gameGrid" Grid.Row="0" Grid.Column="0" Margin="20 20 20 20" />
+            <Label x:Name="noItemsLabel" Grid.Row="0" Grid.Column="0" Visibility="Hidden" Content="No available listings..." />
+            
         </Grid>
         
     </ScrollViewer>

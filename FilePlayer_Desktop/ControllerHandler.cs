@@ -3,21 +3,22 @@ using Microsoft.Practices.Prism.PubSubEvents;
 using FilePlayer.Model;
 using System.Collections.Generic;
 using System;
+using System.Collections;
 
 namespace FilePlayer
 {
 
     public enum ApplicationState
     {
-        None,
-        Last,
-        ItemlistBrowse,
-        ItemPlay,
-        FilterMain,
-        CharGetter,
-        VerticalOptionSelecter,
-        ButtonDialog,
-        SearchGameData
+        None = 0,
+        ControllerNotFound=1,
+        ItemlistBrowse = 2,
+        ItemPlay = 3,
+        FilterMain = 4,
+        CharGetter = 5,
+        VerticalOptionSelecter = 6,
+        ButtonDialog = 7,
+        SearchGameData = 8
     }
 
     class ControllerHandler
@@ -26,11 +27,8 @@ namespace FilePlayer
         private SubscriptionToken controllerSubToken = null;
         Dictionary<ApplicationState, Dictionary<string, Action>> handlerMap;
 
-        private ApplicationState CurrentState = ApplicationState.None;
-        private ApplicationState PreviousState = ApplicationState.None;
+        private Stack stateStack = new Stack();
 
-        //private string CurrentState = "NONE";
-        //private string PreviousState = "NONE";
 
         public void SendEvent<T>(T eventArgs)
         {
@@ -41,8 +39,8 @@ namespace FilePlayer
         {
             this.iEventAggregator = iEventAggregator;
             InitMaps();
-
-            SetState(ApplicationState.ItemlistBrowse);
+            
+            SetState(ApplicationState.ItemlistBrowse, true);
 
             controllerSubToken = this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Subscribe(
                 (controllerEventArgs) =>
@@ -53,19 +51,36 @@ namespace FilePlayer
         }
                 
 
-        public void SetState(ApplicationState state)
+        public void SetState(ApplicationState state, Boolean isOn)
         {
-            if (state == ApplicationState.Last)
+            if (isOn)
             {
-                CurrentState = PreviousState;
+                stateStack.Push(state);
             }
             else
             {
-                PreviousState = CurrentState;
-                CurrentState = state;
-            }
+                Stack states = new Stack();
 
+                ApplicationState currState = (ApplicationState) stateStack.Pop();
+
+                while ((stateStack.Count > 0) && (currState != state)) //in case windows are closed out of order
+                {
+                    states.Push(currState);
+                    currState = (ApplicationState) stateStack.Pop();
+                }
+
+                for (int i = 0; i < states.Count; i++) //put remaining back in stack
+                {
+                    stateStack.Push(states.Pop());
+                }
+
+                if (currState != state)
+                {
+                    stateStack.Push(currState);
+                }
+            }
         }
+
 
         void ControllerEventHandler(ControllerEventArgs e)
         {
@@ -73,16 +88,25 @@ namespace FilePlayer
             {
                 case "CONTROLLER_NOT_FOUND":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOT_FOUND", new string[] { }));
+                    if ((ApplicationState)stateStack.Peek() != ApplicationState.ControllerNotFound)
+                    {
+                        SetState(ApplicationState.ControllerNotFound, true);
+                    }
                     break;
                 case "CONTROLLER_CONNECTED":
                     this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_CONNECTED", new string[] { }));
+                    if ((ApplicationState)stateStack.Peek() == ApplicationState.ControllerNotFound)
+                    {
+                        SetState(ApplicationState.ControllerNotFound, false);
+                    }
                     break;
                 default:
-                    if (handlerMap.ContainsKey(CurrentState))
+                    ApplicationState currState = (ApplicationState)stateStack.Peek();
+                    if (handlerMap.ContainsKey(currState))
                     {
-                        if (handlerMap[CurrentState].ContainsKey(e.action))
+                        if (handlerMap[currState].ContainsKey(e.action))
                         {
-                            handlerMap[CurrentState][e.action]();
+                            handlerMap[currState][e.action]();
                         }
                     }
                     break;
@@ -92,7 +116,6 @@ namespace FilePlayer
 
         public void InitMaps()
         {
-
             Dictionary<string, Action> ItemlistViewEventMap = new Dictionary<string, Action>()
             {
                 { "A", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "ITEM_LIST_CONFIRMATION_OPEN" })); } },
@@ -186,17 +209,17 @@ namespace FilePlayer
 
             Dictionary<string, Action> SearchGameDataEventMap = new Dictionary<string, Action>()
             {
-                { "A", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("SEARCHGAMEDATA_SELECT", new string[] { "" })); } },
-                { "B", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("SEARCHGAMEDATA_CLOSE", new string[] { "" })); } },
+                { "A", () => { SendEvent<SearchGameDataEventArgs>(new SearchGameDataEventArgs("SEARCHGAMEDATA_SELECT")); } },
+                { "B", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("SEARCHGAMEDATA_CLOSE")); } },
                 { "X", () => { } },
                 { "Y", () => { } },
-                { "DUP", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("SEARCHGAMEDATA_MOVE_UP")); } },
-                { "DDOWN", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("SEARCHGAMEDATA_MOVE_DOWN")); } },
-                { "DLEFT", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("SEARCHGAMEDATA_MOVE_LEFT")); } },
-                { "DRIGHT", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("SEARCHGAMEDATA_MOVE_RIGHT")); } },
+                { "DUP", () => { SendEvent<SearchGameDataEventArgs>(new SearchGameDataEventArgs("SEARCHGAMEDATA_MOVE_UP")); } },
+                { "DDOWN", () => { SendEvent<SearchGameDataEventArgs>(new SearchGameDataEventArgs("SEARCHGAMEDATA_MOVE_DOWN")); } },
+                { "DLEFT", () => { SendEvent<SearchGameDataEventArgs>(new SearchGameDataEventArgs("SEARCHGAMEDATA_MOVE_LEFT")); } },
+                { "DRIGHT", () => { SendEvent<SearchGameDataEventArgs>(new SearchGameDataEventArgs("SEARCHGAMEDATA_MOVE_RIGHT")); } },
                 { "LSHOULDER", () => { } },
                 { "RSHOULDER", () => { } },
-                { "GUIDE", () => { } }
+                { "GUIDE", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("SEARCHGAMEDATA_CLOSE")); } }
             };
 
             Dictionary<string, Action> NoneMap = new Dictionary<string, Action>();

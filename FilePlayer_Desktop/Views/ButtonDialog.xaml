@@ -19,12 +19,14 @@
         ShowCloseButton="False"
         MinHeight="200"
         MinWidth="150"
-        BorderBrush="Transparent"
-        BorderThickness="0"
+        BorderBrush ="{StaticResource AccentColorBrush2}"
+        BorderThickness="5"
         Closed="OnWindowClosed">
 
 
+
     <Window.Resources>
+        
         <Style x:Key="DataGridCellStyle" TargetType="{x:Type DataGridCell}" BasedOn="{StaticResource MetroDataGridCell}">
             <Setter Property="Background" Value="{x:Null}" />
             <Setter Property="BorderBrush" Value="{x:Null}" />
@@ -78,7 +80,7 @@
                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="True">
                     <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
                     <!-- highlight for button in metro dark theme ispressed = GrayBrush7-->
-                    <Setter Property="BorderBrush" Value="#2b2c36" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentColorBrush}" />
                     <Setter Property="FontWeight" Value="UltraBold"/>
                     <Setter Property="FontSize" Value="20" />
                     <Setter Property="HorizontalAlignment" Value="Center" />
@@ -88,7 +90,7 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="False">
                     <Setter Property="Button.Background" Value="{DynamicResource GrayBrush8}" />
-                    <Setter Property="BorderBrush" Value="#31323d" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource GrayBrush8}" />
                     <Setter Property="FontWeight" Value="Bold"/>
                     <Setter Property="FontSize" Value="20" />
                     <Setter Property="HorizontalAlignment" Value="Center" />
@@ -114,10 +116,12 @@
             <Setter Property="GridLinesVisibility" Value="None" />
             <Setter Property="CellStyle" Value="{StaticResource DataGridCellStyle}" />
             <Setter Property="RowStyle" Value="{StaticResource DataGridRowStyle}" />
+            <Setter Property="Margin" Value="0 5 0 5" />
         </Style>
 
     </Window.Resources>
-    
+
+
     <DataGrid x:Name="buttonGrid" 
               Style="{StaticResource ButtonDataGrid}" 
               ItemsSource="{Binding ButtonNames}" SelectedIndex="{Binding SelectedButtonIndex}">

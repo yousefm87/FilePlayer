@@ -9,25 +9,24 @@ namespace FilePlayer.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            string name = "";
+            string currentItemString = "";
 
-            switch ((string)parameter)
-            {
-                case "Progress":
-                    string numerator = "?";
-                    string denominator = "?";
+            string itemType = (string) parameter;
+   
+            string numerator = "?";
+            string denominator = "?";
+            string itemName = "?";
 
-                    if ((values[1] != null) && (!values[1].Equals(DependencyProperty.UnsetValue)))
-                        numerator = (string) values[1];
-                    if ((values[2] != null) && (!values[2].Equals(DependencyProperty.UnsetValue)))
-                        denominator = (string) values[2];
+            if ((values[0] != null) && (!values[0].Equals(DependencyProperty.UnsetValue)))
+                numerator = (string) values[0];
+            if ((values[1] != null) && (!values[1].Equals(DependencyProperty.UnsetValue)))
+                denominator = (string) values[1];
+            if ((values[2] != null) && (!values[2].Equals(DependencyProperty.UnsetValue)))
+                itemName = (string) values[2];
 
-                    name = numerator + "/" + denominator ;
-                    break;
+            currentItemString = itemType + " (" + numerator + "/" + denominator + ") - " + itemName;
 
-            }
-
-            return name;
+            return currentItemString;
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

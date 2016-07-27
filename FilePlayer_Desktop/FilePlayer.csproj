@@ -30,7 +30,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <UpdateUrl>http://localhost/FilePlayer/</UpdateUrl>
-    <ApplicationRevision>56</ApplicationRevision>
+    <ApplicationRevision>57</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -338,6 +338,10 @@
     </Resource>
     <Resource Include="Images\xbox360controller_artwhite.png" />
     <Resource Include="Images\xbox360controller_artblack.png" />
+    <Resource Include="Images\refreshIcon3.png" />
+    <Resource Include="Images\refreshIcon4.png" />
+    <Resource Include="Images\refreshIcon5.png" />
+    <Resource Include="Images\refreshIcon.png" />
     <Content Include="JSON\consoles.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -382,7 +386,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Images\refreshIcon.png">
+    <Content Include="Images\refreshIcon2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

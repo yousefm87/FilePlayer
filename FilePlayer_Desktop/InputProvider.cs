@@ -165,7 +165,6 @@ namespace FilePlayer
                         }
                         if (IsButtonPressed(0, "LTHUMB"))
                         {
-
                             this.iEventAggregator.GetEvent<PubSubEvent<ControllerEventArgs>>().Publish(new ControllerEventArgs { action = "LTHUMB" });
                             Thread.Sleep(WaitTimeAfterClick);
                         }

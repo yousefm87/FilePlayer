@@ -113,6 +113,7 @@ namespace FilePlayer.ViewModels
 
         public GameRetrieverProgressViewModel(IEventAggregator iEventAggregator)
         {
+            Init();
             this.iEventAggregator = iEventAggregator;
 
             eventMap = new Dictionary<string, Action<string[]>>()
@@ -127,7 +128,6 @@ namespace FilePlayer.ViewModels
                     PerformViewAction(this, viewEventArgs);
                 }
             );
-            Init();
 
 
         }

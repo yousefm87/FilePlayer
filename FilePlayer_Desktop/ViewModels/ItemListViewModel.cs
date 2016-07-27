@@ -271,8 +271,6 @@ namespace FilePlayer.ViewModels
                 { "GIANTBOMB_UPLOAD_START", UploadFromGiantbomb },
                 { "OPEN_FILTER", OpenFilter },
                 { "CLOSE_FILTER", CloseFilter },
-                { "ADD_SHADE", () => { SetShade(true); } },
-                { "REMOVE_SHADE", () => { SetShade(false); } },
                 { "ITEMLIST_MOVE_LEFT", () =>
                     {
                         if (MoveLeftCommand.CanExecute())
@@ -326,8 +324,17 @@ namespace FilePlayer.ViewModels
                         }
                     }
                 },
+                {"GIANTBOMB_PLATFORM_UPLOAD_FINISH", (details) =>
+                    {
+                        InitializeList();
+                    }
+                },
+
+                { "ADD_SHADE", (windowName) => { SetShade(true, windowName[0]); } },
+                { "REMOVE_SHADE", (windowName) => { SetShade(false, windowName[0]); } },
                 { "FILTER_LIST", FilterItemlist },
                 { "GAMEDATA_ADD_ITEM", AddGameDataItem }
+
             };
 
             buttonDialogEventMap = new Dictionary<string, Action>()
@@ -345,7 +352,12 @@ namespace FilePlayer.ViewModels
                     }
                 }, 
                 { "FILE_DELETE_DATA", DeleteCurrentGameData }, //Click "Delete Game Data"
-                { "FILE_SEARCH_DATA", SendSearchGameDataEvent }
+                { "FILE_SEARCH_DATA", SendSearchGameDataEvent },
+                { "UPDATE_ITEMLISTS", () =>
+                    {
+                        InitializeList();
+                    }
+                }
             };
 
         }
@@ -442,12 +454,11 @@ namespace FilePlayer.ViewModels
         {
             Task.Factory.StartNew(() =>
             {
-                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None));
+                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None, true));
 
                 GameRetriever.GetAllPlatformsData(itemLists, iEventAggregator);
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_UPLOAD_COMPLETE", new String[] { }));
-                
-                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.ItemlistBrowse));
+
+                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None, false));
             });
         }
         
@@ -550,7 +561,7 @@ namespace FilePlayer.ViewModels
         }
 
 
-        public void SetShade(bool isShaded)
+        public void SetShade(bool isShaded, string windowName)
         {
             if (isShaded)
             {
@@ -559,12 +570,26 @@ namespace FilePlayer.ViewModels
                     ShadeEffect = true;
                 }
 
-                shadeStack.Push(0);
+                shadeStack.Push(windowName);
             }
             else
             {
-                shadeStack.Pop();
+                Stack winNames = new Stack();
 
+                string currWinName = (string)shadeStack.Pop();
+
+                while ((shadeStack.Count > 0) && (currWinName != windowName)) //in case windows are closed out of order
+                {
+                    winNames.Push(currWinName);
+                    currWinName = (string)shadeStack.Pop();
+                }
+               
+       
+                for (int i = 0; i < winNames.Count; i++) //put remaining back in stack
+                {
+                    shadeStack.Push(winNames.Pop());
+                }
+                
                 if (shadeStack.Count == 0)
                 {
                     ShadeEffect = false;

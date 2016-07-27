@@ -7,11 +7,15 @@
              xmlns:prism="http://www.codeplex.com/prism"
              xmlns:local="clr-namespace:FilePlayer.Views"
              mc:Ignorable="d" 
-             Visibility="{Binding FilterVisibility}">
+             Visibility="{Binding FilterVisibility}"
+             >
+
+
 
     <UserControl.Resources>
+        
         <Style x:Key="FilterBarStyle" TargetType="{x:Type Grid}">
-
+            
             <Setter Property="HorizontalAlignment" Value="Center" />
             <Setter Property="VerticalAlignment" Value="Top"/>
             <Setter Property="Background" Value="{DynamicResource GrayBrush10}" />
@@ -31,7 +35,9 @@
             <Setter Property="FontSize" Value="40" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Height" Value="65" />
-
+            
+            <Setter Property="Background" Value="{DynamicResource GrayBrush8}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource GrayBrush8}" />
 
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
@@ -40,19 +46,18 @@
 
         <Style x:Key="SelectedFilterInputStyle" TargetType="{x:Type TextBox}" >
             <Setter Property="Background" Value="{DynamicResource HighlightBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HighlightBrush}" />
             <Setter Property="Padding" Value="20,0,0,0" />
             <Setter Property="FontSize" Value="40" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Height" Value="65" />
             
-
-
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="VerticalAlignment" Value="Stretch" />
         </Style>
 
         <Style x:Key="UnselectedFilterResetBtnStyle" TargetType="{x:Type Label}" >
-            <Setter Property="BorderBrush" Value="#07070F" />
+            <Setter Property="BorderBrush" Value="{DynamicResource GrayBrush10}" />
             <Setter Property="BorderThickness" Value="1" />
 
             <Setter Property="HorizontalAlignment" Value="Center" />
@@ -61,8 +66,8 @@
         </Style>
 
         <Style x:Key="SelectedFilterResetBtnStyle" TargetType="{x:Type Label}" >
-            <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
-            <Setter Property="BorderBrush" Value="#212129" />
+            <Setter Property="Background" Value="{DynamicResource HighlightBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource HighlightBrush}" />
             <Setter Property="BorderThickness" Value="1" />
 
             <Setter Property="HorizontalAlignment" Value="Center" />
@@ -70,32 +75,35 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Style="{StaticResource FilterBarStyle}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="8*" />
 
-            <ColumnDefinition Width="10*" />
+    <Border HorizontalAlignment="Stretch" VerticalAlignment="Top" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="0 0 0 1">
+        <Grid Style="{StaticResource FilterBarStyle}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="8*" />
 
-            <ColumnDefinition Width="8*" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10*" />
+
+                <ColumnDefinition Width="8*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
         
-        <Label x:Name="resetBtn" Margin="10,10,0,10" Grid.Row="0" Grid.RowSpan="1" Grid.Column="0" Style="{StaticResource UnselectedFilterResetBtnStyle}" >
-            <StackPanel>
-                <Image Stretch="Uniform" Source="../Images/refreshIcon.png" Height="65" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center" />
-            </StackPanel>
-        </Label>
+            <Label x:Name="resetBtn" Margin="10,10,0,10" Grid.Row="0" Grid.RowSpan="1" Grid.Column="0" Style="{StaticResource UnselectedFilterResetBtnStyle}" >
+                <StackPanel>
+                    <Image Stretch="Uniform" Source="../Images/refreshIcon.png" Height="65" Width="80" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                </StackPanel>
+            </Label>
 
-        <TextBox x:Name="filterTypeText" Text="{Binding FilterType}" Style="{StaticResource UnselectedFilterInputStyle}"
-                 Margin="20,10,10,10" Grid.Row="0" Grid.Column="1" />
+            <TextBox x:Name="filterTypeText" Text="{Binding FilterType}" Style="{StaticResource UnselectedFilterInputStyle}"
+                     Margin="20,10,10,10" Grid.Row="0" Grid.Column="1" />
 
-        <TextBox x:Name="fileFilterText" Text="{Binding Filter}" Style="{StaticResource UnselectedFilterInputStyle}"
-                 Margin="10,10,0,10" Grid.Row="0" Grid.Column="2" />
+            <TextBox x:Name="fileFilterText" Text="{Binding Filter}" Style="{StaticResource UnselectedFilterInputStyle}"
+                     Margin="10,10,0,10" Grid.Row="0" Grid.Column="2" />
 
 
-    </Grid>
+        </Grid>
+    </Border>
 </UserControl>

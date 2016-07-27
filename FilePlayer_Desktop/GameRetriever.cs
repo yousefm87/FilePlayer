@@ -1,5 +1,4 @@
 ﻿using FilePlayer.Model;
-using FilePlayer.ViewModels;
 using GiantBomb.Api;
 using GiantBomb.Api.Model;
 using Microsoft.Practices.Prism.PubSubEvents;
@@ -16,7 +15,6 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace FilePlayer
 {
@@ -275,8 +273,6 @@ namespace FilePlayer
 
             try
             {
-
-
                 IEnumerable<Game> games = giantBomb.SearchForGames(gameQuery);
 
                 int maxCount = (games.Count() > MAX_SEARCH) ? MAX_SEARCH : games.Count();
@@ -296,13 +292,16 @@ namespace FilePlayer
                 }
 
 
-                float distanceThreshold = gameQuery.Length;
+                float distanceThreshold = gameQuery.Length; 
 
                 if (minGameDistance <= distanceThreshold)
                 {
                     IEnumerable<Release> releases = giantBomb.GetReleasesForGame(games.ElementAt(minGameIndex).Id);
 
                     string itemImageURL = "";
+                    string itemDeck = "";
+                    string itemDescription = "";
+                    string itemReleaseDate = "";
                     bool retrievedImage = false;
 
                     if (releases.Count() > 0)
@@ -310,16 +309,18 @@ namespace FilePlayer
                         float minReleasePlatformDistance = Int32.MaxValue;
                         float minReleaseGameDistance = Int32.MaxValue;
                         int minReleaseIndex = -1;
+
                         for (int releaseNum = 0; releaseNum < (releases.Count() - 1); releaseNum++)
                         {
                             float platformDistance = SiftDistance(platformName.ToLower(), releases.ElementAt(releaseNum).Platform.Name.ToLower(), releases.ElementAt(releaseNum).Platform.Name.Length);
                             float gameDistance = SiftDistance(gameQuery.ToLower(), releases.ElementAt(releaseNum).Name.ToLower(), releases.ElementAt(releaseNum).Name.Length);
 
+
                             if (releases.ElementAt(releaseNum).Image != null)
                             {
-                                if (platformDistance <= minReleasePlatformDistance)
+                                if (platformDistance <= minReleasePlatformDistance) // At or below minimum platform distance - note: cares about game over platform
                                 {
-                                    if (gameDistance <= minReleaseGameDistance)
+                                    if (gameDistance <= minReleaseGameDistance) // At or below game distance
                                     {
                                         if ((platformDistance == minReleasePlatformDistance) && (gameDistance == minReleaseGameDistance))
                                         { }
@@ -334,23 +335,58 @@ namespace FilePlayer
                             }
                         }
 
-                        if (minReleaseIndex != -1)
+                        if (minReleaseIndex != -1) // First try to get image URL from Game Release object
                         {
-                            retrievedImage = true;
-                            itemImageURL = releases.ElementAt(minReleaseIndex).Image.MediumUrl;
+                            if (releases.ElementAt(minReleaseIndex).Image.MediumUrl != null)
+                            {
+                                itemImageURL = releases.ElementAt(minReleaseIndex).Image.MediumUrl;
+                            }
+
+                            if (releases.ElementAt(minReleaseIndex).Deck != null)
+                            {
+                                itemDeck = releases.ElementAt(minReleaseIndex).Deck;
+                            }
+
+                            if (releases.ElementAt(minReleaseIndex).Description != null)
+                            {
+                                itemDescription = releases.ElementAt(minReleaseIndex).Description;
+                            }
+
+                            if (releases.ElementAt(minReleaseIndex).ReleaseDate != null)
+                            {
+                                itemReleaseDate = releases.ElementAt(minReleaseIndex).ReleaseDate.ToString();
+                            }
+
+                            retrievedImage = (itemImageURL != "");
                         }
 
                     }
 
-                    if (!retrievedImage)
+                    //Get game information from Game Release object if not set
+                    if (games.ElementAt(minGameIndex).Image != null)
                     {
-                        if (games.ElementAt(minGameIndex).Image != null)
+                        if (games.ElementAt(minGameIndex).Image.MediumUrl != null)
                         {
-                            itemImageURL = games.ElementAt(minGameIndex).Image.MediumUrl;
-                            retrievedImage = true;
+                            itemImageURL = (itemImageURL != "") ? itemImageURL : games.ElementAt(minGameIndex).Image.MediumUrl;
                         }
                     }
+                        
+                    if (games.ElementAt(minGameIndex).Deck != null)
+                    {
+                        itemDeck = (itemDeck != "") ? itemDeck : games.ElementAt(minGameIndex).Deck;
+                    }
 
+                    if (games.ElementAt(minGameIndex).Description != null)
+                    {
+                        itemDescription = (itemDescription != "") ? itemDescription : games.ElementAt(minGameIndex).Description;
+                    }
+
+                    if (games.ElementAt(minGameIndex).OriginalReleaseDate != null)
+                    {
+                        itemReleaseDate = (itemReleaseDate != "") ? itemReleaseDate : games.ElementAt(minGameIndex).OriginalReleaseDate.ToString();
+                    }
+                      
+                    
                     string extension = itemImageURL.Split('.').Last();
 
                     if (extension.Length > 4)
@@ -358,22 +394,16 @@ namespace FilePlayer
                         extension = "jpg";
                     }
 
-                    string saveToFilePath = imageFolderPath + gameQuery + "." + extension;
-                    string itemImageLocation = saveToFilePath;
-                    if (retrievedImage)
+                    string itemImageLocation = imageFolderPath + gameQuery + "." + extension;
+
+                    if (itemImageURL != "")//download image if needed
                     {
-                        if ((!File.Exists(saveToFilePath)) || (File.Exists(saveToFilePath) && overwriteFile))
+                        if ((!File.Exists(itemImageLocation)) || (File.Exists(itemImageLocation) && overwriteFile))
                         {
-                            //if (File.Exists(saveToFilePath))
-                            //{
-                            //    GC.Collect();
-                            //    GC.WaitForPendingFinalizers();
-                            //    File.Delete(saveToFilePath);
-                            //}
                             WebClient webClient = new WebClient();
                             try
                             {
-                                webClient.DownloadFile(itemImageURL, saveToFilePath);
+                                webClient.DownloadFile(itemImageURL, itemImageLocation);
                             }
                             catch (WebException)
                             {
@@ -386,10 +416,7 @@ namespace FilePlayer
                     {
                         itemImageLocation = "";
                     }
-
-                    string itemDeck = games.ElementAt(minGameIndex).Deck;
-                    string itemDescription = games.ElementAt(minGameIndex).Description;
-                    string itemReleaseDate = games.ElementAt(minGameIndex).OriginalReleaseDate.ToString();
+                    
 
                     writer.WriteStartObject();
 
@@ -573,8 +600,9 @@ namespace FilePlayer
             {
                 using (var response = request.GetResponse())
                 {
-                    bool isImageValid = response.ContentType.ToLower(CultureInfo.InvariantCulture).StartsWith("image/", StringComparison.OrdinalIgnoreCase);
-                    return isImageValid;
+                    bool isImageValid = response.ContentType.ToLower(CultureInfo.InvariantCulture).StartsWith("application/octet-stream", StringComparison.OrdinalIgnoreCase);
+                    bool isImageValid2 = response.ContentType.ToLower(CultureInfo.InvariantCulture).StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+                    return isImageValid || isImageValid2;
                 }
 
             }

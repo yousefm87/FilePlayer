@@ -1,22 +1,16 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Controls;
-using Prism.Interactivity.InteractionRequest;
-using System.Windows.Media;
+﻿using System.Windows.Controls;
 using Microsoft.Practices.Prism.PubSubEvents;
 using FilePlayer.Model;
 using FilePlayer.ViewModels;
-using System.Windows.Data;
+using MahApps.Metro.Controls;
 
 namespace FilePlayer.Views
 {
     /// <summary>
     /// Interaction logic for GameRetrieverProgress.xaml
     /// </summary>
-    public partial class GameRetrieverProgress : Window
+    public partial class GameRetrieverProgress : MetroWindow
     {
-
-        private IEventAggregator iEventAggregator;
         public SubscriptionToken progressActionToken;
 
         public string[] buttonActions;
@@ -34,9 +28,9 @@ namespace FilePlayer.Views
 
             this.Topmost = true;
             this.Topmost = false;
+            Activate();
 
-            iEventAggregator = Event.EventInstance.EventAggregator;
-
+            
         }
 
     }

@@ -112,11 +112,10 @@ namespace FilePlayer
 
                     while (!searchGameData.IsVisible)
                     {
+                        searchGameData.Height = Application.Current.MainWindow.ActualHeight - 100;
+                        searchGameData.Width = Application.Current.MainWindow.ActualWidth - 120;
+
                         searchGameData.Show();
-                        //searchGameData.MaxHeight = Application.Current.MainWindow.ActualHeight - 100;
-                        //searchGameData.MaxWidth = Application.Current.MainWindow.ActualWidth - 120;
-                        //searchGameData.Left = (Application.Current.MainWindow.ActualWidth - searchGameData.Width) / 2;
-                        //searchGameData.Top = (Application.Current.MainWindow.ActualHeight - searchGameData.Height) / 2;
                     }
                 });
             }
@@ -152,7 +151,6 @@ namespace FilePlayer
             {
                 //MaximizeShell();
 
-                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None));
                 this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOTFOUND_OPEN", new string[] { })); //for shade
 
                 this.Dispatcher.Invoke((Action)delegate
@@ -161,6 +159,7 @@ namespace FilePlayer
                     controllerNotFound = new ControllerNotFound();
                     controllerNotFound.ShowInTaskbar = false;
                     controllerNotFound.Owner = Application.Current.MainWindow;
+                    controllerNotFound.Topmost = true;
 
                     while (!controllerNotFound.IsVisible)
                     {
@@ -187,7 +186,7 @@ namespace FilePlayer
                 controllerNotFound = null;
 
                 this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("CONTROLLER_NOTFOUND_CLOSE", new string[] { }));
-                this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.Last));
+                
             }
         }
 
@@ -263,6 +262,7 @@ namespace FilePlayer
 
             Array.Copy(ShellViewModel.VerticalOptionData, 3, options, 0, arrLength);
             Array.Copy(ShellViewModel.VerticalOptionData, 3 + arrLength, actions, 0, arrLength);
+
             dynamicCanvas.Dispatcher.Invoke((Action)delegate
             {
                 verticalOptionSelecter = new VerticalOptionSelecter(options, actions);
@@ -307,9 +307,10 @@ namespace FilePlayer
                 
                 while (!gameRetrieverProgress.IsVisible)
                 {
-                    gameRetrieverProgress.Show();
+                    
                     gameRetrieverProgress.Left = (Application.Current.MainWindow.ActualWidth - gameRetrieverProgress.Width) / 2;
                     gameRetrieverProgress.Top = (Application.Current.MainWindow.ActualHeight - gameRetrieverProgress.Height) / 2;
+                    gameRetrieverProgress.Show();
                 }
             });
         }

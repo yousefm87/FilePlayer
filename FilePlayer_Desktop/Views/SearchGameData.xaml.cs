@@ -5,18 +5,9 @@ using Microsoft.Practices.Prism.PubSubEvents;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using FilePlayer.Views;
-using GiantBomb.Api.Model;
+using System.ComponentModel;
 
 namespace FilePlayer.Views
 {
@@ -25,9 +16,11 @@ namespace FilePlayer.Views
     /// </summary>
     public partial class SearchGameData : MetroWindow
     {
+       
+        private Dictionary<string, Action> propertyChangedMap;
 
-        private IEventAggregator iEventAggregator;
-        public SubscriptionToken dialogActionToken;
+        private int currRow = 0;
+        private int currCol = 0;
 
         public string[] buttonActions;
         public Button[] buttons;
@@ -35,31 +28,55 @@ namespace FilePlayer.Views
 
         public SearchGameDataViewModel SearchGameDataViewModel { get; set; }
 
-        public string GameQuery = "";
+
 
         public int MaxColumns = 0;
         public int MaxRows = 0;
 
+
         public SearchGameData(string gameQuery)
         {
             InitializeComponent();
-            iEventAggregator = Event.EventInstance.EventAggregator;
 
-            SearchGameDataViewModel = new SearchGameDataViewModel(Event.EventInstance.EventAggregator, gameQuery);
+            SearchGameDataViewModel = new SearchGameDataViewModel(gameQuery);
             this.DataContext = SearchGameDataViewModel;
-
-            GameQuery = gameQuery;
 
             Init2();
 
             this.Topmost = true;
 
-            dialogActionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
-                (viewEventArgs) =>
-                {
-                    PerformViewAction(this, viewEventArgs);
-                }
-            );
+            
+            propertyChangedMap = new Dictionary<string, Action>()
+            {
+                { "SelectedCol", TrySelectItem  },
+                { "SelectedRow", TrySelectItem  }
+            };
+
+            SearchGameDataViewModel.PropertyChanged += PropertyChangedHandler;
+        }
+
+        private void TrySelectItem()
+        {
+            if (IsItemExist(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol))
+            {
+                SetItemSelected(currRow, currCol, false);
+                SetItemSelected(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol, true);
+
+                currRow = SearchGameDataViewModel.SelectedRow;
+                currCol = SearchGameDataViewModel.SelectedCol;
+            }
+            else
+            {
+                SearchGameDataViewModel.SetRowCol(currRow, currCol);
+            }
+        }
+
+        private void PropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+        {
+            if (propertyChangedMap.ContainsKey(e.PropertyName))
+            {
+                propertyChangedMap[e.PropertyName]();
+            }
         }
 
         //public void Init()
@@ -133,11 +150,17 @@ namespace FilePlayer.Views
                 }
             }
 
+            ColumnDefinition gridCol;
             for (int i = 0; i < maxColCt; i++) //Add Column Definitions
             {
-                ColumnDefinition gridCol = new ColumnDefinition();
+                gridCol = new ColumnDefinition();
+                gridCol.Width = new GridLength(1, GridUnitType.Auto);
                 gameGrid.ColumnDefinitions.Add(gridCol);
             }
+
+            gridCol = new ColumnDefinition();
+            gridCol.Width = new GridLength(1, GridUnitType.Star);
+            gameGrid.ColumnDefinitions.Add(gridCol);
 
             for (int i = 0; i < SearchGameDataViewModel.GameData.Count(); i++) //Add Releases for each Game
             {
@@ -149,7 +172,7 @@ namespace FilePlayer.Views
                         currCol++;
                     }
                     
-                }
+                }      
             }
 
 
@@ -171,8 +194,7 @@ namespace FilePlayer.Views
                 Grid.SetRow(currGameItem, row);
                 Grid.SetColumn(currGameItem, col);
 
-                gameGrid.Children.Add(currGameItem);
-                
+                gameGrid.Children.Add(currGameItem);             
             }
 
             return gameAdded;
@@ -229,10 +251,22 @@ namespace FilePlayer.Views
             });
         }
 
+        public bool IsItemExist(int row, int col)
+        {
+            bool itemFound = false;
+            this.Dispatcher.Invoke((Action)delegate
+            {
+                SearchGameItem element = gameGrid.Children.OfType<SearchGameItem>().Where(e => Grid.GetColumn(e) == col && Grid.GetRow(e) == row).FirstOrDefault();
+
+                itemFound = (element != null);
+            });
+
+            return itemFound;
+        }
+
+
         public bool SetItemSelected(int row, int col, bool selected)
         {
-
-
             bool itemFound = false;
 
             this.Dispatcher.Invoke((Action)delegate
@@ -256,74 +290,6 @@ namespace FilePlayer.Views
             });
 
             return itemFound;
-        }
-
-
-
-
-        void PerformViewAction(object sender, ViewEventArgs e)
-        {
-            switch (e.action)
-            {
-                case "SEARCHGAMEDATA_MOVE_LEFT":
-                    if (SetItemSelected(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol - 1, true))
-                    {
-                        SetItemSelected(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol, false);
-                        SearchGameDataViewModel.SelectedCol = SearchGameDataViewModel.SelectedCol - 1;
-                    }
-                    break;
-                case "SEARCHGAMEDATA_MOVE_RIGHT":
-                    if (SetItemSelected(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol + 1, true))
-                    {
-                        SetItemSelected(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol, false);
-                        SearchGameDataViewModel.SelectedCol = SearchGameDataViewModel.SelectedCol + 1;
-                    }
-                    break;
-                case "SEARCHGAMEDATA_MOVE_UP":
-                    if (SetItemSelected(SearchGameDataViewModel.SelectedRow - 1, SearchGameDataViewModel.SelectedCol, true))
-                    {
-                        SetItemSelected(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol, false);
-                        SearchGameDataViewModel.SelectedRow = SearchGameDataViewModel.SelectedRow - 1;
-                    }
-                    break;
-                case "SEARCHGAMEDATA_MOVE_DOWN":
-                    if (SetItemSelected(SearchGameDataViewModel.SelectedRow + 1, SearchGameDataViewModel.SelectedCol, true))
-                    {
-                        SetItemSelected(SearchGameDataViewModel.SelectedRow, SearchGameDataViewModel.SelectedCol, false);
-                        SearchGameDataViewModel.SelectedRow = SearchGameDataViewModel.SelectedRow + 1;
-                    }
-                    break;
-                case "SEARCHGAMEDATA_SELECT":
-                    SelectItem();
-                    break;
-
-            }
-
-        }
-
-
-        public void SelectItem()
-        {
-            string itemName = GameQuery;
-            string itemDesc;
-            string itemRel;
-            string itemImgLoc;
-
-
-            itemDesc = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ElementAt(SearchGameDataViewModel.SelectedCol - 1).GameDescription;
-            itemRel = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ElementAt(SearchGameDataViewModel.SelectedCol - 1).ReleaseDate;
-            itemImgLoc = SearchGameDataViewModel.GameData.ElementAt(SearchGameDataViewModel.SelectedRow).ElementAt(SearchGameDataViewModel.SelectedCol - 1).ImageURL;
-
-            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GAMEDATA_ADD_ITEM", new String[] { itemName, itemDesc, itemRel, itemImgLoc }));
-        }
-
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            this.Topmost = false;
-            if (dialogActionToken != null)
-            {
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Unsubscribe(dialogActionToken);
-            }
         }
     }
 }

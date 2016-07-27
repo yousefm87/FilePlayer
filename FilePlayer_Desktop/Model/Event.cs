@@ -26,12 +26,24 @@ namespace FilePlayer.Model
     public class StateEventArgs : EventArgs
     {
         public ApplicationState state;
+        public Boolean isOn;
 
-        public StateEventArgs(ApplicationState _state)
+        public StateEventArgs(ApplicationState _state, Boolean _isOn)
         {
             state = _state;
+            isOn = _isOn;
         }
        
+    }
+
+    public class SearchGameDataEventArgs : EventArgs
+    {
+        public string action;
+        
+        public SearchGameDataEventArgs(string _action)
+        {
+            action = _action;
+        }
     }
 
 

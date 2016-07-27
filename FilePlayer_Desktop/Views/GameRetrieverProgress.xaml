@@ -1,23 +1,32 @@
-﻿<Window x:Class="FilePlayer.Views.GameRetrieverProgress"
+﻿<controls:MetroWindow x:Class="FilePlayer.Views.GameRetrieverProgress"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"        
+        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:prism="http://www.codeplex.com/prism"
         xmlns:views="clr-namespace:FilePlayer.Views"
         xmlns:viewModels="clr-namespace:FilePlayer.ViewModels"
         xmlns:styles="clr-namespace:FilePlayer.Styles"
         xmlns:converters="clr-namespace:FilePlayer.Converters"
         mc:Ignorable="d"
-        SizeToContent="WidthAndHeight"
-        WindowStyle="None"
+        WindowStyle="SingleBorderWindow"
+        ShowCloseButton="False"
+        ShowMaxRestoreButton="False"
+        ShowMinButton="False"
         AllowsTransparency="True"
         Background = "{DynamicResource GrayBrush10}"
-        BorderBrush ="Black"
-        BorderThickness="1"
+        BorderBrush ="{StaticResource AccentColorBrush}"
+        BorderThickness="5"
+                      
+        Title="Uploading Game Data"        
+        TitleAlignment="Center" 
+        TitlebarHeight="40"
         MinHeight="200"
-        MinWidth="150">
+        MinWidth="150"
+        WindowStartupLocation="CenterOwner" 
+                      >
 
 
     <Window.Resources>
@@ -70,8 +79,35 @@
         <Style x:Key="progressBarStyle" TargetType="ProgressBar" BasedOn="{StaticResource MetroProgressBar}">
             <Setter Property="MinWidth" Value="300" />
             <Setter Property="MinHeight" Value="25" />
+            <Setter Property="Background" Value="{StaticResource BlackColorBrush}" />
         </Style>
-        
+
+        <Style x:Key="ButtonStyle" TargetType="Button" BasedOn="{StaticResource AccentedSquareButtonStyle}">
+
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
+                    <!-- highlight for button in metro dark theme ispressed = GrayBrush7-->
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentColorBrush}" />
+                    <Setter Property="FontWeight" Value="UltraBold"/>
+                    <Setter Property="FontSize" Value="20" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="Height" Value="80" />
+                    <Setter Property="Width" Value="320" />
+                    <Setter Property="Margin" Value="18,1,18,1" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType={x:Type DataGridRow}}, Path=IsSelected}" Value="False">
+                    <Setter Property="Button.Background" Value="{DynamicResource GrayBrush8}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource GrayBrush8}" />
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="FontSize" Value="20" />
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="Height" Value="80" />
+                    <Setter Property="Width" Value="320" />
+                    <Setter Property="Margin" Value="18,1,18,1" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
 
     </Window.Resources>
 
@@ -87,57 +123,54 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Label x:Name="platformProgressLabel"  Grid.Row="0" Grid.RowSpan="1">
+        <Label x:Name="platformProgressLabel"  Grid.Row="0" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="4">
             <TextBlock x:Name="platformProgressText" Style="{StaticResource StatusStyle}">
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource progressConverter}"
-                                  ConverterParameter="Progress"  
-                                  StringFormat="Platforms: {0}">
-                        <Binding />
-                        <Binding Path="PlatformNumerator"  />
+                                  ConverterParameter="Platform">
+                        <Binding Path="PlatformNumerator"/>
                         <Binding Path="PlatformDenominator" />
+                        <Binding Path="PlatformName" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
         </Label>
 
 
-        <Label x:Name="platformLabel"  Grid.Row="1" Grid.RowSpan="1">
-            <TextBlock x:Name="platformText" Style="{StaticResource TitleStyle}" Text="{Binding PlatformName}" />
-        </Label>
 
 
-        <Grid Grid.Row="2" Grid.RowSpan="1">
+        <Grid Grid.Row="2" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="4">
             <ProgressBar x:Name="platformProgress" Style="{StaticResource progressBarStyle}" Minimum="0" Maximum="100" Value="{Binding PlatformPercentage}"/>
-            <TextBlock Text="{Binding PlatformPercentage, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding PlatformPercentage, StringFormat={}{0:0}%}" Foreground="{StaticResource WhiteColorBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
-        <Label x:Name="gameProgressLabel"  Grid.Row="3" Grid.RowSpan="1">
+        <Label x:Name="gameProgressLabel"  Grid.Row="3" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="4">
             <TextBlock x:Name="gameProgressText" Style="{StaticResource StatusStyle}">
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource progressConverter}"
-                                  ConverterParameter="Progress"  
-                                  UpdateSourceTrigger="Explicit"
-                                  StringFormat="Games: {0}">
-                        <Binding />
+                                  ConverterParameter="Game"  
+                                  UpdateSourceTrigger="Explicit">
                         <Binding Path="GameNumerator" />
                         <Binding Path="GameDenominator" />
+                        <Binding Path="GameName" />
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
         </Label>
 
-
-        <Label x:Name="gameLabel"  Grid.Row="4" Grid.RowSpan="1">
-            <TextBlock x:Name="gameText" Style="{StaticResource TitleStyle}" Text="{Binding GameName}" />
-        </Label>
-
-        <Grid Grid.Row="5" Grid.RowSpan="1">
+        <Grid Grid.Row="5" Grid.RowSpan="1" Grid.Column="0" Grid.ColumnSpan="4">
             <ProgressBar x:Name="gameProgress" Style="{StaticResource progressBarStyle}" 
-                     Minimum="0" Maximum="100" Value="{Binding GamePercentage}"/>
-            <TextBlock Text="{Binding GamePercentage, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                     Minimum="0" Maximum="100" Value="{Binding GamePercentage}">
+                
+            </ProgressBar>
+            <TextBlock Text="{Binding GamePercentage, StringFormat={}{0:0}%}" Foreground="{StaticResource WhiteColorBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
+
     </Grid>
-</Window>
+
+</controls:MetroWindow>
 
