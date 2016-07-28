@@ -84,9 +84,12 @@
 
     <ListBox x:Name="optionsList" 
              ItemContainerStyle="{StaticResource OptionDataListItemStyle}"
-                ItemsSource="{Binding VertOptions}" 
-                SelectedIndex="{Binding SelectedOptionIndex}"
-                Background="#2b2d38">
+             ItemsSource="{Binding VertOptions}" 
+             SelectedIndex="{Binding SelectedOptionIndex}"
+             Background="#2b2d38"
+             BorderBrush="{StaticResource AccentColorBrush}"
+             BorderThickness="5"
+             >
 
     </ListBox>
 </UserControl>

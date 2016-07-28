@@ -84,8 +84,9 @@ namespace FilePlayer.Converters
                         BitmapImage bitmapImage = new BitmapImage();
                         bitmapImage.BeginInit();
                         bitmapImage.StreamSource = new FileStream(path, FileMode.Open, FileAccess.Read);
-                        bitmapImage.DecodePixelWidth = (int)_decodePixelWidth;
-                        bitmapImage.DecodePixelHeight = (int)_decodePixelHeight;
+
+                    //bitmapImage.DecodePixelWidth = (int)_decodePixelWidth;
+                        //bitmapImage.DecodePixelHeight = (int)_decodePixelHeight;
                         //load the image now so we can immediately dispose of the stream
                         bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                         bitmapImage.EndInit();
