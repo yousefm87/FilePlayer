@@ -396,7 +396,6 @@ namespace FilePlayer.ViewModels
                     {
                         ShellWindowState = WindowState.Minimized;
                         extAppController.MaximizeCurrentApp();
-                        controllerHandler.SetState(ApplicationState.ItemPlay, true);
                     }
                 },
                 { "CLOSE_APP", () => //Click "Close App"
