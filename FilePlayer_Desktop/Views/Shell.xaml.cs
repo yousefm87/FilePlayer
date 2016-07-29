@@ -106,6 +106,7 @@ namespace FilePlayer
 
                 this.Dispatcher.Invoke((Action)delegate
                 {
+                    this.Activate();
                     searchGameData = new SearchGameData(ShellViewModel.SearchGameDataQuery);
                     searchGameData.ShowInTaskbar = false;
                     searchGameData.Owner = Application.Current.MainWindow;

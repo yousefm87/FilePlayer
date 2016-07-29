@@ -384,6 +384,7 @@ namespace FilePlayer.ViewModels
                 { "FILE_DELETE_DATA", () => //Click "Delete Game Data"
                     {
                         //controllerHandler.SetState(ApplicationState.ItemlistBrowse);
+                        
                     }
                 },
                 { "FILE_SEARCH_DATA", () => //Click "Search Game Data"
