@@ -7,46 +7,11 @@ using System;
 
 namespace FilePlayer.ViewModels
 {
-    public class ButtonDialogPreset
-    {
-        public string dialogName { get; set; }
-        public string[] buttonNames { get; set; }
-        public string[] buttonActions { get; set; }
-
-        public ButtonDialogPreset(string dialogType)
-        {
-            switch (dialogType)
-            {
-                case "ITEM_LIST_PAUSE_OPEN":
-                    dialogName = "ITEMLIST_PAUSE";
-                    buttonNames = new string[] { "Exit", "Reload Consoles", "Upload Game Data" };
-                    buttonActions = new string[] { "EXIT", "UPDATE_ITEMLISTS", "GAMEDATA_UPLOAD" };
-                    break;
-                case "ITEM_LIST_CONFIRMATION_OPEN":
-                    dialogName = "ITEMLIST_CONFIRMATION";
-                    buttonNames = new string[] { "Open", "Search For Data", "Delete Data" };
-                    buttonActions = new string[] { "FILE_OPEN", "FILE_SEARCH_DATA", "FILE_DELETE_DATA" };
-                    break;
-                case "APP_PAUSE_OPEN":
-                    dialogName = "APP_PAUSE";
-                    buttonNames = new string[] { "Return to App", "Close App", "Exit" };
-                    buttonActions = new string[] { "RETURN_TO_APP", "CLOSE_APP", "EXIT" };
-                    break;
-                default:
-                    dialogName = "";
-                    buttonNames = new string[] { };
-                    buttonActions = new string[] { };
-                    break;
-            }
-        }
-    }
-        
-
     public class ButtonDialogViewModel : ViewModelBase
     {
         private IEventAggregator iEventAggregator;
         private SubscriptionToken dialogActionToken;
-        public Dictionary<string, Action> EventMap { get; private set; }
+        private Dictionary<string, Action> EventMap { get; set; }
         
         private IEnumerable<string> buttonNames;
         private IEnumerable<string> buttonResponses;
@@ -62,6 +27,7 @@ namespace FilePlayer.ViewModels
                 OnPropertyChanged("SelectedButtonIndex");
             }
         }
+
         public IEnumerable<string> ButtonNames
         {
             get { return buttonNames; }
@@ -82,7 +48,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public string DialogName
+        private string DialogName
         {
             get { return dialogName; }
             set
@@ -91,20 +57,14 @@ namespace FilePlayer.ViewModels
                 OnPropertyChanged("DialogName");
             }
         }
-
-        
+          
 
         public ButtonDialogViewModel(IEventAggregator iEventAggregator, string dialogType)
         {
-            this.iEventAggregator = iEventAggregator;
-
-            ButtonDialogPreset preset = new ButtonDialogPreset(dialogType);
-
-            this.DialogName = preset.dialogName;
-            this.ButtonNames = preset.buttonNames;
-            this.ButtonResponses = preset.buttonActions;
-
+            SetButtonDialogPreset(dialogType);
             this.SelectedButtonIndex = 0;
+
+            this.iEventAggregator = iEventAggregator;
 
             EventMap = new Dictionary<string, Action>()
             {
@@ -137,6 +97,30 @@ namespace FilePlayer.ViewModels
             }
         }
 
+
+        public void SetButtonDialogPreset(string dialogType)
+        {
+            switch (dialogType)
+            {
+                case "ITEM_LIST_PAUSE_OPEN":
+                    this.DialogName = "ITEMLIST_PAUSE";
+                    this.ButtonNames = new string[] { "Exit", "Reload Consoles", "Upload Game Data" };
+                    this.ButtonResponses = new string[] { "EXIT", "UPDATE_ITEMLISTS", "GAMEDATA_UPLOAD" };
+                    break;
+                case "ITEM_LIST_CONFIRMATION_OPEN":
+                    this.DialogName = "ITEMLIST_CONFIRMATION";
+                    this.ButtonNames = new string[] { "Open", "Search For Data", "Delete Data" };
+                    this.ButtonResponses = new string[] { "FILE_OPEN", "FILE_SEARCH_DATA", "FILE_DELETE_DATA" };
+                    break;
+                case "APP_PAUSE_OPEN":
+                    this.DialogName = "APP_PAUSE";
+                    this.ButtonNames = new string[] { "Return to App", "Close App", "Exit" };
+                    this.ButtonResponses = new string[] { "RETURN_TO_APP", "CLOSE_APP", "EXIT" };
+                    break;
+                default:
+                    throw new ArgumentException("Button Dialog Type '" + dialogType + "' not recognized!");
+            }
+        }
 
         private void MoveUp()
         {

@@ -1,4 +1,5 @@
-﻿using FilePlayer.Model;
+﻿using FilePlayer.Constants;
+using FilePlayer.Model;
 using Microsoft.Practices.Prism.PubSubEvents;
 using System;
 using System.Collections.Generic;
@@ -19,13 +20,8 @@ namespace FilePlayer.ViewModels
         private Dictionary<string, Action> eventMap;
 
         private string spaceText;
-        private static string[] charSetABC = new string[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-                                                            "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-                                                            "", "", "U", "V", "W", "X", "Y", "Z", "", "" };
-        private static string[] charSetNonABC = new string[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-                                                              "", ".", "?", "!", ":", "-", "#","&", "+", "",
-                                                              "", "", "(", ")", "\\", "/", "\"", "'", "", "" };
-        private string[][] charSets = new string[][] { charSetABC, charSetNonABC };
+
+        private string[][] charSets = CharSets.charSets;
 
         private int currCharSetIndex = 0;
         private int selectedControlIndex = 0;

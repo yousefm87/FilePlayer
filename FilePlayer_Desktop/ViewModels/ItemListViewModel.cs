@@ -27,6 +27,9 @@ namespace FilePlayer.ViewModels
         private ItemLists itemLists;
         private GameInfo gameInfo;
 
+        private static string DEFAULT_FILTER_TEXT = "";
+        private static string DEFAUTL_FILTER_TYPE = "Contains";
+
         private const string consolesSamplesURL = "https://github.com/yousefm87/FilePlayer/wiki/Consoles.Json";
 
         private IEventAggregator iEventAggregator;
@@ -37,13 +40,16 @@ namespace FilePlayer.ViewModels
         private Dictionary<string, Action> eventMap;
         private Dictionary<string, Action<string[]>> eventMapParams;
 
-        public DelegateCommand<string[]> MoveUpCommand { get; private set; }
-        public DelegateCommand<string[]> MoveDownCommand { get; private set; }
-        public DelegateCommand MoveLeftCommand { get; private set; }
-        public DelegateCommand MoveRightCommand { get; private set; }
-        public DelegateCommand OpenAppCommand { get; private set; }
-        public DelegateCommand OpenSampleCommand { get; private set; }
-        public DelegateCommand OpenDataFolderCommand { get; private set; }
+        private DelegateCommand<string[]> MoveUpCommand { get; set; }
+        private DelegateCommand<string[]> MoveDownCommand { get; set; }
+        private DelegateCommand MoveLeftCommand { get; set; }
+        private DelegateCommand MoveRightCommand { get; set; }
+        private DelegateCommand OpenAppCommand { get; set; }
+        private DelegateCommand OpenSampleCommand { get; set; }
+        private DelegateCommand OpenDataFolderCommand { get; set; }
+        private DelegateCommand SelectItemCommand { get; set; }
+        private DelegateCommand ToggleFilterCommand { get; set; }
+        private DelegateCommand UploadFromGiantBombCommand { get; set; }
 
         private IEnumerable<string> allItemNames;
         private IEnumerable<string> allItemPaths;
@@ -57,7 +63,7 @@ namespace FilePlayer.ViewModels
         private bool shadeEffect;
         private Stack shadeStack = new Stack();
 
-        private Visibility errorVisibility;
+        private Visibility errorVisibility = Visibility.Hidden;
         private Visibility filterVisibility;
 
         private string filterText;
@@ -260,17 +266,36 @@ namespace FilePlayer.ViewModels
             MoveLeftCommand = new DelegateCommand(SetPreviousList, CanSetPreviousList);
             MoveRightCommand = new DelegateCommand(SetNextList, CanSetNextList);
 
-            
+            OpenSampleCommand = new DelegateCommand(OpenConsoleSamplePage, CanOpenConsoleSamplePage);
             OpenDataFolderCommand = new DelegateCommand(OpenDataFolder, CanOpenDataFolder);
+            SelectItemCommand = new DelegateCommand(SelectItem, CanSelectItem);
+
+            ToggleFilterCommand = new DelegateCommand(ToggleFilter, CanToggleFilter);
+            UploadFromGiantBombCommand = new DelegateCommand(UploadFromGiantbomb, CanUploadFromGiantBomb);
         }
+
+
 
         private void InitializeEventMaps()
         {
             eventMap = new Dictionary<string, Action>()
             {
-                { "GIANTBOMB_UPLOAD_START", UploadFromGiantbomb },
-                { "OPEN_FILTER", OpenFilter },
-                { "CLOSE_FILTER", CloseFilter },
+                { "GIANTBOMB_UPLOAD_START", () =>
+                    {
+                        if (UploadFromGiantBombCommand.CanExecute())
+                        {
+                            UploadFromGiantBombCommand.Execute();
+                        }
+                    }
+                },
+                { "TOGGLE_FILTER", () =>
+                    {
+                        if (ToggleFilterCommand.CanExecute())
+                        {
+                            ToggleFilterCommand.Execute();
+                        }
+                    }
+                },
                 { "ITEMLIST_MOVE_LEFT", () =>
                     {
                         if (MoveLeftCommand.CanExecute())
@@ -302,7 +327,14 @@ namespace FilePlayer.ViewModels
                             OpenDataFolderCommand.Execute();
                         }
                     }
-
+                },
+                { "ITEMLIST_SELECT", () =>
+                    {
+                        if (SelectItemCommand.CanExecute())
+                        {
+                            SelectItemCommand.Execute();
+                        }
+                    }
                 }
             };
 
@@ -383,7 +415,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public void EventHandler(ViewEventArgs e)
+        private void EventHandler(ViewEventArgs e)
         {
             if (eventMap.ContainsKey(e.action))
             {
@@ -396,7 +428,7 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public void GenerateSampleJson()
+        private void GenerateSampleJson()
         {
             if (!Directory.Exists(Path.GetDirectoryName(sampleDestStr)))
             {
@@ -410,23 +442,14 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        public void InitializeList()
+        private void InitializeList()
         {
             this.ItemLists = new ItemLists(consolesStr);
 
             if (ItemLists.GetConsoleCount() > 0)
             {
-                string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
-
-                string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
-
-                this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
-
-
-                this.AllItemNames = ItemLists.GetItemNames(ItemLists.CurrConsole);
-                this.AllItemPaths = ItemLists.GetItemFilePaths(ItemLists.CurrConsole);
-
-                this.CurrAppName = ItemLists.GetConsoleName(ItemLists.CurrConsole);
+                RefreshList();
+                                                
                 this.SelectedItemIndex = 0;
 
                 ErrorVisiblility = Visibility.Hidden;
@@ -444,13 +467,27 @@ namespace FilePlayer.ViewModels
         }
 
 
-        public void AddGameDataItem(string[] gameDataItem)
+        private void RefreshList()
+        {
+            string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
+            string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
+
+            this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
+
+            this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, FilterText, FilterTypeText);
+            this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, FilterText, FilterTypeText);
+
+            this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
+        }
+
+
+        private void AddGameDataItem(string[] gameDataItem)
         {
             GameInfo.AddGame(gameDataItem[0], gameDataItem[1], gameDataItem[2], gameDataItem[3]);
             SelectedItemIndex = SelectedItemIndex;
         }
 
-        public void UploadFromGiantbomb()
+        private void UploadFromGiantbomb()
         {
             Task.Factory.StartNew(() =>
             {
@@ -461,18 +498,26 @@ namespace FilePlayer.ViewModels
                 this.iEventAggregator.GetEvent<PubSubEvent<StateEventArgs>>().Publish(new StateEventArgs(ApplicationState.None, false));
             });
         }
-        
-        public void OpenFilter()
+
+
+        private bool CanToggleFilter()
         {
-            FilterVisibility = Visibility.Visible;
+            return (ItemLists.GetConsoleCount() > 0);
         }
 
-        public void CloseFilter()
+        private void ToggleFilter()
         {
-            FilterVisibility = Visibility.Hidden;
+            if (FilterVisibility == Visibility.Hidden)
+            {
+                FilterVisibility = Visibility.Visible;
+            }
+            else
+            {
+                FilterVisibility = Visibility.Hidden;
+            }
         }
 
-        public void FilterItemlist(string[] filterData)
+        private void FilterItemlist(string[] filterData)
         {
 
             if (!FilterText.Equals(filterData[0]) || !FilterTypeText.Equals(filterData[1]))
@@ -487,29 +532,14 @@ namespace FilePlayer.ViewModels
             }
         }
 
-        private void RefreshList()
-        {
-            this.AllItemNames = this.ItemLists.GetItemNames(ItemLists.CurrConsole, FilterText, FilterTypeText);
-            this.AllItemPaths = this.ItemLists.GetItemFilePaths(ItemLists.CurrConsole, FilterText, FilterTypeText);
-
-
-            this.CurrAppName = this.ItemLists.GetConsoleName(ItemLists.CurrConsole);
-
-            string gameInfoStr = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "gameinfo.json";
-
-            string imgFolder = ItemLists.GetConsoleFilePath(ItemLists.CurrConsole) + "Images\\";
-
-            this.GameInfo = new GameInfo(gameInfoStr, imgFolder);
-        }
-
-
+        
         private bool CanSetNextList()
         {
             return (ItemLists.GetConsoleCount() > 0) && (ItemLists.CurrConsole < (ItemLists.GetConsoleCount() - 1));
         }
 
 
-        public void SetNextList()
+        private void SetNextList()
         {
             ItemLists.SetConsoleNext();
             RefreshList();
@@ -517,12 +547,12 @@ namespace FilePlayer.ViewModels
         }
 
 
-        public bool CanSetPreviousList()
+        private bool CanSetPreviousList()
         {
             return (ItemLists.GetConsoleCount() > 0) && (ItemLists.CurrConsole > 0);
         }
 
-        public void SetPreviousList()
+        private void SetPreviousList()
         {
             ItemLists.SetConsolePrevious();
             RefreshList();
@@ -561,7 +591,7 @@ namespace FilePlayer.ViewModels
         }
 
 
-        public void SetShade(bool isShaded, string windowName)
+        private void SetShade(bool isShaded, string windowName)
         {
             if (isShaded)
             {
@@ -596,13 +626,24 @@ namespace FilePlayer.ViewModels
                 }
             }
         }
-        
-        public bool CanMoveIndex(string[] numMoves)
+
+        private bool CanSelectItem()
+        {
+            return (AllItemNames.Count() > 0); 
+        }
+
+        private void SelectItem()
+        {
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "ITEM_LIST_CONFIRMATION_OPEN" }));
+        }
+
+
+        private bool CanMoveIndex(string[] numMoves)
         {
             return (AllItemNames.Count() > 0);
         }
 
-        public int MoveIndexUp(int numMove)
+        private int MoveIndexUp(int numMove)
         {
             int selectedIndex = SelectedItemIndex;
             int newSelectedIndex = selectedIndex - numMove;
@@ -617,14 +658,14 @@ namespace FilePlayer.ViewModels
             return SelectedItemIndex;
         }
 
-        public void MoveIndexUp(string[] numMoves)
+        private void MoveIndexUp(string[] numMoves)
         {
             int numMove = Int32.Parse(numMoves[0]);
 
             MoveIndexUp(numMove);
         }
 
-        public int MoveIndexDown(int numMove)
+        private int MoveIndexDown(int numMove)
         {
             int selectedIndex = SelectedItemIndex;
 
@@ -643,11 +684,16 @@ namespace FilePlayer.ViewModels
             return SelectedItemIndex;
         }
 
-        public void MoveIndexDown(string[] numMoves)
+        private void MoveIndexDown(string[] numMoves)
         {
             int numMove = Int32.Parse(numMoves[0]);
 
             MoveIndexDown(numMove);
+        }
+
+        private bool CanUploadFromGiantBomb()
+        {
+            return ItemLists.HasItems();
         }
 
 

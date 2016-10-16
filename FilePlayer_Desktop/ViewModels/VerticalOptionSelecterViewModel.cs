@@ -1,5 +1,7 @@
 ﻿using FilePlayer.Model;
+using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.PubSubEvents;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,6 +20,12 @@ namespace FilePlayer.ViewModels
         private IEnumerable<string> vertOptions;
         private IEnumerable<string> responses;
         private int selectedOptionIndex;
+
+        private DelegateCommand MoveUpCommand { get; set; }
+        private DelegateCommand MoveDownCommand { get; set; }
+        private DelegateCommand SelectControlCommand { get; set; }
+
+        private Dictionary<string, Action> eventMap;
 
         public int SelectedOptionIndex
         {
@@ -56,65 +64,97 @@ namespace FilePlayer.ViewModels
             this.Responses = _responses;
             this.SelectedOptionIndex = 0;
 
+            MoveUpCommand = new DelegateCommand(MoveUp, CanMoveUp);
+            MoveDownCommand = new DelegateCommand(MoveDown, CanMoveDown);
+            SelectControlCommand = new DelegateCommand(SelectControl, CanSelectControl);
+
+            InitEventMaps();
             optionToken = this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Subscribe(
                 (viewEventArgs) =>
                 {
-                    PerformViewAction(this, viewEventArgs);
+                    EventHandler(viewEventArgs);
                 }
             );
+        }
+
+        private void EventHandler(ViewEventArgs e)
+        {
+            if (eventMap.ContainsKey(e.action))
+            {
+                eventMap[e.action]();
+            }
         }
 
 
 
 
-
-
-        void PerformViewAction(object sender, ViewEventArgs e)
+        void InitEventMaps()
         {
-            switch (e.action)
+            eventMap = new Dictionary<string, Action>()
             {
-                case "VOS_MOVE_UP":
-                    MoveUp();
-                    break;
-                case "VOS_MOVE_DOWN":
-                    MoveDown();
-                    break;
-                case "VOS_SELECT":
-                    SelectControl();
-                    break;
-
-            }
+                { "VOS_MOVE_UP", () =>
+                    {
+                        if (MoveUpCommand.CanExecute())
+                        {
+                            MoveUp();
+                        }
+                    }
+                },
+                { "VOS_MOVE_DOWN", () =>
+                    {
+                        if (MoveDownCommand.CanExecute())
+                        {
+                            MoveDownCommand.Execute();
+                        }
+                    }
+                },
+                { "VOS_SELECT", () =>
+                    {
+                        if (SelectControlCommand.CanExecute())
+                        {
+                            SelectControlCommand.Execute();
+                        }
+                    }
+                }
+            };
 
         }
 
 
         public void MoveUp()
         {
-            if (SelectedOptionIndex > 0)
-            {
-                SelectedOptionIndex--;
-            }
+            SelectedOptionIndex--;
+        }
+
+        public bool CanMoveUp()
+        {
+            return (SelectedOptionIndex > 0);
         }
 
         public void MoveDown()
         {
-            bool bottomEdgeSelected = SelectedOptionIndex == (VertOptions.Count() - 1);
-
-            if (!bottomEdgeSelected)
-            {
-                SelectedOptionIndex++;
-            }
+            SelectedOptionIndex++;
         }
+
+        public bool CanMoveDown()
+        {
+            return (SelectedOptionIndex != (VertOptions.Count() - 1));
+        }
+
 
         public void SelectControl()
         {
+            string response = Responses.ElementAt(SelectedOptionIndex);
+            string optionVal = VertOptions.ElementAt(SelectedOptionIndex);
 
-                string response = Responses.ElementAt(SelectedOptionIndex);
-                string optionVal = VertOptions.ElementAt(SelectedOptionIndex);
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("VOS_OPTION", new string[] { optionVal, response }));
 
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("VOS_OPTION", new string[] { optionVal, response }));
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Unsubscribe(optionToken);
+        }
 
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Unsubscribe(optionToken);
+        public bool CanSelectControl()
+        {
+            return VertOptions.Count() > 0;
         }
 
     }

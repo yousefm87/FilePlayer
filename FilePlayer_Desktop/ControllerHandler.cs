@@ -50,6 +50,22 @@ namespace FilePlayer
             );
         }
                 
+        public bool Contains (ApplicationState state)
+        {
+            return stateStack.Contains(state);
+        }
+
+        public void ToggleState (ApplicationState state)
+        {
+            if (Contains(state))
+            {
+                SetState(state, false);
+            }
+            else
+            {
+                SetState(state, true);
+            }
+        }
 
         public void SetState(ApplicationState state, Boolean isOn)
         {
@@ -118,9 +134,9 @@ namespace FilePlayer
         {
             Dictionary<string, Action> ItemlistViewEventMap = new Dictionary<string, Action>()
             {
-                { "A", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "ITEM_LIST_CONFIRMATION_OPEN" })); } },
+                { "A", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("ITEMLIST_SELECT")); } },
                 { "B", () => { } },
-                { "Y", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("OPEN_FILTER", new string[] { "" })); } },
+                { "Y", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("TOGGLE_FILTER", new string[] { "" })); } },
                 { "DUP", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("ITEMLIST_MOVE_UP", new string[] { 1.ToString() })); } },
                 { "DDOWN", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("ITEMLIST_MOVE_DOWN", new string[] { 1.ToString() })); } },
                 { "DLEFT", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("ITEMLIST_MOVE_LEFT", new string[] { 1.ToString() })); } },
@@ -159,15 +175,16 @@ namespace FilePlayer
                 { "DRIGHT", () => { } },
                 { "LSHOULDER", () => { } },
                 { "RSHOULDER", () => { } },
-                { "GUIDE", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "APP_PAUSE_OPEN" })); } }
+                { "GUIDE", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "APP_PAUSE_OPEN" })); } },
+                { "BACK", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("BUTTONDIALOG_OPEN", new string[] { "APP_PAUSE_OPEN" })); } }
             };
 
             Dictionary<string, Action> FilterEventMap = new Dictionary<string, Action>()
             {
                 { "A", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("FILTER_SELECT_CONTROL", new string[] { "" })); } },
-                { "B", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("CLOSE_FILTER", new string[] { "" })); } },
+                { "B", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("TOGGLE_FILTER", new string[] { "" })); } },
                 { "X", () => { } },
-                { "Y", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("CLOSE_FILTER", new string[] { "" })); } },
+                { "Y", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("TOGGLE_FILTER", new string[] { "" })); } },
                 { "DUP", () => { } },
                 { "DDOWN", () => { } },
                 { "DLEFT", () => { SendEvent<ViewEventArgs>(new ViewEventArgs("FILTER_MOVE_LEFT")); } },

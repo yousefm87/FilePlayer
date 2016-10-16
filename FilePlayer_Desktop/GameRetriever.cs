@@ -31,8 +31,6 @@ namespace FilePlayer
             public string PlatformName { get; set; }
             public List<GameData> GameReleases { get; set; }
 
-            
-
 
             public GameData()
             {
@@ -221,9 +219,10 @@ namespace FilePlayer
         public static void GetPlatformData(IEnumerable<string> gamelist, string platformName, string saveDir, bool overwriteFile, IEventAggregator iEventAggregator)
         {
             string IMAGE_SUBFOLDER = saveDir + "Images\\";
-
             Directory.CreateDirectory(IMAGE_SUBFOLDER);
-            
+
+            int GIANTBOMB_API_RATE_LIMIT = 1100; //Giantbomb uses a 1 sec/request rate limit. Set to 1.1 for cushion
+
             StringBuilder sb = new StringBuilder();
             StringWriter sw = new StringWriter(sb);
             JsonWriter writer = new JsonTextWriter(sw);
@@ -249,9 +248,9 @@ namespace FilePlayer
 
                 GetGameData(currGame, platformName, IMAGE_SUBFOLDER, overwriteFile, writer);
 
-                if(watch.ElapsedMilliseconds < 2300) //May sleep in order to maintain the 2.3 sec/request limit
+                if(watch.ElapsedMilliseconds < GIANTBOMB_API_RATE_LIMIT) //May sleep in order to maintain giantbomb rate limit
                 {
-                    Thread.Sleep(2300 - Convert.ToInt32(watch.ElapsedMilliseconds));
+                    Thread.Sleep(GIANTBOMB_API_RATE_LIMIT - Convert.ToInt32(watch.ElapsedMilliseconds));
                 }
                 iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("GIANTBOMB_GAME_UPLOAD_FINISH",
                                                                                 new string[] { currGame, (gameIndex + 1).ToString(),

@@ -146,7 +146,8 @@ namespace FilePlayer.Views
             return fileText;
         }
 
-
+        //TODO: MOVE TO VIEW MODEL
+        //TODO: (2) Use command for reset filters
         public void SelectControl()
         {
             this.Dispatcher.Invoke((Action)delegate

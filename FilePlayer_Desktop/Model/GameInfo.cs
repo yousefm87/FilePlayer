@@ -16,6 +16,7 @@ namespace FilePlayer.Model
         public int CurrConsole { get; set; }
         public string JsonFilePath = "";
         public string ImagePath = "";
+
         public GameInfo(String jsonFilePath, String imgPath)
         {
             JsonFilePath = jsonFilePath;
@@ -42,6 +43,7 @@ namespace FilePlayer.Model
                 CurrConsole = 0;
             }
         }
+
         /// <summary>
         /// Deletes Game from gameinfo.json and deletes image file from 
         /// </summary>

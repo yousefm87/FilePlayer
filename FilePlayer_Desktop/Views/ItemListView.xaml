@@ -211,7 +211,7 @@
             </Label>
         </Grid>
 
-        <StackPanel x:Name="errorMessage" Background="{StaticResource WhiteBrush}" Visibility="{Binding ErrorVisiblility}"  Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" >
+        <StackPanel x:Name="errorMessage" Background="{StaticResource WhiteBrush}" Visibility="{Binding ErrorVisiblility, FallbackValue=Hidden}"  Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" >
             <TextBlock Style="{StaticResource ErrorMessageTitle}" Text="No Consoles Found"/>
             <TextBlock Style="{StaticResource ErrorMessageBody}" Text="Add consoles in:&#x0a;    C:\FPData\consoles.json.&#x0a;Each console must have fields as described at:&#x0a;    https://github.com/yousefm87/FilePlayer/wiki/Consoles.Json"/>
             <TextBlock Style="{StaticResource ErrorMessageStyle}" />

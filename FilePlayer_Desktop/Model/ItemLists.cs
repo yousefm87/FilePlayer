@@ -38,7 +38,21 @@ namespace FilePlayer.Model
         }
 
 
+        public bool HasItems()
+        {
+            int numItems = 0;
 
+            for(int i=0; i < GetConsoleCount(); i++)
+            {
+                JToken currConsoleItemList = consoles["consoles"][i]["itemlist"];
+
+                int currConsoleItemCount = currConsoleItemList.Children()["name"].Values<String>().Count();
+
+                numItems = numItems + currConsoleItemCount;
+            }
+
+            return numItems > 0;
+        }
         public void UpdateConsoles()
         {
             consoles = JObject.Parse(File.ReadAllText(JsonFilePath));

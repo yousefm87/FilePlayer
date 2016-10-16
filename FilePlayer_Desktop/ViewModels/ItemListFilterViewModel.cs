@@ -1,4 +1,5 @@
 ﻿using FilePlayer.Model;
+using Microsoft.Practices.Prism.Commands;
 using Microsoft.Practices.Prism.PubSubEvents;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,10 @@ namespace FilePlayer.ViewModels
         private string filterType;
         private string[] buttonActions;
 
+        private DelegateCommand MoveLeftCommand { get; set; }
+        private DelegateCommand MoveRightCommand { get; set; }
+        private DelegateCommand RemoveLastCharFromFilterCommand { get; set; }
+        private DelegateCommand ResetFiltersCommand { get; set; }
 
         private IEventAggregator iEventAggregator;
         private SubscriptionToken filterViewToken = null;
@@ -49,6 +54,7 @@ namespace FilePlayer.ViewModels
             {
                 filter = value;
                 OnPropertyChanged("Filter");
+                FilterList();
             }
         }
         public string FilterType
@@ -59,7 +65,7 @@ namespace FilePlayer.ViewModels
                 filterType = value;
                 OnPropertyChanged("FilterType");
 
-                this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { Filter, FilterType }));
+                FilterList();
             }
         }
 
@@ -71,15 +77,36 @@ namespace FilePlayer.ViewModels
             FilterType = "Contains";
             numControls = _numControls;
 
+            MoveRightCommand = new DelegateCommand(MoveRight, CanMoveRight);
+            MoveLeftCommand = new DelegateCommand(MoveLeft, CanMoveLeft);
+            RemoveLastCharFromFilterCommand = new DelegateCommand(RemoveLastCharFromFilter, CanRemoveLastCharFromFilter);
+            ResetFiltersCommand = new DelegateCommand(ResetFilters, CanResetFilters);
+
 
             EventMap = new Dictionary<string, Action>()
             {
-                {"FILTER_MOVE_LEFT", MoveLeft },
-                {"FILTER_MOVE_RIGHT", MoveRight },
-                {"CHAR_BACK", FilterRemoveLastChar },
-                {"CHAR_CLOSE", () => 
+                {"FILTER_MOVE_LEFT", () =>
                     {
-                        this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { Filter, FilterType }));
+                        if (MoveLeftCommand.CanExecute())
+                        {
+                            MoveLeftCommand.Execute();
+                        }
+                    }
+                },
+                {"FILTER_MOVE_RIGHT", () =>
+                    {
+                        if (MoveRightCommand.CanExecute())
+                        {
+                            MoveRightCommand.Execute();
+                        }
+                    }
+                },
+                {"CHAR_BACK", () =>
+                    {
+                        if (RemoveLastCharFromFilterCommand.CanExecute())
+                        {
+                            RemoveLastCharFromFilterCommand.Execute();
+                        }
                     }
                 }
 
@@ -118,21 +145,25 @@ namespace FilePlayer.ViewModels
             }
         }
 
-
-        public void MoveLeft()
+        private bool CanMoveLeft()
         {
-            if (selectedControlIndex != 0)
-            {
-                SelectedControlIndex--;
-            }
+            return (selectedControlIndex != 0);
         }
 
-        public void MoveRight()
+
+        private void MoveLeft()
         {
-            if (selectedControlIndex != (numControls - 1))
-            {
-                SelectedControlIndex++;
-            }
+            SelectedControlIndex--;
+        }
+
+        private bool CanMoveRight()
+        {
+            return (selectedControlIndex != (numControls - 1));
+        }
+
+        private void MoveRight()
+        {
+            SelectedControlIndex++;
         }
 
         public void AppendToFilter(string appendStr)
@@ -140,19 +171,33 @@ namespace FilePlayer.ViewModels
             Filter = Filter + appendStr;
         }
 
-        public void FilterRemoveLastChar()
+        public bool CanRemoveLastCharFromFilter()
         {
-            if (Filter.Length > 0)
-            {
-                Filter = Filter.Substring(0, Filter.Length - 1);
-            }
+            return (Filter.Length > 0);
+        }
+
+
+        public void RemoveLastCharFromFilter()
+        {
+            Filter = Filter.Substring(0, Filter.Length - 1);
         }       
+
+        public bool CanResetFilters()
+        {
+            return (Filter != "") && (FilterType != "Contains");
+        }
 
         public void ResetFilters()
         {
             Filter = "";
             FilterType = "Contains";
         }
+
+        public void FilterList()
+        {
+            this.iEventAggregator.GetEvent<PubSubEvent<ViewEventArgs>>().Publish(new ViewEventArgs("FILTER_LIST", new string[] { Filter, FilterType }));
+        }
+        
 
 
     }

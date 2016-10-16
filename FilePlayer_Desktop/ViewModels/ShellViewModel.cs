@@ -303,21 +303,15 @@ namespace FilePlayer.ViewModels
                         gamepadThread.Abort();
                     }
                 },
-                { "OPEN_FILTER", () => 
+                { "TOGGLE_FILTER", () =>
                     {
-                        controllerHandler.SetState(ApplicationState.FilterMain, true);
-                    }
-                },
-                { "CLOSE_FILTER", () =>
-                    {
-                        controllerHandler.SetState(ApplicationState.FilterMain, false);
+                        controllerHandler.ToggleState(ApplicationState.FilterMain);
                     }
                 },
                 { "MINIMIZE_SHELL", () =>
                     {
                         ShellWindowState = WindowState.Minimized;
                     }
-
                 }
             
             };
